@@ -1,0 +1,27 @@
+{
+  "extends": "../tsconfig.settings.json",
+  "compilerOptions": {
+      "target": "es2017",
+      "lib": ["es6", "es2015.promise", "es2017", "dom"],
+      "removeComments": true,
+      "resolveJsonModule": true,
+      "outDir": "lib",
+      "rootDir": "src",
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "files": [
+    // TypeScript bug? The compiler complains that this file is not
+    // included unless I list it in "files", even if I put this exact
+    // string as an include pattern.
+    "src/auth/environments.json",
+  ],
+  "references": [
+    { "path": "../fdb-debugger" },
+    { "path": "../fdb-host" },
+    { "path": "../fdb-protocol" },
+  ],
+}

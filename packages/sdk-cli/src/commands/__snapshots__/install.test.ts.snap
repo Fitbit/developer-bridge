@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`logs an error if loaded app contains no components 1`] = `
+Array [
+  "Nothing to do: app contains neither a device nor a companion component",
+]
+`;
+
+exports[`when an app is loaded when a device is connected when sideloading fails logs a message 1`] = `
+Array [
+  "Install failed: sideload failed!",
+]
+`;

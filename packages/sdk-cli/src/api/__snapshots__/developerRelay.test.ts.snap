@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`connect() when the WebSocket connection is unsucessful throws 1`] = `"Connection failed!"`;

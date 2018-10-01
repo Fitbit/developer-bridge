@@ -1,0 +1,31 @@
+{
+  "name": "developer-bridge",
+  "version": "0.1.0",
+  "description": "Fitbit Developer Bridge toolkit",
+  "private": true,
+  "author": "Fitbit, Inc.",
+  "license": "BSD-3-Clause",
+  "repository": "github:Fitbit/developer-bridge",
+  "bugs": {
+    "url": "https://github.com/Fitbit/developer-bridge/issues"
+  },
+  "homepage": "https://github.com/Fitbit/developer-bridge#readme",
+  "scripts": {
+    "build": "rm -rf packages/*/lib && tsc -b packages",
+    "test": "jest",
+    "lint": "tslint --project packages/tsconfig.settings.json",
+    "publish": "yarn run test && lerna publish"
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.2",
+    "jest": "^23.6.0",
+    "lerna": "^3.3.2",
+    "ts-jest": "^23.10.2",
+    "tslint": "^5.11.0",
+    "tslint-config-airbnb": "^5.11.0",
+    "typescript": "~3.0.3"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

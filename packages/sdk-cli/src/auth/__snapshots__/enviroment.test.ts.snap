@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`given an FITBIT_SDK_ENVIRONMENT value of "__bad_env__" throws 1`] = `"Invalid environment specified: __bad_env__"`;

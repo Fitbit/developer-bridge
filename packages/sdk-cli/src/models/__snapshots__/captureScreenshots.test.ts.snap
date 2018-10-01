@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`when destPath is an existing file rejects 1`] = `"EEXIST, file already exists 'collide.png'"`;
+
+exports[`when the PPM fails to parse rejects 1`] = `"bad magic"`;
+
+exports[`when the host does not support PPM screenshots rejects 1`] = `"No image format supported by the device is supported by the debugger"`;
+
+exports[`when the host does not suppot screenshots rejects 1`] = `"Connected device does not support screenshots"`;

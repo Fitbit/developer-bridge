@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "fdb-protocol" },
+    { "path": "fdb-host" },
+    { "path": "fdb-debugger" },
+    { "path": "sdk-cli" },
+  ],
+}

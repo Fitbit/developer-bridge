@@ -1,0 +1,15 @@
+{
+  "extends": "tslint-config-airbnb",
+  "rules": {
+    "no-inferrable-types": true,
+    "strict-boolean-expressions": false,
+    "prefer-template": [true, "allow-single-concat"],
+    "import-name": [true, {
+      "jszip": "JSZip",
+      "mockFs": "mockFS",
+      "portablePixmap": "PortablePixmap",
+      "simpleSha256": "simpleSHA256",
+      "ws": "WebSocket"
+    }]
+  }
+}

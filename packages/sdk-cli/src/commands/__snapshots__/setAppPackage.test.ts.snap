@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`logs an error if the package fails to load 1`] = `
+Array [
+  "Failed to load app package. Error: Failed to load package",
+]
+`;
+
+exports[`logs the app ID and build ID 1`] = `
+Array [
+  "Loaded appID:fakeUUID buildID:fakeBuildID",
+]
+`;
+
+exports[`when called with no package path and a package was loaded previously logs that it is reloading the app package 1`] = `
+Array [
+  Array [
+    "No app package specified. Reloading path/to/the/app/package.fba.",
+  ],
+  Array [
+    "Loaded appID:fakeUUID buildID:fakeBuildID",
+  ],
+]
+`;
+
+exports[`when called with no package path and no package was loaded previously logs that it is using the default 1`] = `
+Array [
+  Array [
+    "No app package specified. Using default ./build/app.fba.",
+  ],
+  Array [
+    "Loaded appID:fakeUUID buildID:fakeBuildID",
+  ],
+]
+`;

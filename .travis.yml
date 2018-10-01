@@ -1,0 +1,23 @@
+language: node_js
+node_js:
+  - "8"
+  - "10"
+
+os:
+  - linux
+  - osx
+
+dist: trusty
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - libsecret-1-dev
+
+before_script:
+  - yarn build
+
+# --runInBand needed so tests don't timeout https://github.com/facebook/jest/issues/3855
+script:
+  - yarn test --runInBand

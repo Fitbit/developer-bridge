@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`given a Higgs CU2 device is incompatible with non-Higgs apps 1`] = `"App was built for Alpha and Beta, but connected device only supports higgs applications."`;
+
+exports[`given a Higgs CU2 device with a compatibility matrix ignores the "device" string 1`] = `"App was built for Higgs, but connected device only supports alpha applications."`;
+
+exports[`given an app which is compatible with multiple families is incompatible with a host which is missing the capability entirely 1`] = `"App was built for higgs and alpha, but connected device only supports  applications."`;
+
+exports[`given an app which is compatible with multiple families is incompatible with a host with an empty compatibility list 1`] = `"App was built for higgs and alpha, but connected device only supports  applications."`;
+
+exports[`given an app which is compatible with multiple families is incompatible with an incompatible host 1`] = `"App was built for higgs and alpha, but connected device only supports beta and delta applications."`;
+
+exports[`given an app which is only compatible with one family is incompatible if the device reported API version too low 1`] = `"Connected device does not support API version requested by app."`;
+
+exports[`given an app which is only compatible with one family is incompatible with an incompatible host 1`] = `"App was built for higgs, but connected device only supports beta applications."`;
+
+exports[`given an app with a companion is incompatible if the phone reported API version too low 1`] = `"Connected phone does not support API version specified requested by companion."`;
+
+exports[`ignores the "device" string for Higgs CU3 1`] = `"App was built for Higgs, but connected device only supports  applications."`;

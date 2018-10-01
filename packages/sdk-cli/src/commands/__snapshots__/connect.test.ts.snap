@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`does not auto-connect a busy host 1`] = `
+Array [
+  "No devices are connected and available",
+]
+`;
+
+exports[`when the device type argument is device logs an error if no devices are connected 1`] = `
+Array [
+  "No devices are connected and available",
+]
+`;
+
+exports[`when the device type argument is device when a single device is connected logs a message explaining the auto-connection 1`] = `
+Array [
+  "Auto-connecting only known device: App Host",
+]
+`;
+
+exports[`when the device type argument is device when a single device is connected logs a message when the host disconnects 1`] = `
+Array [
+  "Device 'App Host' disconnected",
+]
+`;
+
+exports[`when the device type argument is phone logs an error if no phones are connected 1`] = `
+Array [
+  "No phones are connected and available",
+]
+`;
+
+exports[`when the device type argument is phone when a single phone is connected logs a message explaining the auto-connection 1`] = `
+Array [
+  "Auto-connecting only known phone: Companion Host",
+]
+`;
+
+exports[`when the device type argument is phone when a single phone is connected logs a message when the host disconnects 1`] = `
+Array [
+  "Phone 'Companion Host' disconnected",
+]
+`;

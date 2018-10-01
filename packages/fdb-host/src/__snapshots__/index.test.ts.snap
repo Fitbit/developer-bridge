@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app install abort deletes the current app install stream 1`] = `"No current app install stream exists"`;
+
+exports[`app install begin throws an error if the app install stream is currently being used 1`] = `"App install stream is currently being used"`;
+
+exports[`app install finalize throws if no install handler has been set 1`] = `[InvalidParams: No install handler has been set]`;
+
+exports[`app install validate app install stream throws if the stream token does not match current app install stream 1`] = `"Stream token does not match the current app install stream"`;
+
+exports[`app install validate app install stream throws if there is no current app install stream 1`] = `"No current app install stream exists"`;

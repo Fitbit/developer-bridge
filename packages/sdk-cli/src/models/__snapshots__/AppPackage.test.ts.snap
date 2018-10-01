@@ -1,0 +1,495 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fromArtifact accepts a v5 manifest with a companion 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": Object {
+      "data": Array [
+        99,
+        111,
+        109,
+        112,
+        97,
+        110,
+        105,
+        111,
+        110,
+      ],
+      "type": "Buffer",
+    },
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            100,
+            101,
+            118,
+            105,
+            99,
+            101,
+          ],
+          "type": "Buffer",
+        },
+        "platform": undefined,
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "companion": "companion.zip",
+      "watch": "device.zip",
+    },
+    "manifestVersion": 5,
+    "platform": Array [
+      "HIGGS",
+    ],
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "companionApi": "1.0.0",
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v5 manifest with a versioned platform 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": undefined,
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            100,
+            101,
+            118,
+            105,
+            99,
+            101,
+            46,
+            122,
+            105,
+            112,
+            32,
+            99,
+            111,
+            110,
+            116,
+            101,
+            110,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": Array [
+          "32.1.16+",
+        ],
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "watch": "device.zip",
+    },
+    "manifestVersion": 5,
+    "platform": Array [
+      "HIGGS:32.1.16+",
+    ],
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v5 manifest with an unversioned platform 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": undefined,
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            100,
+            101,
+            118,
+            105,
+            99,
+            101,
+            46,
+            122,
+            105,
+            112,
+            32,
+            99,
+            111,
+            110,
+            116,
+            101,
+            110,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": undefined,
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "watch": "device.zip",
+    },
+    "manifestVersion": 5,
+    "platform": Array [
+      "HIGGS",
+    ],
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v5 manifest with multiple platforms 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": undefined,
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            100,
+            101,
+            118,
+            105,
+            99,
+            101,
+            46,
+            122,
+            105,
+            112,
+            32,
+            99,
+            111,
+            110,
+            116,
+            101,
+            110,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": Array [
+          "32.1.16+",
+        ],
+      },
+      "meson": Object {
+        "artifact": Object {
+          "data": Array [
+            100,
+            101,
+            118,
+            105,
+            99,
+            101,
+            46,
+            122,
+            105,
+            112,
+            32,
+            99,
+            111,
+            110,
+            116,
+            101,
+            110,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": Array [
+          "1.2.3+",
+        ],
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "watch": "device.zip",
+    },
+    "manifestVersion": 5,
+    "platform": Array [
+      "HIGGS:32.1.16+",
+      "MESON:1.2.3+",
+    ],
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v6 manifest with a companion 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": Object {
+      "data": Array [
+        99,
+        111,
+        109,
+        112,
+        97,
+        110,
+        105,
+        111,
+        110,
+      ],
+      "type": "Buffer",
+    },
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            104,
+            105,
+            103,
+            103,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": undefined,
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "companion": Object {
+        "filename": "companion.zip",
+      },
+      "watch": Object {
+        "higgs": Object {
+          "filename": "higgs.zip",
+        },
+      },
+    },
+    "manifestVersion": 6,
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "companionApi": "1.0.0",
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v6 manifest with multiple device components 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": undefined,
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            104,
+            105,
+            103,
+            103,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": Array [
+          "23.1.5",
+          "32.4.16+",
+        ],
+      },
+      "meson": Object {
+        "artifact": Object {
+          "data": Array [
+            109,
+            101,
+            115,
+            111,
+            110,
+          ],
+          "type": "Buffer",
+        },
+        "platform": Array [
+          "32.4.17+",
+        ],
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "watch": Object {
+        "higgs": Object {
+          "filename": "higgs.zip",
+          "platform": Array [
+            "23.1.5",
+            "32.4.16+",
+          ],
+        },
+        "meson": Object {
+          "filename": "meson.zip",
+          "platform": Array [
+            "32.4.17+",
+          ],
+        },
+      },
+    },
+    "manifestVersion": 6,
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v6 manifest with no device component 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": Object {
+      "data": Array [],
+      "type": "Buffer",
+    },
+    "device": Object {},
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "companion": Object {
+        "filename": "companion.zip",
+      },
+    },
+    "manifestVersion": 6,
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "companionApi": "1.0.0",
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact accepts a v6 manifest with no platform spec for the device 1`] = `
+AppPackage {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": undefined,
+    "device": Object {
+      "higgs": Object {
+        "artifact": Object {
+          "data": Array [
+            104,
+            105,
+            103,
+            103,
+            115,
+            46,
+            122,
+            105,
+            112,
+            32,
+            99,
+            111,
+            110,
+            116,
+            101,
+            110,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "platform": undefined,
+      },
+    },
+  },
+  "manifest": Object {
+    "appId": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+    "buildId": "0x0123456789abcdef",
+    "components": Object {
+      "watch": Object {
+        "higgs": Object {
+          "filename": "higgs.zip",
+        },
+      },
+    },
+    "manifestVersion": 6,
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": undefined,
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
+exports[`fromArtifact rejects a manifest that is not JSON 1`] = `[SyntaxError: Unexpected token N in JSON at position 0]`;
+
+exports[`fromArtifact rejects a manifest with unsupported version 1`] = `[Error: Unsupported manifest version 100]`;
+
+exports[`fromArtifact rejects a non-zip file 1`] = `[Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?]`;
+
+exports[`fromArtifact rejects a v5 manifest which references a nonexistent companion component file 1`] = `[Error: companion.zip not present in zip file]`;
+
+exports[`fromArtifact rejects a v5 manifest which references a nonexistent device component file 1`] = `[Error: doesnotexist.zip not present in zip file]`;
+
+exports[`fromArtifact rejects a v5 manifest with mistyped components 1`] = `[Error: No components listed in manifest.json]`;
+
+exports[`fromArtifact rejects a v5 manifest with no device component 1`] = `[Error: No components listed in manifest.json]`;
+
+exports[`fromArtifact rejects a v5 manifest with no platform descriptor 1`] = `[Error: Missing platform descriptors]`;
+
+exports[`fromArtifact rejects a v6 manifest which references a nonexistent companion component file 1`] = `[Error: companion.zip not present in zip file]`;
+
+exports[`fromArtifact rejects a v6 manifest which references a nonexistent device component file 1`] = `[Error: doesnotexist.zip not present in zip file]`;
+
+exports[`fromArtifact rejects a v6 manifest with mistyped components 1`] = `[Error: No components listed in manifest.json]`;
+
+exports[`fromArtifact rejects a zip file without a manifest 1`] = `[Error: manifest.json not present in zip file]`;

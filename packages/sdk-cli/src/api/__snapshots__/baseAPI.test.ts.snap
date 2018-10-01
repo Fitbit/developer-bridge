@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apiFetch() rejects if no auth header is available 1`] = `"Fetch of fakeAPI failed: no stored auth token"`;

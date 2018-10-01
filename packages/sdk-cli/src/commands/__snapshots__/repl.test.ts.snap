@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`connected device not support REPL logs an error 1`] = `"Connected device does not support REPL"`;
+
+exports[`connected device supports REPL executing a statement host disconnected since entering REPL logs an error 1`] = `"Host disconnected, exiting REPL"`;
+
+exports[`connected device supports REPL executing a statement logs if an error occurs during eval 1`] = `[Error: something went wrong :(]`;
+
+exports[`connected device supports REPL logs an informational message explaining how to exit 1`] = `"Entering REPL mode, type \\"exit\\" to quit"`;
+
+exports[`no device is connected logs an error 1`] = `"No device connected"`;

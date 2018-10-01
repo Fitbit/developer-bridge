@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`set() stores tokens 1`] = `
+Array [
+  "fitbit-sdk",
+  "production",
+  "{\\"access_token\\":\\"access\\",\\"refresh_token\\":\\"refresh\\",\\"token_type\\":\\"bearer\\",\\"issued_at\\":1529366247520}",
+]
+`;

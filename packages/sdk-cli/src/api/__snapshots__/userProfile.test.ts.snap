@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`returns a user object 1`] = `
+Object {
+  "email": "john.smith@example.com",
+  "fullName": "John Smith",
+}
+`;
