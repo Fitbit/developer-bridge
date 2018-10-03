@@ -6,6 +6,7 @@ import AppContext from '../models/AppContext';
 import HostConnections from '../models/HostConnections';
 import * as sideload from '../models/sideload';
 
+import { buildAction } from './build';
 import { connectAction } from './connect';
 import { setAppPackageAction } from './setAppPackage';
 
@@ -37,9 +38,12 @@ export default function install(
 
     cli
       .command('install [packagePath]', 'Install an app package')
+      .option('-b, --build', 'Build a new package before installing')
       .types({ string: ['packagePath'] })
       .action(async (args: vorpal.Args & { packagePath?: string }) => {
         const { appContext, hostConnections } = stores;
+
+        if (!args.packagePath && args.options.build) await buildAction(cli);
 
         const appPackage = await setAppPackageAction(cli, appContext, args.packagePath);
         if (!appPackage) return false;
