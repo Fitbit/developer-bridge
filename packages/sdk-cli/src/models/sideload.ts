@@ -1,6 +1,6 @@
+import { AppPackage } from '@fitbit/app-package';
 import { RemoteHost } from '@fitbit/fdb-debugger';
 
-import AppPackage from '../models/AppPackage';
 import * as compatibility from '../models/compatibility';
 
 type ProgressCallback = (sent: number, total: number) => void;

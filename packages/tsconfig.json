@@ -1,6 +1,7 @@
 {
   "files": [],
   "references": [
+    { "path": "app-package" },
     { "path": "fdb-protocol" },
     { "path": "fdb-host" },
     { "path": "fdb-debugger" },

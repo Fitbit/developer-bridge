@@ -1,9 +1,9 @@
+import { ComponentSourceMaps } from '@fitbit/app-package';
 import { ConsoleMessage, ConsoleTrace, RemoteHost } from '@fitbit/fdb-debugger';
 import lodash from 'lodash';
 import { SourceMapConsumer } from 'source-map';
 
 import { AppPackageStore } from './AppContext';
-import { ComponentSourceMaps } from './AppPackage';
 import * as compatibility from '../models/compatibility';
 import HostConnections, { HostAddedEvent } from './HostConnections';
 import mapValues from '../util/mapValues';
@@ -77,7 +77,7 @@ export default class LogConsumer {
     }
 
     const sourceMapConsumers = await mapValues(lodash(sourceMaps).pickBy().value(), async maps =>
-      mapValues(maps!, async map => new SourceMapConsumer(map)));
+      mapValues(maps!, async map => new SourceMapConsumer(map as any)));
 
     this.componentSourceMapConsumers = {
       ...this.componentSourceMapConsumers,

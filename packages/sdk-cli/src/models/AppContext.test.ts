@@ -1,10 +1,13 @@
+import { fromJSZip } from '@fitbit/app-package';
 import AppContext from '../models/AppContext';
-import AppPackage from '../models/AppPackage';
 import * as promiseFs from '../util/promiseFs';
+
+jest.mock('@fitbit/app-package');
+
+const emptyZip = Buffer.from('UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA==', 'base64');
 
 let appContext: AppContext;
 let readFileSpy: jest.MockInstance<typeof promiseFs.readFile>;
-let appPackageSpy: jest.MockInstance<typeof AppPackage.fromArtifact>;
 let appPackageLoadedSpy: jest.Mock;
 
 const mockPreviousApp = {
@@ -29,7 +32,7 @@ describe.each([
     appContext.onAppPackageLoad.attach(appPackageLoadedSpy);
 
     readFileSpy = jest.spyOn(promiseFs, 'readFile');
-    appPackageSpy = jest.spyOn(AppPackage, 'fromArtifact');
+    (fromJSZip as any).mockReset();
   });
 
   describe('if the file path cannot be read', () => {
@@ -49,8 +52,8 @@ describe.each([
     const error = new Error('Failed to parse package');
 
     beforeEach(() => {
-      readFileSpy.mockResolvedValueOnce(Buffer.alloc(0));
-      appPackageSpy.mockRejectedValueOnce(error);
+      readFileSpy.mockResolvedValueOnce(emptyZip);
+      (fromJSZip as any).mockRejectedValueOnce(error);
     });
 
     it('rejects', () => expect(loadAppPackage()).rejects.toBe(error));
@@ -68,8 +71,8 @@ describe.each([
     };
 
     beforeEach(() => {
-      readFileSpy.mockResolvedValueOnce(Buffer.alloc(0));
-      appPackageSpy.mockResolvedValueOnce(mockApp);
+      readFileSpy.mockResolvedValueOnce(emptyZip);
+      (fromJSZip as any).mockResolvedValueOnce(mockApp);
       return loadAppPackage();
     });
 

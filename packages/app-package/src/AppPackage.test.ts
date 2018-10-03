@@ -1,40 +1,13 @@
-import jszip from 'jszip';
+import jszip = require('jszip');
 
-import AppPackage, { SourceMaps } from './AppPackage';
+import { fromJSZip } from './AppPackage';
 
 const manifestCommon = {
   appId: 'eff9d309-eadd-41d7-9af3-696eafc3fa31',
   buildId: '0x0123456789abcdef',
 };
 
-const testPackage = {
-  buildId: manifestCommon.buildId,
-  uuid: manifestCommon.appId,
-  components: {
-    device: {
-      higgs: {
-        platform: ['1.2.3+'],
-        artifact: Buffer.alloc(0),
-      },
-    },
-    companion: Buffer.alloc(0),
-  },
-  requestedPermissions: ['access_activity', 'access_location'],
-  sdkVersion: {
-    deviceApi: '3.0.0',
-    companionApi: '2.5.0',
-  },
-};
-
-const rawSourceMap = {
-  version: 3,
-  sources: ['app/index.js'],
-  names: [],
-  mappings: 'someMappings',
-  file: 'index.js',
-};
-
-describe('fromArtifact', () => {
+describe('fromJSZip', () => {
   const manifestV5 = {
     ...manifestCommon,
     manifestVersion: 5,
@@ -53,23 +26,20 @@ describe('fromArtifact', () => {
     for (const [path, content] of Object.entries(files)) {
       zip.file(path, typeof content === 'object' ? JSON.stringify(content) : content);
     }
-    return zip.generateAsync({ type: 'nodebuffer' });
+    return zip;
   }
 
   function itRejects(name: string, files: FilesObject = {}) {
     it(`rejects ${name}`, async () =>
-      expect(AppPackage.fromArtifact(await buildPackage(files)))
+      expect(fromJSZip(await buildPackage(files)))
         .rejects.toMatchSnapshot());
   }
 
   function itAccepts(name: string, files: FilesObject) {
     it(`accepts ${name}`, async () =>
-      expect(AppPackage.fromArtifact(await buildPackage(files)))
+      expect(fromJSZip(await buildPackage(files)))
         .resolves.toMatchSnapshot());
   }
-
-  it('rejects a non-zip file', () =>
-    expect(AppPackage.fromArtifact('' as any)).rejects.toMatchSnapshot());
 
   itRejects('a zip file without a manifest');
 
@@ -240,132 +210,5 @@ describe('fromArtifact', () => {
       },
     },
     'companion.zip': '',
-  });
-
-  it('hydrates a previously-serialized AppPackage instance', async () => {
-    const sourcePackage = new AppPackage(testPackage);
-
-    return expect(AppPackage.fromArtifact(await sourcePackage.generateArtifact()))
-      .resolves.toMatchObject(sourcePackage);
-  });
-
-  describe('when hydrating a previously-serialized source mapped AppPackage', () => {
-    async function expectSourceMappedPackageToDeserialize(sourceMaps: SourceMaps) {
-      const sourcePackage = new AppPackage({
-        ...testPackage,
-        sourceMaps,
-      });
-
-      return expect(AppPackage.fromArtifact(await sourcePackage.generateArtifact()))
-        .resolves.toMatchObject(sourcePackage);
-    }
-
-    it('succeeds', () =>
-      expectSourceMappedPackageToDeserialize({
-        device: {
-          higgs: {
-            'app/index.js': rawSourceMap,
-            'app/test.js': rawSourceMap,
-          },
-          meson: {
-            'app/index.js': rawSourceMap,
-          },
-        },
-        companion: {
-          'companion.js': rawSourceMap,
-        },
-        settings: {
-          'settings.js': rawSourceMap,
-        },
-      }),
-    );
-
-    it('succeeds with a component without source map files', () =>
-      expectSourceMappedPackageToDeserialize({
-        device: {
-          higgs: {
-            'app/index.js': rawSourceMap,
-          },
-        },
-        companion: {},
-      }),
-    );
-
-    it('succeeds with a device source map object that has no components', () =>
-      expectSourceMappedPackageToDeserialize({ device : {} }));
-  });
-});
-
-describe('generateArtifact', () => {
-  describe('when bundling source map files', () => {
-    it('bundles multiple source map files for one component', async () => {
-      const sourcePackage = new AppPackage({
-        ...testPackage,
-        sourceMaps: {
-          device: {
-            higgs: {
-              'app/index.js': rawSourceMap,
-              'app/test.js': rawSourceMap,
-            },
-          },
-        },
-      });
-
-      const fbaZip = await jszip.loadAsync(await sourcePackage.generateArtifact());
-      const manifestJSON = JSON.parse(await fbaZip.file('manifest.json').async('text'));
-      const higgsFiles = manifestJSON.sourceMaps.device.higgs;
-
-      await expect(fbaZip.file(higgsFiles['app/index.js']).async('text').then(JSON.parse))
-        .resolves.toMatchObject({});
-
-      return expect(fbaZip.file(higgsFiles['app/test.js']).async('text').then(JSON.parse))
-        .resolves.toMatchObject({ mappings: 'someMappings' });
-    });
-
-    it('bundles companion source map files', async () => {
-      const sourcePackage = new AppPackage({
-        ...testPackage,
-        sourceMaps: {
-          device: {
-            higgs: {
-              'app/index.js': rawSourceMap,
-            },
-          },
-          companion: {
-            'companion.js': rawSourceMap,
-          },
-        },
-      });
-
-      const fbaZip = await jszip.loadAsync(await sourcePackage.generateArtifact());
-      const manifestJSON = JSON.parse(await fbaZip.file('manifest.json').async('text'));
-      const filePath = manifestJSON.sourceMaps.companion['companion.js'];
-
-      return expect(fbaZip.file(filePath).async('text').then(JSON.parse))
-        .resolves.toMatchObject({});
-    });
-
-    it('bundles settings source map files', async () => {
-      const sourcePackage = new AppPackage({
-        ...testPackage,
-        sourceMaps: {
-          device: {
-            higgs: {
-              'app/index.js': rawSourceMap,
-            },
-          },
-          settings: {
-            'settings.js': rawSourceMap,
-          },
-        },
-      });
-
-      const fbaZip = await jszip.loadAsync(await sourcePackage.generateArtifact());
-      const manifestJSON = JSON.parse(await fbaZip.file('manifest.json').async('text'));
-      const filePath = manifestJSON.sourceMaps.settings['settings.js'];
-
-      return expect(fbaZip.file(filePath).async('text').then(JSON.parse))
-        .resolves.toMatchObject({});
-    });
   });
 });
