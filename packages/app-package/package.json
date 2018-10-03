@@ -1,0 +1,32 @@
+{
+  "name": "@fitbit/app-package",
+  "version": "1.0.0",
+  "author": "Fitbit, Inc.",
+  "license": "BSD-3-Clause",
+  "description": "Utilities for reading FBA files",
+  "repository": "github:Fitbit/developer-bridge",
+  "bugs": {
+    "url": "https://github.com/Fitbit/developer-bridge/issues"
+  },
+  "homepage": "https://github.com/Fitbit/developer-bridge/tree/master/packages/app-package#readme",
+  "main": "lib/AppPackage.js",
+  "types": "lib/AppPackage.d.ts",
+  "scripts": {
+    "build": "rm -rf lib && tsc -b",
+    "prepublishOnly": "yarn run build"
+  },
+  "files": [
+    "/lib/!(*.test|*.spec).{js,d.ts}"
+  ],
+  "dependencies": {
+    "apr-map": "^3.0.3",
+    "lodash": "^4.17.11",
+    "tslib": "^1.9.3"
+  },
+  "devDependencies": {
+    "@types/jszip": "^3.1.4",
+    "@types/lodash": "^4.14.116",
+    "@types/node": "^10.11.4",
+    "jszip": "^3.1.5"
+  }
+}

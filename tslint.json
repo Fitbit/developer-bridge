@@ -5,6 +5,7 @@
     "strict-boolean-expressions": false,
     "prefer-template": [true, "allow-single-concat"],
     "import-name": [true, {
+      "appPackage": "AppPackage",
       "jszip": "JSZip",
       "mockFs": "mockFS",
       "portablePixmap": "PortablePixmap",

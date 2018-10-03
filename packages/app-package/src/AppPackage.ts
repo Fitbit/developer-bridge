@@ -1,8 +1,12 @@
-import jszip from 'jszip';
-import lodash from 'lodash';
-import { RawSourceMap } from 'source-map';
+import aprMap from 'apr-map';
+import jszip = require('jszip');
+import lodash = require('lodash');
 
-import mapValues from '../util/mapValues';
+/**
+ * The source maps are not currently validated, so it would be
+ * misleading to claim that it is a valid source map.
+ */
+type RawSourceMap = unknown;
 
 interface PackageComponents {
   device: {
@@ -95,39 +99,9 @@ async function getTextFromZip(zip: jszip, path: string) {
   return getFile(zip, path).async('text');
 }
 
-function packageComponentSourceMaps(files: ComponentSourceMaps, prefix: string, zip: jszip) {
-  return lodash.mapValues(files, (sourceMap, file) => {
-    const zipFileName = `sourceMaps/${prefix}/${file}.map`;
-    zip.file(zipFileName, JSON.stringify(sourceMap));
-    return zipFileName;
-  });
-}
-
-function bundleSourceMaps(zip: jszip, sourceMaps?: SourceMaps) {
-  if (!sourceMaps) return;
-
-  const sourceMapObject: ManifestSourceMaps = { device: {} };
-  const packageSourceMaps = (files: ComponentSourceMaps, prefix: string) =>
-    packageComponentSourceMaps(files, prefix, zip);
-
-  Object.entries(sourceMaps.device).forEach(([family, files]) => {
-    sourceMapObject.device[family] = packageSourceMaps(files, `device/${family}`);
-  });
-
-  if (sourceMaps.companion) {
-    sourceMapObject.companion = packageSourceMaps(sourceMaps.companion, 'companion');
-  }
-
-  if (sourceMaps.settings) {
-    sourceMapObject.settings = packageSourceMaps(sourceMaps.settings, 'settings');
-  }
-
-  return sourceMapObject;
-}
-
 const extractComponentSourceMaps =
   (sourceMapPaths: BundledComponentSourceMaps, zip: jszip): Promise<ComponentSourceMaps> =>
-    mapValues(sourceMapPaths, path => getTextFromZip(zip, path).then(JSON.parse));
+    aprMap(sourceMapPaths, path => getTextFromZip(zip, path).then(JSON.parse));
 
 async function extractSourceMaps(zip: jszip, sourceMapManifest?: ManifestSourceMaps) {
   if (!sourceMapManifest) return undefined;
@@ -136,7 +110,7 @@ async function extractSourceMaps(zip: jszip, sourceMapManifest?: ManifestSourceM
     component && extractComponentSourceMaps(component, zip);
 
   return {
-    device: await mapValues(
+    device: await aprMap(
       sourceMapManifest.device,
       component => extractComponentSourceMaps(component, zip),
     ) as DeviceSourceMaps,
@@ -247,103 +221,41 @@ function getManifestParser(manifest: ManifestCommon) {
   }
 }
 
-export default class AppPackage {
-  public buildId: string;
-  public components: PackageComponents;
-  public sourceMaps?: SourceMaps;
-  public requestedPermissions: string[];
-  public uuid: string;
-  public sdkVersion: SDKVersion;
+export interface AppPackage {
+  buildId: string;
+  components: PackageComponents;
+  sourceMaps?: SourceMaps;
+  requestedPermissions: string[];
+  uuid: string;
+  sdkVersion: SDKVersion;
+}
 
-  /** Used by Studio's sideload view to show the manifest content
-   * @deprecated  */
-  public manifest?: ManifestV5 | ManifestV6;
+export async function fromJSZip(fbaZip: jszip): Promise<AppPackage> {
+  const textFile = (path: string) => getTextFromZip(fbaZip, path);
+  const bufferFile = (path: string) => getBufferFromZip(fbaZip, path);
 
-  constructor({
-    buildId,
-    components,
+  const manifestJSON = JSON.parse(await textFile('manifest.json'));
+  const parser = getManifestParser(manifestJSON);
+
+  const device = await Promise.all(
+    parser.getDeviceComponents().map(
+      ([family, { platform, filename }]) => bufferFile(filename)
+        .then(artifact => [family, { platform, artifact }]),
+    ),
+  ).then(lodash.fromPairs);
+
+  const companionFilename = parser.getCompanionFilename();
+  const companion = companionFilename ? await bufferFile(companionFilename) : undefined;
+
+  const sourceMaps = await parser.getSourceMapExtractor()(fbaZip);
+
+  return {
+    ...parser.pullMetadata(),
     sourceMaps,
-    requestedPermissions,
-    uuid,
-    sdkVersion,
-  }: {
-    buildId: string,
-    components: PackageComponents,
-    sourceMaps?: SourceMaps,
-    requestedPermissions: string[],
-    uuid: string,
-    sdkVersion: SDKVersion,
-  }) {
-    this.buildId = buildId;
-    this.components = components;
-    this.sourceMaps = sourceMaps;
-    this.requestedPermissions = requestedPermissions;
-    this.uuid = uuid;
-    this.sdkVersion = sdkVersion;
-  }
-
-  generateArtifact() {
-    const zip = new jszip();
-
-    const manifest: ManifestV6 = {
-      manifestVersion: 6,
-      buildId: this.buildId,
-      appId: this.uuid,
-      requestedPermissions: this.requestedPermissions,
-      components: { watch: {} },
-      sdkVersion: this.sdkVersion,
-      sourceMaps: bundleSourceMaps(zip, this.sourceMaps),
-    };
-
-    for (const [family, { platform, artifact }] of Object.entries(this.components.device)) {
-      const filename = `device-${family}.zip`;
-      manifest.components.watch[family] = { platform, filename };
-      zip.file(filename, artifact);
-    }
-
-    if (this.components.companion) {
-      manifest.components.companion = {
-        filename: 'companion.zip',
-      };
-      zip.file(manifest.components.companion.filename, this.components.companion);
-    }
-
-    zip.file('manifest.json', JSON.stringify(manifest, null, 2));
-    return zip.generateAsync({ type: 'nodebuffer' });
-  }
-
-  static async fromArtifact(artifactData: Buffer) {
-    const fbaZip = await jszip.loadAsync(artifactData);
-    const textFile = (path: string) => getTextFromZip(fbaZip, path);
-    const bufferFile = (path: string) => getBufferFromZip(fbaZip, path);
-
-    const manifestJSON = JSON.parse(await textFile('manifest.json'));
-    const parser = getManifestParser(manifestJSON);
-
-    const device = await Promise.all(
-      parser.getDeviceComponents().map(
-        ([family, { platform, filename }]) => bufferFile(filename)
-          .then(artifact => [family, { platform, artifact }]),
-      ),
-    ).then(lodash.fromPairs);
-
-    const companionFilename = parser.getCompanionFilename();
-    const companion = companionFilename ? await bufferFile(companionFilename) : undefined;
-
-    const sourceMaps = await parser.getSourceMapExtractor()(fbaZip);
-
-    const appPackage = new this({
-      ...parser.pullMetadata(),
-      sourceMaps,
-      components: {
-        device,
-        companion,
-      },
-      sdkVersion: parser.getSDKVersions(),
-    });
-
-    appPackage.manifest = manifestJSON;
-
-    return appPackage;
-  }
+    components: {
+      device,
+      companion,
+    },
+    sdkVersion: parser.getSDKVersions(),
+  };
 }

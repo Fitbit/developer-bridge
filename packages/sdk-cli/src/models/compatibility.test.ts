@@ -1,10 +1,10 @@
+import { AppPackage } from '@fitbit/app-package';
 import { FDBTypes } from '@fitbit/fdb-protocol';
 
-import AppPackage from './AppPackage';
 import { findCompatibleAppComponent, assertCompanionComponentIsCompatible } from './compatibility';
 
 function makeAppPackage(...families: string[]) {
-  const appPackage = new AppPackage({
+  const appPackage: AppPackage = {
     uuid: '',
     buildId: '',
     requestedPermissions: [],
@@ -14,7 +14,7 @@ function makeAppPackage(...families: string[]) {
     sdkVersion: {
       deviceApi: '1.0.0',
     },
-  });
+  };
   families.forEach((name) => {
     appPackage.components.device[name] = {
       artifact: Buffer.alloc(0),

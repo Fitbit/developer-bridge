@@ -1,10 +1,9 @@
+import { AppPackage } from '@fitbit/app-package';
 import { FDBTypes } from '@fitbit/fdb-protocol';
 import { default as ErrorSubclass } from 'error-subclass';
 import humanizeList from 'humanize-list';
 import lodash from 'lodash';
 import semver from 'semver';
-
-import AppPackage from './AppPackage';
 
 class CompatibilityError extends ErrorSubclass {
   static displayName = 'CompatibilityError';

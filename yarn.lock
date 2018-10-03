@@ -639,7 +639,7 @@
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/keytar/-/keytar-4.0.1.tgz#e2cf6405dc33861424e59b67516c66d2cf7bc21b"
 
-"@types/lodash@^4.14.104", "@types/lodash@^4.14.110":
+"@types/lodash@^4.14.104", "@types/lodash@^4.14.110", "@types/lodash@^4.14.116":
   version "4.14.116"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.116.tgz#5ccf215653e3e8c786a58390751033a9adca0eb9"
 
@@ -664,6 +664,10 @@
     "@types/node" "*"
 
 "@types/node@*":
+  version "10.11.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.4.tgz#e8bd933c3f78795d580ae41d86590bfc1f4f389d"
+
+"@types/node@^10.11.4":
   version "10.11.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.4.tgz#e8bd933c3f78795d580ae41d86590bfc1f4f389d"
 
@@ -916,6 +920,47 @@ append-transform@^0.4.0:
   resolved "https://registry.yarnpkg.com/append-transform/-/append-transform-0.4.0.tgz#d76ebf8ca94d276e247a36bad44a4b74ab611991"
   dependencies:
     default-require-extensions "^1.0.0"
+
+apr-engine-each@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/apr-engine-each/-/apr-engine-each-3.0.3.tgz#1d678537c89380b6987c5c1f0aac7a7dca3e63c8"
+  dependencies:
+    apr-engine-run "^3.0.3"
+    lodash.defaults "^4.2.0"
+
+apr-engine-iterator@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/apr-engine-iterator/-/apr-engine-iterator-3.0.3.tgz#013415eae0acebb569daa6cfb7e25698101d4f5d"
+  dependencies:
+    apr-engine-until "^3.0.3"
+    build-array "^1.0.0"
+    lodash.isarraylike "^4.2.0"
+    lodash.isfinite "^3.3.2"
+    lodash.keys "^4.2.0"
+
+apr-engine-run@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/apr-engine-run/-/apr-engine-run-3.0.3.tgz#c7f3e6e31f12de636d00e84be22160fe82569990"
+  dependencies:
+    apr-engine-iterator "^3.0.3"
+
+apr-engine-sum@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/apr-engine-sum/-/apr-engine-sum-3.0.3.tgz#48af1a89d3a7fb60745d32118a51bd225a26732b"
+  dependencies:
+    lodash.isarraylike "^4.2.0"
+
+apr-engine-until@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/apr-engine-until/-/apr-engine-until-3.0.3.tgz#0168a429e1f6ad054cc8fbe2edff65663f92e9cb"
+
+apr-map@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/apr-map/-/apr-map-3.0.3.tgz#2bf91e9aeb18794bc95631311d6e94741ef16dc2"
+  dependencies:
+    apr-engine-each "^3.0.3"
+    apr-engine-sum "^3.0.3"
+    lodash.defaults "^4.2.0"
 
 aproba@^1.0.3, aproba@^1.1.1:
   version "1.2.0"
@@ -1349,6 +1394,12 @@ buffer-fill@^1.0.0:
 buffer-from@1.x, buffer-from@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.1.tgz#32713bc028f75c02fdb710d7c7bcec1f2c6070ef"
+
+build-array@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/build-array/-/build-array-1.0.0.tgz#385e66f6b05c29ff16870c6e9944ccae77f7f100"
+  dependencies:
+    type-component "0.0.1"
 
 builtin-modules@^1.0.0, builtin-modules@^1.1.1:
   version "1.1.1"
@@ -3891,6 +3942,22 @@ lodash._reinterpolate@~3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/lodash._reinterpolate/-/lodash._reinterpolate-3.0.0.tgz#0ccf2d89166af03b3663c796538b75ac6e114d9d"
 
+lodash.defaults@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.defaults/-/lodash.defaults-4.2.0.tgz#d09178716ffea4dde9e5fb7b37f6f0802274580c"
+
+lodash.isarraylike@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.isarraylike/-/lodash.isarraylike-4.2.0.tgz#4623310ab318804b667ddc3619058137559400c4"
+
+lodash.isfinite@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/lodash.isfinite/-/lodash.isfinite-3.3.2.tgz#fb89b65a9a80281833f0b7478b3a5104f898ebb3"
+
+lodash.keys@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.keys/-/lodash.keys-4.2.0.tgz#a08602ac12e4fb83f91fc1fb7a360a4d9ba35205"
+
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
@@ -3912,7 +3979,7 @@ lodash@^3.3.1:
   version "3.10.1"
   resolved "http://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
 
-lodash@^4.13.1, lodash@^4.17.10, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@^4.5.1:
+lodash@^4.13.1, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@^4.5.1:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
 
@@ -6044,6 +6111,10 @@ type-check@~0.3.2:
   resolved "https://registry.yarnpkg.com/type-check/-/type-check-0.3.2.tgz#5884cab512cf1d355e3fb784f30804b2b520db72"
   dependencies:
     prelude-ls "~1.1.2"
+
+type-component@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/type-component/-/type-component-0.0.1.tgz#952a6c81c21efd24d13d811d0c8498cb860e1956"
 
 type-detect@^4.0.0, type-detect@^4.0.5:
   version "4.0.8"
