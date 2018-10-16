@@ -23,7 +23,7 @@ interface DeviceSourceMaps {
 }
 
 export interface SourceMaps {
-  device: DeviceSourceMaps;
+  device?: DeviceSourceMaps;
   companion?: ComponentSourceMaps;
   settings?: ComponentSourceMaps;
 }
@@ -37,7 +37,7 @@ interface BundledComponentSourceMaps {
 }
 
 interface ManifestSourceMaps {
-  device: {
+  device?: {
     [family: string]: BundledComponentSourceMaps;
   };
   companion?: BundledComponentSourceMaps;
@@ -107,13 +107,13 @@ async function extractSourceMaps(zip: jszip, sourceMapManifest?: ManifestSourceM
   if (!sourceMapManifest) return undefined;
 
   const extractComponent = (component?: BundledComponentSourceMaps) =>
-    component && extractComponentSourceMaps(component, zip);
+    component ? extractComponentSourceMaps(component, zip) : undefined;
 
   return {
-    device: await aprMap(
+    device: sourceMapManifest.device ? await aprMap(
       sourceMapManifest.device,
       component => extractComponentSourceMaps(component, zip),
-    ) as DeviceSourceMaps,
+    ) as DeviceSourceMaps : undefined,
     companion: await extractComponent(sourceMapManifest.companion),
     settings: await extractComponent(sourceMapManifest.settings),
   };
