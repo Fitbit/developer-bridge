@@ -221,7 +221,7 @@ export const ProtocolCapabilities = t.partial(
      * Other object serialization schemes which this endpoint is capable
      * of receiving in addition to JSON.
      */
-    additionalSerializations: t.array(AdditionalSerializationCodec),
+    additionalSerializations: t.array(t.string),
   },
   'ProtocolCapabilities',
 );
