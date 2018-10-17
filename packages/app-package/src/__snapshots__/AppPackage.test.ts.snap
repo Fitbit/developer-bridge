@@ -365,6 +365,30 @@ Object {
 }
 `;
 
+exports[`fromJSZip accepts a v6 manifest with sourcemaps but no device component 1`] = `
+Object {
+  "buildId": "0x0123456789abcdef",
+  "components": Object {
+    "companion": Object {
+      "data": Array [],
+      "type": "Buffer",
+    },
+    "device": Object {},
+  },
+  "requestedPermissions": undefined,
+  "sdkVersion": Object {
+    "companionApi": "1.0.0",
+    "deviceApi": "1.0.0",
+  },
+  "sourceMaps": Object {
+    "companion": Object {},
+    "device": undefined,
+    "settings": undefined,
+  },
+  "uuid": "eff9d309-eadd-41d7-9af3-696eafc3fa31",
+}
+`;
+
 exports[`fromJSZip rejects a manifest that is not JSON 1`] = `[SyntaxError: Unexpected token N in JSON at position 0]`;
 
 exports[`fromJSZip rejects a manifest with unsupported version 1`] = `[Error: Unsupported manifest version 100]`;

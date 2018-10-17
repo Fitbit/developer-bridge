@@ -211,4 +211,17 @@ describe('fromJSZip', () => {
     },
     'companion.zip': '',
   });
+
+  itAccepts('a v6 manifest with sourcemaps but no device component', {
+    'manifest.json': {
+      ...manifestV6,
+      sourceMaps: {
+        companion: {},
+      },
+      components: {
+        companion: { filename: 'companion.zip' },
+      },
+    },
+    'companion.zip': '',
+  });
 });

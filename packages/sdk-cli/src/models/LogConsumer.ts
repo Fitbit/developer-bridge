@@ -65,7 +65,7 @@ export default class LogConsumer {
       settings: this.appContext.appPackage.sourceMaps.settings,
     };
 
-    if (this.appHost) {
+    if (this.appHost && this.appContext.appPackage.sourceMaps.device) {
       try {
         const family = compatibility.findCompatibleAppComponent(
           this.appContext.appPackage,
