@@ -6,13 +6,18 @@ export default function mockHost(cli: vorpal) {
   let handleCancel: () => void;
 
   async function mockHostAction(hostType: HostType, args: vorpal.Args) {
+    const onCancel = new Promise<void>((resolve) => {
+      handleCancel = resolve;
+    });
+
     const maxAPIVersion = args.options.maxAPIVersion;
-    const { closePromise, handleClose } = await createMockHost(
+    const { closePromise, close } = await createMockHost(
       hostType,
       { maxAPIVersion },
       msg => cli.activeCommand.log(msg),
     );
-    handleCancel = handleClose;
+
+    onCancel.then(close);
     return closePromise;
   }
 

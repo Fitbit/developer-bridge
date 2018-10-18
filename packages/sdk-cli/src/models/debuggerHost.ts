@@ -69,6 +69,6 @@ export async function createDebuggerHost(
   return {
     closePromise,
     host,
-    handleClose: () => socket.close(),
+    close: () => socket.close(),
   };
 }

@@ -55,7 +55,7 @@ export async function createMockHost(
       install: makeInstallCapabilities(hostType, hostProperties),
     },
   };
-  const { closePromise, host, handleClose } = await createDebuggerHost(hostDescriptor, handleLog);
+  const { closePromise, host, close } = await createDebuggerHost(hostDescriptor, handleLog);
 
   host.setInstallHandler(
     async (bundleData) => {
@@ -71,5 +71,5 @@ export async function createMockHost(
     hostDescriptor.capabilities.install,
   );
 
-  return { closePromise, handleClose };
+  return { closePromise, close };
 }
