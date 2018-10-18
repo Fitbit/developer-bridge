@@ -1,23 +1,27 @@
 import vorpal from 'vorpal';
-import WebSocket from 'ws';
 
-import * as debuggerHost from '../models/debuggerHost';
+import { createMockHost, HostType } from '../models/mockHost';
 
 export default function mockHost(cli: vorpal) {
-  let socket: WebSocket | undefined;
+  let handleCancel: () => void;
 
-  async function mockHostAction(hostType: debuggerHost.HostType, args: vorpal.Args) {
+  async function mockHostAction(hostType: HostType, args: vorpal.Args) {
+    const onCancel = new Promise<void>((resolve) => {
+      handleCancel = resolve;
+    });
+
     const maxAPIVersion = args.options.maxAPIVersion;
-    socket = await debuggerHost.createHostConnection(hostType);
-    return debuggerHost.createDebuggerHost(
-      socket,
+    const { closePromise, close } = await createMockHost(
       hostType,
-      msg => cli.activeCommand.log(msg),
       { maxAPIVersion },
+      msg => cli.activeCommand.log(msg),
     );
+
+    onCancel.then(close);
+    return closePromise;
   }
 
-  const hostTypes: debuggerHost.HostType[] = ['app', 'companion'];
+  const hostTypes: HostType[] = ['app', 'companion'];
   for (const hostType of hostTypes) {
     cli
     .command(
@@ -26,8 +30,6 @@ export default function mockHost(cli: vorpal) {
     )
     .option('--maxAPIVersion <version>', 'Set the advertised max API version')
     .action(args => mockHostAction(hostType, args))
-    .cancel(() => {
-      if (socket) socket.close();
-    });
+    .cancel(() => handleCancel());
   }
 }
