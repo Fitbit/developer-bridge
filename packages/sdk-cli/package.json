@@ -70,8 +70,8 @@
     "fitbit": "./lib/cli.js"
   },
   "files": [
-    "/lib/!(*.test|*.spec).js",
-    "/lib/!(testUtils)**/!(*.test|*.spec).js",
+    "/lib/!(*.test|*.spec).{js,d.ts}",
+    "/lib/!(testUtils)**/!(*.test|*.spec).{js,d.ts}",
     "/lib/**/*.json"
   ],
   "greenkeeper": {
