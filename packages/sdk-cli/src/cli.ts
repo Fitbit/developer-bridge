@@ -17,6 +17,7 @@ import { formatMessage } from './models/formatMessage';
 
 import build from  './commands/build';
 import connect from  './commands/connect';
+import heapSnapshot from './commands/heapSnapshot';
 import hosts from './commands/hosts';
 import install from './commands/install';
 import logout from  './commands/logout';
@@ -34,6 +35,7 @@ const cli = new vorpal();
 cli.history('Fitbit-Command-Line-SDK');
 cli.use(build);
 cli.use(connect({ hostConnections }));
+cli.use(heapSnapshot({ hostConnections }));
 cli.use(install({ hostConnections, appContext }));
 cli.use(screenshot({ hostConnections }));
 cli.use(setAppPackage({ appContext }));
