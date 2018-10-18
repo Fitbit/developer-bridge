@@ -98,11 +98,17 @@ export default function install(
         }
 
         if (hasApp && appHost) {
-          cli.activeCommand.log('Launching app');
-          await appHost.host.launchAppComponent({
-            uuid: appPackage.uuid,
-            component: 'app',
-          });
+          if (
+            appHost.host.hasCapability('appHost.launch.appComponent')
+            && appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch) {
+            cli.activeCommand.log('Launching app');
+            await appHost.host.launchAppComponent({
+              uuid: appPackage.uuid,
+              component: 'app',
+            });
+          } else {
+            cli.activeCommand.log('Device does not support launching app remotely');
+          }
         }
 
         return true;
