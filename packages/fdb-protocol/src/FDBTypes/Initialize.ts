@@ -3,9 +3,11 @@ import * as t from 'io-ts';
 import { AppInstallCapabilities } from './AppInstall';
 import { IOCapabilities } from './BulkData';
 import { ConsoleDebuggerCapabilities } from './Console';
+import { HeapSnapshotCapability } from './HeapSnapshot';
 import { LaunchCapabilities } from './Launch';
 import { ProtocolCapabilities } from './Meta';
 import { ScreenshotCapabilities } from './Screenshot';
+import { Component } from './Structures';
 
 // Runtime types are variables which are used like types, which is
 // reflected in their PascalCase naming scheme.
@@ -58,6 +60,14 @@ export const HostKind = t.union([
 ]);
 export type HostKind = t.TypeOf<typeof HostKind>;
 
+export const AppDebugCapabilities = t.partial(
+  {
+    heapSnapshot: HeapSnapshotCapability,
+  },
+  'AppDebugCapabilities',
+);
+export type AppDebugCapabilities = t.TypeOf<typeof AppDebugCapabilities>;
+
 /**
  * App Host-specific capabilities.
  */
@@ -66,6 +76,7 @@ export const ApplicationHostCapabilities = t.partial(
     install: AppInstallCapabilities,
     launch: LaunchCapabilities,
     screenshot: ScreenshotCapabilities,
+    debug: t.dictionary(Component, t.union([t.undefined, AppDebugCapabilities])),
   },
   'ApplicationHostCapabilities',
 );
