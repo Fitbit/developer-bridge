@@ -1,6 +1,6 @@
 import { Type } from 'io-ts';
 
-import * as types from './FDBTypes';
+import * as types from './Structures';
 
 function testAType<S, A>(
   description: string,
