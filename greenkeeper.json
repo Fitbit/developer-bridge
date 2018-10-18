@@ -1,0 +1,15 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "package.json",
+        "packages/app-package/package.json",
+        "packages/fdb-debugger/package.json",
+        "packages/fdb-debugger/package.json.d.ts",
+        "packages/fdb-host/package.json",
+        "packages/fdb-protocol/package.json",
+        "packages/sdk-cli/package.json"
+      ]
+    }
+  }
+}
