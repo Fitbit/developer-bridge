@@ -73,6 +73,7 @@ export class RemoteHost extends EventEmitter {
     this.bulkDataStreams,
     'app component contents list',
   );
+  private heapSnapshotReceiver = new BulkDataReceiver(this.bulkDataStreams, 'heap snapshot');
   private serializerTransform = new ConfigurableEncode();
 
   protected constructor(timeout: number) {
@@ -92,6 +93,10 @@ export class RemoteHost extends EventEmitter {
     this.appContentsListReceiver.registerCloserMethods(
       this.dispatcher,
       'app.contents.stream',
+    );
+    this.heapSnapshotReceiver.registerCloserMethods(
+      this.dispatcher,
+      'app.debug.heapSnapshot',
     );
   }
 
@@ -464,5 +469,33 @@ export class RemoteHost extends EventEmitter {
     )
       .then(buffer => JSON.parse(buffer.toString()))
       .then(decode(FDBTypes.AppComponentContentsList));
+  }
+
+  getHeapSnapshotSupport(): {
+    supported: boolean,
+    requiresInstrumentedLaunch: boolean,
+    formats: string[],
+  } {
+    return {
+      supported: false,
+      requiresInstrumentedLaunch: false,
+      formats: [],
+      ...(
+        this.hasCapability('appHost.debug.app.heapSnapshot') &&
+        this.info.capabilities.appHost!.debug!.app!.heapSnapshot!
+      ),
+    };
+  }
+
+  protected beginHeapSnapshotCapture = this.bindMethod(
+    'app.debug.heapSnapshot.capture',
+    FDBTypes.AppHeapSnapshotRequest,
+    t.any,
+  );
+
+  captureHeapSnapshot(format: string) {
+    return this.heapSnapshotReceiver.receiveFromStream(
+      stream => this.beginHeapSnapshotCapture({ format, stream: stream.token }),
+    );
   }
 }
