@@ -73,5 +73,10 @@
     "/lib/!(*.test|*.spec).js",
     "/lib/!(testUtils)**/!(*.test|*.spec).js",
     "/lib/**/*.json"
-  ]
+  ],
+  "greenkeeper": {
+    "ignore": [
+       "@openid/appauth"
+     ]
+  }
 }
