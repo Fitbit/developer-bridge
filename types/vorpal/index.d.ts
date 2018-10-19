@@ -185,7 +185,7 @@ declare module 'vorpal' {
        * @return {Command}
        * @api public
        */
-      option(flags: string, description: string): this;
+      option(flags: string, description: string, autocomplete?: Autocomplete): this;
 
       /**
        * Defines a function to be called when the
@@ -198,6 +198,11 @@ declare module 'vorpal' {
 
       cancel(fn: () => void): this;
     }
+
+    type Autocomplete =
+      string[] |
+      ((input: string) => string[] | Promise<string>) |
+      ((input: string, callback: (completions: string[]) => void) => void);
 
     interface Args {
       options: {
