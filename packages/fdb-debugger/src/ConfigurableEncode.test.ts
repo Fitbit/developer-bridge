@@ -1,4 +1,4 @@
-import * as cbor from 'cbor';
+import * as cbor from 'cbor-js';
 import { FDBTypes } from '@fitbit/fdb-protocol';
 
 import ConfigurableEncode, { EncoderCallback } from './ConfigurableEncode';
@@ -6,6 +6,7 @@ import ConfigurableEncode, { EncoderCallback } from './ConfigurableEncode';
 let stream: ConfigurableEncode;
 let dataCallback: jest.Mock;
 let errorCallback: jest.Mock;
+let encoderSpy: jest.MockInstance<any>;
 
 beforeEach(() => {
   stream = new ConfigurableEncode();
@@ -13,10 +14,11 @@ beforeEach(() => {
   errorCallback = jest.fn();
   stream.on('data', dataCallback);
   stream.on('error', errorCallback);
+  encoderSpy = jest.spyOn(cbor, 'encode');
 });
 
 const testCases: [FDBTypes.SerializationType, EncoderCallback][] = [
-  ['cbor-definite', cbor.encode],
+  ['cbor-definite', obj => Buffer.from(cbor.encode(obj))],
   ['json', JSON.stringify],
 ];
 
@@ -35,6 +37,7 @@ it.each(testCases)('exposes current encoding via encoder property', (encoding) =
 it('emits an error if encoding fails', () => {
   // Forcing an encoding error by trying to CBOR encode a function (which will throw)
   stream.setEncoder('cbor-definite');
-  stream.write({ func: () => {} });
+  encoderSpy.mockImplementation(() => { throw new Error(); });
+  stream.write({ foo: 'bar' });
   expect(errorCallback).toBeCalledWith(expect.any(Error));
 });

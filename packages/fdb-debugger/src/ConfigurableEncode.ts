@@ -1,12 +1,12 @@
 import { Transform } from 'stream';
 
 import { FDBTypes } from '@fitbit/fdb-protocol';
-import * as cbor from 'cbor';
+import * as cbor from 'cbor-js';
 
 export type EncoderCallback = (data: any) => Buffer | string;
 
 const encoders: {[key in FDBTypes.SerializationType]: (data: any) => Buffer | string} = {
-  'cbor-definite': cbor.encode,
+  'cbor-definite': buf => Buffer.from(cbor.encode(buf)),
   json: JSON.stringify,
 };
 

@@ -21,7 +21,7 @@
   "dependencies": {
     "@fitbit/fdb-protocol": "^1.5.0-pre.3",
     "@fitbit/jsonrpc-ts": "^1.0.1",
-    "cbor": "^4.1.1",
+    "cbor-js": "^0.1.0",
     "io-ts": "^1.2.1",
     "jszip": "^3.1.5",
     "lodash": "^4.17.4",
@@ -29,7 +29,6 @@
     "tslib": "^1.9.0"
   },
   "devDependencies": {
-    "@types/cbor": "^2.0.0",
     "@types/duplexify": "^3.5.0",
     "@types/jszip": "^3.1.4",
     "@types/lodash": "^4.14.104",
