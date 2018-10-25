@@ -3,6 +3,7 @@ import * as t from 'io-ts';
 import { AppInstallCapabilities } from './AppInstall';
 import { IOCapabilities } from './BulkData';
 import { ConsoleDebuggerCapabilities } from './Console';
+import { EvalToStringCapability } from './Eval';
 import { HeapSnapshotCapability } from './HeapSnapshot';
 import { LaunchCapabilities } from './Launch';
 import { ProtocolCapabilities } from './Meta';
@@ -63,6 +64,7 @@ export type HostKind = t.TypeOf<typeof HostKind>;
 export const AppDebugCapabilities = t.partial(
   {
     heapSnapshot: HeapSnapshotCapability,
+    evalToString: EvalToStringCapability,
   },
   'AppDebugCapabilities',
 );

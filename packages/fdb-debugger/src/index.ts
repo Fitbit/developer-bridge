@@ -434,14 +434,14 @@ export class RemoteHost extends EventEmitter {
   }
 
   private sendEvalCmd = this.bindMethod(
-    'experimental.debug.eval',
+    'app.debug.evalToString',
     FDBTypes.AppDebugEvalParams,
     FDBTypes.AppDebugEvalResult,
   );
 
   hasEvalSupport() {
-    return this.hasCapability('experimental.debug.eval') &&
-      this.info.capabilities.experimental!.debug.eval;
+    return this.hasCapability('appHost.debug.app.evalToString.supported') &&
+      this.info.capabilities.appHost!.debug!.app!.evalToString!.supported;
   }
 
   eval(cmd: string) {

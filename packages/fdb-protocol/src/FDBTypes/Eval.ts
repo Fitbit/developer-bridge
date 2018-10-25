@@ -1,8 +1,12 @@
 import * as t from 'io-ts';
+import { DebugCapability } from './AppDebug';
 
 // Runtime types are variables which are used like types, which is
 // reflected in their PascalCase naming scheme.
 /* tslint:disable:variable-name */
+
+export const EvalToStringCapability = DebugCapability;
+export type EvalToStringCapability = t.TypeOf<typeof EvalToStringCapability>;
 
 export const AppDebugEvalParams = t.interface(
   {
