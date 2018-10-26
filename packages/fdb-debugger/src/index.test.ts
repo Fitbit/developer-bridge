@@ -707,17 +707,13 @@ it('handles attempts to abort a nonexistent screenshot stream', async () => {
 });
 
 it('detects when the host supports eval', async () => {
-  const host = await init({
-    experimental: {
-      debug: { eval: true },
-    },
-  });
+  const host = await init({ appHost: { debug: { app: { evalToString: { supported: true } } } } });
   expect(host.hasEvalSupport()).toBe(true);
 });
 
 it.each([
   {},
-  { experimental: { debug: { eval: false } } },
+  { appHost: { debug: { app: { evalToString: { supported: false } } } } },
 ])('detects when the host does not support eval %#', async (capabilities) => {
   const host = await init(capabilities);
   expect(host.hasEvalSupport()).toBe(false);
