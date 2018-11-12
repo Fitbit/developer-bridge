@@ -43,7 +43,7 @@ it('calls the installAction with the provided packagePath', async () => {
   );
 });
 
-it('waits for the build to complete before calling install', async () => {
+it('waits for the build to complete before calling install', () => {
   cli.exec('build-and-install');
   expect(buildActionSpy).toBeCalled();
   expect(installActionSpy).not.toBeCalled();
