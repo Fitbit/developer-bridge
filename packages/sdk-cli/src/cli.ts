@@ -16,6 +16,7 @@ import LogConsumer from './models/LogConsumer';
 import { formatMessage } from './models/formatMessage';
 
 import build from  './commands/build';
+import buildAndInstall from './commands/buildAndInstall';
 import connect from  './commands/connect';
 import heapSnapshot from './commands/heapSnapshot';
 import hosts from './commands/hosts';
@@ -34,6 +35,7 @@ const hostConnections = new HostConnections();
 const cli = new vorpal();
 cli.history('Fitbit-Command-Line-SDK');
 cli.use(build);
+cli.use(buildAndInstall({ hostConnections, appContext }));
 cli.use(connect({ hostConnections }));
 cli.use(heapSnapshot({ hostConnections }));
 cli.use(install({ hostConnections, appContext }));

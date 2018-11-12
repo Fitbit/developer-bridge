@@ -6,13 +6,11 @@ import HostConnections from '../models/HostConnections';
 import install from './install';
 import * as sideload from '../models/sideload';
 
-import { buildAction } from './build';
 import { connectAction } from './connect';
 import { setAppPackageAction } from './setAppPackage';
 
 jest.mock('fs');
 jest.mock('../models/sideload');
-jest.mock('./build');
 jest.mock('./connect');
 jest.mock('./setAppPackage');
 
@@ -270,27 +268,5 @@ describe('when a companion-only app is loaded', () => {
     it('sideloads the companion', () => {
       expect(sideloadCompanionSpy).toBeCalled();
     });
-  });
-});
-
-describe('build option', () => {
-  it('calls the build action when the --build option is provided', async () => {
-    await cli.exec('install --build');
-    expect(buildAction).toBeCalledWith(expect.anything());
-  });
-
-  it('calls the build action when the -b option is provided', async () => {
-    await cli.exec('install -b');
-    expect(buildAction).toBeCalledWith(expect.anything());
-  });
-
-  it('does not call the build action if the option is not provided', async () => {
-    await cli.exec('install');
-    expect(buildAction).not.toBeCalled();
-  });
-
-  it('does not call the build option if a packagePath is provided', async () => {
-    await cli.exec('install app.fba --build');
-    expect(buildAction).not.toBeCalled();
   });
 });
