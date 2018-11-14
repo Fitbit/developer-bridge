@@ -132,6 +132,15 @@ declare module 'vorpal' {
       action<T>(actionFn: (this: CommandInstance, command: string) => void | Promise<T>): this;
 
       /**
+       * Provides an alias to the command
+       *
+       * @param {String} alias
+       * @return {Command}
+       * @api public
+       */
+      alias(alias: string): this;
+
+      /**
        * Sets args for static typing of options
        * using minimist.
        *
