@@ -620,9 +620,10 @@
   version "2.2.29"
   resolved "https://registry.yarnpkg.com/@types/invariant/-/invariant-2.2.29.tgz#aa845204cd0a289f65d47e0de63a6a815e30cc66"
 
-"@types/jest@^23.3.2":
-  version "23.3.3"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.3.tgz#246ebcc52771d2327bb8e37aa971b412d9dc4237"
+"@types/jest@^23.3.9":
+  version "23.3.9"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.9.tgz#c16b55186ee73ae65e001fbee69d392c51337ad1"
+  integrity sha512-wNMwXSUcwyYajtbayfPp55tSayuDVU6PfY5gzvRSj80UvxdXEJOVPnUVajaOp7NgXLm+1e2ZDLULmpsU9vDvQw==
 
 "@types/jquery@^3.3.2":
   version "3.3.21"
@@ -3059,15 +3060,10 @@ invert-kv@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
 
-io-ts@^1.2.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.3.1.tgz#04b71579fec0592cb758bd460a1fc0520f18b3c8"
-  dependencies:
-    fp-ts "^1.0.0"
-
-io-ts@^1.3.2:
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.3.4.tgz#ae735d85900b1b6ae9c44eca32ee3396b38fb1db"
+io-ts@1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.4.1.tgz#7061d85a60dad3e7bbfa6679035d400a1302366e"
+  integrity sha512-jzOHbNMvXlHfF64Ik+WHQ0ZI7NqTrZQzh0YsWAM4lWBp3Sm/4wWZAMlsUtulNeEFSJsRUxeaYU/WhR2qFoLNXQ==
   dependencies:
     fp-ts "^1.0.0"
 
@@ -4387,9 +4383,10 @@ nigel@3.x.x:
     hoek "5.x.x"
     vise "3.x.x"
 
-nock@^10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-10.0.1.tgz#71eeb580c2995878e582b3e32420daead9eb44f7"
+nock@^10.0.2:
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-10.0.2.tgz#9e9a92253808e480a8163c2a21fc12937c02c3b0"
+  integrity sha512-uWrdlRzG28SXM5yqYsUHfYBRqljF8P6aTRDh6Y5kTgs/Q4GB59QWlpiegmDHQouvmX/rDyKkC/nk+k4nA+QPNw==
   dependencies:
     chai "^4.1.2"
     debug "^4.1.0"
@@ -6284,9 +6281,10 @@ validate-npm-package-name@^3.0.0:
   dependencies:
     builtins "^1.0.3"
 
-validator@^10.8.0:
-  version "10.8.0"
-  resolved "https://registry.yarnpkg.com/validator/-/validator-10.8.0.tgz#8acb15a5c39411cbc8ef2be0c98c2514da4410a7"
+validator@^10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-10.9.0.tgz#d10c11673b5061fb7ccf4c1114412411b2bac2a8"
+  integrity sha512-hZJcZSWz9poXBlAkjjcsNAdrZ6JbjD3kWlNjq/+vE7RLLS/+8PAj3qVVwrwsOz/WL8jPmZ1hYkRvtlUeZAm4ug==
 
 verror@1.10.0:
   version "1.10.0"

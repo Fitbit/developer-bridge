@@ -18,7 +18,7 @@
     "@fitbit/fdb-debugger": "^1.5.0-pre.5",
     "@fitbit/fdb-host": "^1.5.0-pre.5",
     "@fitbit/fdb-protocol": "^1.5.0-pre.5",
-    "@fitbit/jsonrpc-ts": "^1.0.0",
+    "@fitbit/jsonrpc-ts": "^1.0.2",
     "@fitbit/portable-pixmap": "^1.0.2",
     "@openid/appauth": "^0.3.5",
     "chalk": "^2.4.1",
@@ -27,7 +27,7 @@
     "fetch-ponyfill": "^6.0.2",
     "fs-extra": "^7.0.0",
     "humanize-list": "^1.0.1",
-    "io-ts": "^1.2.1",
+    "io-ts": "1.4.1",
     "jszip": "^3.1.5",
     "keytar": "^4.2.1",
     "lodash": "^4.17.10",
@@ -64,7 +64,7 @@
     "@types/ws": "^6.0.1",
     "mock-fs": "^4.5.0",
     "mockdate": "^2.0.2",
-    "nock": "^10.0.1"
+    "nock": "^10.0.2"
   },
   "bin": {
     "fitbit": "./lib/cli.js"
