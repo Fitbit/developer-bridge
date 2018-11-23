@@ -35,6 +35,6 @@
   },
   "peerDependencies": {
     "@fitbit/jsonrpc-ts": "^1.0.2",
-    "io-ts": "1.4.1"
+    "io-ts": "1.4.2"
   }
 }
