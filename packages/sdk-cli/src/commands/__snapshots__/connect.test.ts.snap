@@ -12,6 +12,12 @@ Array [
 ]
 `;
 
+exports[`when the device type argument is device logs an error if the hosts call throws 1`] = `
+Array [
+  "Could not find any device hosts: some error",
+]
+`;
+
 exports[`when the device type argument is device when a single device is connected logs a message explaining the auto-connection 1`] = `
 Array [
   "Auto-connecting only known device: App Host",
@@ -27,6 +33,12 @@ Array [
 exports[`when the device type argument is phone logs an error if no phones are connected 1`] = `
 Array [
   "No phones are connected and available",
+]
+`;
+
+exports[`when the device type argument is phone logs an error if the hosts call throws 1`] = `
+Array [
+  "Could not find any phone hosts: some error",
 ]
 `;
 

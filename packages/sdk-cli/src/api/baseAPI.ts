@@ -1,7 +1,6 @@
 import * as auth from '../auth';
 import environment from '../auth/environment';
 import fetch, { Headers } from '../fetch';
-import { decodeJSON } from '../util/fetchUtil';
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const authToken = await auth.getAccessToken();
@@ -16,5 +15,3 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   };
   return fetch(`${environment().config.apiUrl}/${path}`, mergedInit);
 }
-
-export { decodeJSON };

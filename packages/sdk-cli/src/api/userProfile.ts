@@ -1,7 +1,8 @@
 
 import * as t from 'io-ts';
 
-import { apiFetch, decodeJSON } from './baseAPI';
+import { apiFetch } from './baseAPI';
+import { decodeJSON } from '../util/fetchUtil';
 
 // tslint:disable-next-line:variable-name
 const UserProfileResponse = t.type(
