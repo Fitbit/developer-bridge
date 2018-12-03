@@ -69,8 +69,8 @@ export async function hosts() {
     .then(async (response: Response) => {
       if (response.ok || response.status !== 403) return response;
 
-      const errorObj = decode(Hosts403Response)(await assertJSON()(response));
-      const errorString = errorObj.errors.reduce((str, error) => `${str}\n${error.message}`, '');
+      const errorObj = await assertJSON()(response).then(decode(Hosts403Response));
+      const errorString = errorObj.errors.join('\n');
       throw new Error(errorString);
     })
     .then(decodeJSON(HostsResponse));

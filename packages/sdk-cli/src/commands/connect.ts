@@ -19,7 +19,7 @@ export const connectAction = async (
   try {
     hosts = await developerRelay.hosts();
   } catch (error) {
-    cli.log(`Could not find any ${deviceType} hosts: ${error.message}`);
+    cli.log(`An error was encountered when loading the list of available ${deviceType} hosts: ${error.message}`);
     return false;
   }
 
