@@ -2,8 +2,8 @@ import * as t from 'io-ts';
 import stream from 'stream';
 import websocketStream from 'websocket-stream';
 
-import { apiFetch, assertOK } from './baseAPI';
-import { assertContentType, decodeJSON } from '../util/fetchUtil';
+import { apiFetch, assertAPIResponseOK, decodeJSON } from './baseAPI';
+import { assertContentType } from '../util/fetchUtil';
 
 // tslint:disable-next-line:variable-name
 export const Host = t.type(
@@ -32,7 +32,7 @@ async function getConnectionURL(hostID: string) {
   const response = await apiFetch(
     `1/user/-/developer-relay/hosts/${hostID}`,
     { method: 'POST' },
-  ).then(assertOK).then(assertContentType('text/uri-list'));
+  ).then(assertAPIResponseOK).then(assertContentType('text/uri-list'));
   const uriList = (await response.text())
     .split('\r\n')
     .filter(line => line[0] !== '#');

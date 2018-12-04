@@ -1,25 +1,5 @@
-import { Response } from '../fetch';
 import * as fetchUtil from './fetchUtil';
-
-function makeResponse(
-  init: ResponseInit = { status: 200 },
-  body = '{}',
-) {
-  const response = new Response(
-    body,
-    {
-      statusText: `Status ${init.status}`,
-      ...init,
-    },
-  );
-
-  Object.defineProperty(response, 'url', {
-    value: 'http://api',
-    writable: false,
-  });
-
-  return response;
-}
+import makeResponse from '../testUtils/makeResponse';
 
 describe('assertJSON()', () => {
   it.each([
@@ -62,5 +42,20 @@ describe('assertJSON()', () => {
         makeResponse({ headers: { 'Content-Type': 'application/vnd.document+json' } }),
       ),
     ).resolves.toEqual({});
+  });
+});
+
+describe('okOrElse', () => {
+  const mockFailure = jest.fn();
+
+  it('resolves with the response if the response is ok', () => {
+    const response = makeResponse();
+    return expect(fetchUtil.okOrElse(mockFailure)(response)).resolves.toBe(response);
+  });
+
+  it('calls the failure method if the response is not ok', () => {
+    const response = makeResponse({ status: 403 });
+    fetchUtil.okOrElse(mockFailure)(response);
+    expect(mockFailure).toBeCalledWith(response);
   });
 });
