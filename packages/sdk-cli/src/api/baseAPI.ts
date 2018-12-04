@@ -23,12 +23,11 @@ export const assertAPIResponseOK = okOrElse((response) => {
       // tslint:disable-next-line:max-line-length
       new Error(`Fetch of ${response.url} returned status ${response.status} ${response.statusText}`),
     ))
-    .then(responseObject => Promise.reject(new Error(APIErrorResponse.decode(responseObject).fold(
+    .then(resObj => Promise.reject<Response>(new Error(APIErrorResponse.decode(resObj).fold(
       // tslint:disable-next-line:max-line-length
       () => `fetch of ${response.url} returned status ${response.status} ${response.statusText} with body: ${JSON.stringify(responseObject, undefined, 2)}`,
       errorObj => errorObj.errors.map(err => err.message).join('\n'),
-    )))
-    .then(() => Promise.resolve(response)));
+    ))));
 });
 
 export const decodeJSON = <A, O, I>(endpointType: t.Type<A, O, I>) =>
