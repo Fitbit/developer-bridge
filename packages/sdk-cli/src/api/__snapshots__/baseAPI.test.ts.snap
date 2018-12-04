@@ -1,3 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`apiFetch() rejects if no auth header is available 1`] = `"Fetch of fakeAPI failed: no stored auth token"`;
+
+exports[`assertOK() rejects on status code 400 with a non-JSON body 1`] = `"Fetch of undefined returned status 400 Status 400"`;
+
+exports[`assertOK() rejects on status code 401 with a non-JSON body 1`] = `"Fetch of undefined returned status 401 Status 401"`;
+
+exports[`assertOK() rejects on status code 403 with a non-JSON body 1`] = `"Fetch of undefined returned status 403 Status 403"`;
+
+exports[`assertOK() rejects on status code 500 with a non-JSON body 1`] = `"Fetch of undefined returned status 500 Status 500"`;
+
+exports[`assertOK() rejects on status code 502 with a non-JSON body 1`] = `"Fetch of undefined returned status 502 Status 502"`;
+
+exports[`assertOK() rejects on status code 503 with a non-JSON body 1`] = `"Fetch of undefined returned status 503 Status 503"`;
+
+exports[`assertOK() throws an error containing the response body when the error JSON is invalid 1`] = `"Fetch of undefined returns status 403 with payload: {\\"message\\":\\"some error\\"}"`;

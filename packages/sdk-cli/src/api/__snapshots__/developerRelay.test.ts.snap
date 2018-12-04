@@ -2,8 +2,8 @@
 
 exports[`connect() when the WebSocket connection is unsucessful throws 1`] = `"Connection failed!"`;
 
-exports[`hosts() handles a 403 response with a malformed payload 1`] = `[DecodeError: Invalid value undefined supplied to : Hosts403Response/errors: Array<{ message: string }>]`;
+exports[`hosts() handles a 403 response with a malformed payload 1`] = `[Error: Fetch of https://api.fitbit.com/1/user/-/developer-relay/hosts.json returns status 403 with payload: {"message":"reason 2"}]`;
 
-exports[`hosts() handles a 403 response with a non JSON payload 1`] = `[Error: Unexpected Content-Type: expected 'application/json', got '']`;
+exports[`hosts() handles a 403 response with a non JSON payload 1`] = `[Error: Fetch of https://api.fitbit.com/1/user/-/developer-relay/hosts.json returned status 403 Forbidden]`;
 
 exports[`hosts() handles a non 403 error response 1`] = `[Error: Fetch of https://api.fitbit.com/1/user/-/developer-relay/hosts.json returned status 500 Internal Server Error]`;

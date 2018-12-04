@@ -1,10 +1,9 @@
 import * as t from 'io-ts';
-import { decode } from '@fitbit/jsonrpc-ts';
 import stream from 'stream';
 import websocketStream from 'websocket-stream';
 
-import { apiFetch } from './baseAPI';
-import { assertContentType, assertOK, assertJSON, decodeJSON } from '../util/fetchUtil';
+import { apiFetch, assertOK } from './baseAPI';
+import { assertContentType, decodeJSON } from '../util/fetchUtil';
 
 // tslint:disable-next-line:variable-name
 export const Host = t.type(
@@ -28,17 +27,6 @@ const HostsResponse = t.type(
   },
   'HostsResponse',
 );
-
-// tslint:disable-next-line:variable-name
-const Hosts403Response = t.type(
-  {
-    errors: t.array(t.type({
-      message: t.string,
-    })),
-  },
-  'Hosts403Response',
-);
-type Hosts403Response = t.TypeOf<typeof Hosts403Response>;
 
 async function getConnectionURL(hostID: string) {
   const response = await apiFetch(
@@ -66,13 +54,6 @@ export async function connect(hostID: string) {
 
 export async function hosts() {
   const response = await apiFetch('1/user/-/developer-relay/hosts.json')
-    .then(async (response: Response) => {
-      if (response.ok || response.status !== 403) return response;
-
-      const errorObj = await assertJSON()(response).then(decode(Hosts403Response));
-      const errorString = errorObj.errors.join('\n');
-      throw new Error(errorString);
-    })
     .then(decodeJSON(HostsResponse));
 
   const hostsWithRole = (role: string) =>

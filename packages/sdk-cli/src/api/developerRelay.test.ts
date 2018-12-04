@@ -91,7 +91,7 @@ describe('hosts()', () => {
 
   it('parses a 403 response for error reasons', async () => {
     mockHostsResponse(403, { errors: [{ message: 'reason 1' }, { message: 'reason 2' }] });
-    return expect(developerRelay.hosts()).rejects.toEqual(new Error('\nreason 1\nreason 2'));
+    return expect(developerRelay.hosts()).rejects.toEqual(new Error('reason 1\nreason 2'));
   });
 
   it('handles a 403 response with a malformed payload', async () => {

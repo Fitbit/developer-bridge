@@ -14,7 +14,7 @@ Array [
 
 exports[`when the device type argument is device logs an error if the hosts call throws 1`] = `
 Array [
-  "Could not find any device hosts: some error",
+  "An error was encountered when loading the list of available device hosts: some error",
 ]
 `;
 
@@ -38,7 +38,7 @@ Array [
 
 exports[`when the device type argument is phone logs an error if the hosts call throws 1`] = `
 Array [
-  "Could not find any phone hosts: some error",
+  "An error was encountered when loading the list of available phone hosts: some error",
 ]
 `;
 

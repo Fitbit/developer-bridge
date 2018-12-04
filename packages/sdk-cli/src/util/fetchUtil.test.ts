@@ -21,24 +21,6 @@ function makeResponse(
   return response;
 }
 
-describe('assertOK()', () => {
-  it.each([
-    400,
-    401,
-    403,
-    500,
-    502,
-    503,
-  ])('rejects on status code %d', (status) => {
-    return expect((fetchUtil.assertOK(makeResponse({ status }))),
-    ).rejects.toThrowErrorMatchingSnapshot();
-  });
-
-  it('resolves to a response object on status code 200', () => {
-    return expect(fetchUtil.assertOK(makeResponse())).resolves.toBeInstanceOf(Response);
-  });
-});
-
 describe('assertJSON()', () => {
   it.each([
     'application/text',
