@@ -28,10 +28,14 @@ const mockCompanionHost = {
 
 let endpointMock: nock.Scope;
 
-function mockHostsResponse(hosts = [mockAppHost, mockCompanionHost]) {
+function mockHostsResponse(status: number, payload?: any) {
   endpointMock
     .get('/1/user/-/developer-relay/hosts.json')
-    .reply(200, { hosts });
+    .reply(status, payload);
+}
+
+function mockHostsSuccessResponse(hosts = [mockAppHost, mockCompanionHost]) {
+  mockHostsResponse(200, { hosts });
 }
 
 function mockConnectionURLResponse(hostID: string, response: string) {
@@ -51,21 +55,21 @@ beforeEach(() => {
 
 describe('hosts()', () => {
   it('returns list of connected app hosts', async () => {
-    mockHostsResponse();
+    mockHostsSuccessResponse();
     return expect(developerRelay.hosts()).resolves.toEqual(expect.objectContaining({
       appHost: [mockAppHost],
     }));
   });
 
   it('returns list of connected companion hosts', async () => {
-    mockHostsResponse();
+    mockHostsSuccessResponse();
     return expect(developerRelay.hosts()).resolves.toEqual(expect.objectContaining({
       companionHost: [mockCompanionHost],
     }));
   });
 
   it('returns empty lists if no hosts are connected', async () => {
-    mockHostsResponse([]);
+    mockHostsSuccessResponse([]);
     return expect(developerRelay.hosts()).resolves.toEqual({
       appHost: [],
       companionHost: [],
@@ -73,7 +77,7 @@ describe('hosts()', () => {
   });
 
   it('ignores hosts with unknown roles', async () => {
-    mockHostsResponse([
+    mockHostsSuccessResponse([
       {
         ...mockAppHost,
         roles: ['__bad_role__'],
@@ -83,6 +87,26 @@ describe('hosts()', () => {
       appHost: [],
       companionHost: [],
     });
+  });
+
+  it('parses a 403 response for error reasons', async () => {
+    mockHostsResponse(403, { errors: [{ message: 'reason 1' }, { message: 'reason 2' }] });
+    return expect(developerRelay.hosts()).rejects.toEqual(new Error('reason 1\nreason 2'));
+  });
+
+  it('handles a 403 response with a malformed payload', async () => {
+    mockHostsResponse(403, { message: 'reason 2' });
+    return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
+  });
+
+  it('handles a 403 response with a non JSON payload', async () => {
+    mockHostsResponse(403);
+    return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
+  });
+
+  it('handles a non 403 error response', async () => {
+    mockHostsResponse(500);
+    return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
   });
 });
 
