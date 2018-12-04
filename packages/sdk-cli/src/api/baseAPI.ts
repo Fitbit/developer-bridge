@@ -25,7 +25,7 @@ export const assertAPIResponseOK = okOrElse((response) => {
     ))
     .then(resObj => Promise.reject<Response>(new Error(APIErrorResponse.decode(resObj).fold(
       // tslint:disable-next-line:max-line-length
-      () => `fetch of ${response.url} returned status ${response.status} ${response.statusText} with body: ${JSON.stringify(responseObject, undefined, 2)}`,
+      () => `fetch of ${response.url} returned status ${response.status} ${response.statusText} with body: ${JSON.stringify(resObj, undefined, 2)}`,
       errorObj => errorObj.errors.map(err => err.message).join('\n'),
     ))));
 });
