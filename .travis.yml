@@ -9,6 +9,8 @@ os:
 
 dist: trusty
 
+cache: yarn
+
 addons:
   apt:
     packages:
