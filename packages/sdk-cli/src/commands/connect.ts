@@ -11,7 +11,18 @@ export const connectAction = async (
   deviceType: DeviceType,
   hostConnections: HostConnections,
 ) => {
-  const hosts = await developerRelay.hosts();
+  let hosts: {
+    appHost: developerRelay.Host[];
+    companionHost: developerRelay.Host[];
+  };
+
+  try {
+    hosts = await developerRelay.hosts();
+  } catch (error) {
+    cli.log(`An error was encountered when loading the list of available ${deviceType} hosts: ${error.message}`);
+    return false;
+  }
+
   const hostTypes: {[key: string]: keyof typeof hosts} = {
     device: 'appHost',
     phone: 'companionHost',

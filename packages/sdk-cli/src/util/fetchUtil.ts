@@ -1,12 +1,3 @@
-import { decode } from '@fitbit/jsonrpc-ts';
-import * as t from 'io-ts';
-
-export const assertOK = (response: Response) => response.ok ?
-  Promise.resolve(response) :
-  Promise.reject(
-    new Error(`Fetch of ${response.url} returned status ${response.status} ${response.statusText}`),
-  );
-
 export const assertContentType = (expected: string) => (response: Response) => {
   // Parameters of media types are ignored.
   const contentTypeHeader = response.headers.get('content-type') || '';
@@ -24,8 +15,5 @@ export const assertJSON = (expected = 'application/json') => async (response: Re
   return response.json();
 };
 
-export const decodeJSON = <A, O, I>(endpointType: t.Type<A, O, I>) =>
-  (response: Response): Promise<A> =>
-    assertOK(response)
-      .then(assertJSON())
-      .then(decode(endpointType));
+export const okOrElse = <T>(failure: (response: Response) => Promise<T>) => (response: Response) =>
+  response.ok ? Promise.resolve(response) : failure(response);

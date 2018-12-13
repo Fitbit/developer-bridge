@@ -4,7 +4,7 @@
  * project's root directory, not the root of the monorepo.
  */
 
-module.exports = {
+const baseConfig = {
   moduleFileExtensions: [
     'ts',
     'js',
@@ -21,3 +21,6 @@ module.exports = {
   },
   testEnvironment: 'node',
 };
+
+// Gotta be compatible with Node 8.0, which does not support object spread.
+module.exports = overrides => Object.assign({}, baseConfig, overrides);

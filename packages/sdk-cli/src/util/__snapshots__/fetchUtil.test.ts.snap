@@ -7,15 +7,3 @@ exports[`assertJSON() rejects on Content-Type header of application/text 1`] = `
 exports[`assertJSON() rejects on Content-Type header of image/png 1`] = `"Unexpected Content-Type: expected 'application/json', got 'image/png'"`;
 
 exports[`assertJSON() rejects on Content-Type header of undefined 1`] = `"Unexpected Content-Type: expected 'application/json', got 'undefined'"`;
-
-exports[`assertOK() rejects on status code 400 1`] = `"Fetch of http://api returned status 400 Status 400"`;
-
-exports[`assertOK() rejects on status code 401 1`] = `"Fetch of http://api returned status 401 Status 401"`;
-
-exports[`assertOK() rejects on status code 403 1`] = `"Fetch of http://api returned status 403 Status 403"`;
-
-exports[`assertOK() rejects on status code 500 1`] = `"Fetch of http://api returned status 500 Status 500"`;
-
-exports[`assertOK() rejects on status code 502 1`] = `"Fetch of http://api returned status 502 Status 502"`;
-
-exports[`assertOK() rejects on status code 503 1`] = `"Fetch of http://api returned status 503 Status 503"`;

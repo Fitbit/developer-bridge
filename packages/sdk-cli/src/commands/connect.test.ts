@@ -141,6 +141,12 @@ describe.each([
         expect(hostConnectSpy).toBeCalledWith(hostType, mockSelectedHost.id);
       });
     });
+
+    it('logs an error if the hosts call throws', async () => {
+      relayHostsSpy.mockRejectedValueOnce(new Error('some error'));
+      await doConnect(deviceType);
+      expect(mockLog.mock.calls[0]).toMatchSnapshot();
+    });
   },
 );
 
