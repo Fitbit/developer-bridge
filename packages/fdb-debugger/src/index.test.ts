@@ -8,11 +8,12 @@ import JSZip = require('jszip');
 import { FDBTypes } from '@fitbit/fdb-protocol';
 import {
   DecodeError,
+  MethodCallTimeout,
   ParseJSON,
   Peer,
   RPCError,
   StringifyJSON,
-  TypesafeRequestDispatcher ,
+  TypesafeRequestDispatcher,
 } from '@fitbit/jsonrpc-ts';
 
 import { ConsoleMessage, ConsoleTrace, RemoteHost } from '.';
@@ -47,7 +48,7 @@ async function init(capabilities: FDBTypes.HostCapabilities = {}) {
   handler.method('initialize', FDBTypes.InitializeParams, () => ({ ...hostInfo, capabilities }));
   const host = await RemoteHost.connect(mockStream, { timeout: 1000 });
   host.dispatcher.defaultNotificationHandler =
-    (method: string, params: { [key: string]: any } | any[]) => (
+    (method: string, params?: { [key: string]: any } | any[]) => (
       // tslint:disable-next-line:max-line-length
       fail(`RemoteHost failed to handle notification '${method}' with params\n${JSON.stringify(params, undefined, 2)}`)
     );
@@ -154,7 +155,7 @@ it('fails the ping request when the host takes too long to respond', async () =>
   const remoteHost = await init();
   const pingResult = remoteHost.ping();
   jest.runOnlyPendingTimers();
-  return expect(pingResult).rejects.toEqual(new Error('ping timed out'));
+  return expect(pingResult).rejects.toThrow(MethodCallTimeout);
 });
 
 it('sideloads an app', async () => {
@@ -258,7 +259,7 @@ describe('cancels the sideload if the install begin method call', () => {
     handler.method('app.install.stream.begin', t.any, () => new Promise(() => {}));
     const install = remoteHost.installApp('app', sourceBuffer);
     jest.runOnlyPendingTimers();
-    return expect(install).rejects.toEqual(new Error('app.install.stream.begin timed out'));
+    return expect(install).rejects.toThrow(MethodCallTimeout);
   });
 });
 
@@ -363,7 +364,7 @@ describe('fails the sideload if the install finalize method call', () => {
       return new Promise(() => {});
     });
     return expect(remoteHost.installApp('app', sourceBuffer))
-      .rejects.toEqual(new Error('app.install.stream.finalize timed out'));
+      .rejects.toThrow(MethodCallTimeout);
   });
 });
 

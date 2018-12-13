@@ -35,10 +35,10 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@fitbit/jsonrpc-ts@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@fitbit/jsonrpc-ts/-/jsonrpc-ts-1.0.2.tgz#e78d2313eb840f72c51ed7435514302bc58f7785"
-  integrity sha512-FbfCJQi94TqzfteZMuUF69M3eDQLsayKEPc+pjQC8zJMi5KXgaO3ViactQPN4wrzyOyzbp1atTnE8XDlBPknbw==
+"@fitbit/jsonrpc-ts@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/@fitbit/jsonrpc-ts/-/jsonrpc-ts-2.0.0.tgz#b8613adbd11f3d8b82ea93961041989ae3689ebc"
+  integrity sha512-WP8b3sjlG6KmEzlZQMvasYdcKzhzxStyEfYJYEAoAT6a4yG/IpbD2GkJ1hAHuczupSNhOlY8OhBsE6My2SCB4w==
   dependencies:
     "@types/error-subclass" "^2.2.0"
     error-subclass "^2.2.0"
@@ -3082,10 +3082,10 @@ invert-kv@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
 
-io-ts@1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.4.1.tgz#7061d85a60dad3e7bbfa6679035d400a1302366e"
-  integrity sha512-jzOHbNMvXlHfF64Ik+WHQ0ZI7NqTrZQzh0YsWAM4lWBp3Sm/4wWZAMlsUtulNeEFSJsRUxeaYU/WhR2qFoLNXQ==
+io-ts@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/io-ts/-/io-ts-1.5.0.tgz#e50e8a3538df803d30647fb489df9d3bde6568c9"
+  integrity sha512-MrH8xuiJTPysbGAR8vPRVmiBLTnGwunXDz60ifh9mzpBMlg10Wadx8mRSrMSZ/BsmUN/QIdgHVzMhrpGw6jmHQ==
   dependencies:
     fp-ts "^1.0.0"
 
@@ -6207,9 +6207,10 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typescript@~3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.3.tgz#01b70247a6d3c2467f70c45795ef5ea18ce191d5"
+typescript@~3.2.2:
+  version "3.2.2"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-3.2.2.tgz#fe8101c46aa123f8353523ebdcf5730c2ae493e5"
+  integrity sha512-VCj5UiSyHBjwfYacmDuc/NOk4QQixbE+Wn7MFJuS0nRuPQbof132Pw4u53dm264O8LPc2MVsc7RJNml5szurkg==
 
 uglify-js@^3.1.4:
   version "3.4.9"

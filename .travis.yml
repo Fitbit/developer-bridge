@@ -7,7 +7,7 @@ os:
   - linux
   - osx
 
-dist: trusty
+dist: xenial
 
 cache: yarn
 
@@ -16,8 +16,11 @@ addons:
     packages:
     - libsecret-1-dev
 
-# --runInBand needed so tests don't timeout https://github.com/facebook/jest/issues/3855
 script:
   - yarn lint
-  - yarn build
+  # TypeScript runs out of memory on Node 8 otherwise.
+  # https://stackoverflow.com/a/52390439
+  - NODE_OPTIONS=--max_old_space_size=4096 yarn build
+  # --runInBand needed so tests don't time out.
+  # https://github.com/facebook/jest/issues/3855
   - yarn test --runInBand
