@@ -78,5 +78,8 @@
     "ignore": [
       "@openid/appauth"
     ]
+  },
+  "engines": {
+    "node": ">=8.0.0"
   }
 }
