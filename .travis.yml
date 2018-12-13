@@ -18,5 +18,6 @@ addons:
 
 # --runInBand needed so tests don't timeout https://github.com/facebook/jest/issues/3855
 script:
+  - yarn lint
   - yarn build
   - yarn test --runInBand
