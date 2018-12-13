@@ -19,7 +19,10 @@ export const connectAction = async (
   try {
     hosts = await developerRelay.hosts();
   } catch (error) {
-    cli.log(`An error was encountered when loading the list of available ${deviceType} hosts: ${error.message}`);
+    cli.log(
+      // tslint:disable-next-line:max-line-length
+      `An error was encountered when loading the list of available ${deviceType} hosts: ${error.message}`,
+    );
     return false;
   }
 
