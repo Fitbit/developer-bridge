@@ -4,6 +4,7 @@ import duplexify = require('duplexify');
 import * as t from 'io-ts';
 import { FDBTypes } from '@fitbit/fdb-protocol';
 import {
+  MethodCallTimeout,
   ParseJSON,
   Peer,
   RPCError,
@@ -56,7 +57,7 @@ async function init(capabilities: FDBTypes.HostCapabilities = {}) {
   const host = createMockHost();
   await mockDebugger.callMethod('initialize', { capabilities: {} });
   host.dispatcher.defaultNotificationHandler =
-    (method: string, params: { [key: string]: any } | any[]) => (
+    (method: string, params?: { [key: string]: any } | any[]) => (
       // tslint:disable-next-line:max-line-length
       fail(`RemoteHost failed to handle notification '${method}' with params\n${JSON.stringify(params, undefined, 2)}`)
     );
@@ -154,7 +155,7 @@ it('fails the ping request when the debugger takes too long to respond', async (
   const host = await init();
   const pingResult = host.ping();
   jest.runOnlyPendingTimers();
-  return expect(pingResult).rejects.toEqual(new Error('ping timed out'));
+  return expect(pingResult).rejects.toThrow(MethodCallTimeout);
 });
 
 describe('app install', () => {
