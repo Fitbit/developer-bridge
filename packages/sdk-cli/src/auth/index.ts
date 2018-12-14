@@ -3,19 +3,18 @@ import {
   AuthorizationNotifier,
   AuthorizationRequestHandler,
 } from '@openid/appauth/built/authorization_request_handler';
+import { AuthorizationResponse } from '@openid/appauth/built/authorization_response';
 import {
   AuthorizationServiceConfiguration,
 } from '@openid/appauth/built/authorization_service_configuration';
 import * as appAuthFlags from '@openid/appauth/built/flags';
+import { NodeBasedHandler, NodeCrypto } from '@openid/appauth/built/node_support';
 import { RevokeTokenRequest } from '@openid/appauth/built/revoke_token_request';
 import {
   GRANT_TYPE_AUTHORIZATION_CODE,
   GRANT_TYPE_REFRESH_TOKEN,
   TokenRequest,
 } from '@openid/appauth/built/token_request';
-import { NodeBasedHandler } from '@openid/appauth/built/node_support/node_request_handler';
-import crypto from 'crypto';
-import randomstring from 'randomstring';
 
 import environment from './environment';
 import storage from './storage';
@@ -28,18 +27,11 @@ const tokenHandler = new FitbitTokenRequestHandler();
 
 function getAuthConfiguration() {
   const { apiUrl } = environment().config;
-  return AuthorizationServiceConfiguration.fromJson({
+  return new AuthorizationServiceConfiguration({
     token_endpoint: `${apiUrl}/oauth2/token`,
     authorization_endpoint: `${apiUrl}/oauth2/authorize`,
     revocation_endpoint: `${apiUrl}/oauth2/revoke`,
   });
-}
-
-function base64URLEncode(buf: Buffer) {
-  return buf.toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
 }
 
 export async function refreshToken(refreshToken: string) {
@@ -47,13 +39,12 @@ export async function refreshToken(refreshToken: string) {
   try {
     const response = await tokenHandler.performTokenRequest(
       getAuthConfiguration(),
-      new TokenRequest(
-        clientId,
-        '', // redirect_uri, not needed
-        GRANT_TYPE_REFRESH_TOKEN,
-        undefined,
-        refreshToken,
-      ),
+      new TokenRequest({
+        client_id: clientId,
+        redirect_uri: '', // not needed
+        grant_type: GRANT_TYPE_REFRESH_TOKEN,
+        refresh_token: refreshToken,
+      }),
     );
     await storage.set(response);
     return response.accessToken;
@@ -71,7 +62,10 @@ function authorizationCallbackPromise(handler: AuthorizationRequestHandler) {
   const notifier = new AuthorizationNotifier();
   handler.setAuthorizationNotifier(notifier);
 
-  return new Promise<{ state: string, code: string }>((resolve, reject) => {
+  return new Promise<{
+    request: AuthorizationRequest,
+    response: AuthorizationResponse,
+  }>((resolve, reject) => {
     notifier.setAuthorizationListener((request, response, error) => {
       if (error) {
         if (error.errorDescription) {
@@ -81,19 +75,13 @@ function authorizationCallbackPromise(handler: AuthorizationRequestHandler) {
         }
         return reject(authError(error.error));
       }
-      resolve(response!);
+      resolve({ request: request!, response: response! });
     });
   });
 }
 
 async function authorize() {
   const { clientId } = environment().config;
-
-  const expectedState = randomstring.generate(32);
-  const pkceVerifier = base64URLEncode(crypto.randomBytes(32));
-  const pkceChallenge = base64URLEncode(
-    crypto.createHash('sha256').update((pkceVerifier)).digest(),
-  );
 
   const port = 13579;
   const redirectUri = `http://127.0.0.1:${port}`;
@@ -102,31 +90,30 @@ async function authorize() {
   authorizationHandler.performAuthorizationRequest(
     getAuthConfiguration(),
     new AuthorizationRequest(
-      clientId,
-      redirectUri,
-      'profile',
-      AuthorizationRequest.RESPONSE_TYPE_CODE,
-      expectedState,
       {
-        code_challenge: pkceChallenge,
-        code_challenge_method: 'S256',
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        scope: 'profile',
+        response_type: AuthorizationRequest.RESPONSE_TYPE_CODE,
       },
+      new NodeCrypto(),
+      true,
     ),
   );
 
-  const { state, code } = await authorizationCallbackPromise(authorizationHandler);
-  if (state !== expectedState) throw authError('Mismatched state');
+  const { request, response } = await authorizationCallbackPromise(authorizationHandler);
+  if (request.state !== response.state) throw authError('Mismatched state');
   return {
-    code,
-    pkceVerifier,
     redirectUri,
+    code: response.code,
+    pkceVerifier: request.internal!['code_verifier'],
   };
 }
 
 async function revoke(token: string) {
   await tokenHandler.performRevokeTokenRequest(
     getAuthConfiguration(),
-    new RevokeTokenRequest(token),
+    new RevokeTokenRequest({ token }),
   );
 }
 
@@ -136,14 +123,13 @@ export async function login() {
   const { code, pkceVerifier, redirectUri } = await authorize();
   const response = await tokenHandler.performTokenRequest(
     getAuthConfiguration(),
-    new TokenRequest(
-      clientId,
-      redirectUri,
-      GRANT_TYPE_AUTHORIZATION_CODE,
+    new TokenRequest({
       code,
-      undefined,
-      { code_verifier: pkceVerifier },
-    ),
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      grant_type: GRANT_TYPE_AUTHORIZATION_CODE,
+      extras: { code_verifier: pkceVerifier },
+    }),
   );
   await storage.set(response);
 }
@@ -160,6 +146,7 @@ export async function logout() {
 export async function getAccessToken() {
   const authData = await storage.get();
   if (authData === null) return null;
-  if (authData.isValid()) return authData.accessToken;
+  // Check for validity without any time buffer.
+  if (authData.isValid(0)) return authData.accessToken;
   return refreshToken(authData.refreshToken!);
 }

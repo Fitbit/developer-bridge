@@ -1,8 +1,6 @@
 import { TokenResponse, TokenResponseJson } from '@openid/appauth/built/token_response';
-import crypto from 'crypto';
 import nock from 'nock';
 import opener from 'opener';
-import randomstring from 'randomstring';
 import url from 'url';
 
 import * as auth from '.';
@@ -10,6 +8,7 @@ import environment from './environment';
 import fetch from '../fetch';
 import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
 import storage from './storage';
+import { NodeCrypto } from '@openid/appauth/built/node_support';
 
 jest.mock('./storage');
 jest.mock('opener');
@@ -60,7 +59,7 @@ function mockRevokeResponse(code = 200, body = true) {
 function mockStoredAuthData(data = mockTokenStorageData) {
   getAuthStorageSpy.mockReset();
   getAuthStorageSpy.mockResolvedValueOnce(
-    TokenResponse.fromJson(data),
+    new TokenResponse(data),
   );
 }
 
@@ -123,7 +122,7 @@ describe('getAccessToken()', () => {
     it('stores newly refreshed tokens', async () => {
       mockTokenResponse();
       await auth.getAccessToken();
-      expect(setAuthStorageSpy).toBeCalledWith(TokenResponse.fromJson(mockTokenResponseData));
+      expect(setAuthStorageSpy).toBeCalledWith(new TokenResponse(mockTokenResponseData));
     });
 
     it('clears auth storage if refresh fails', async () => {
@@ -137,10 +136,8 @@ describe('getAccessToken()', () => {
 
 describe('login()', () => {
   beforeEach(() => {
-    jest.spyOn(randomstring, 'generate')
-      .mockReturnValueOnce('fixedstate');
-    jest.spyOn(crypto, 'randomBytes')
-      .mockImplementationOnce(Buffer.alloc);
+    jest.spyOn(NodeCrypto.prototype, 'generateRandom')
+      .mockReturnValue('fixedstate');
     callbackURLPromise = getCallbackURLPromise();
   });
 
@@ -159,7 +156,7 @@ describe('login()', () => {
     await loginPromise;
 
     expect(mockTokenEndpoint.isDone()).toBe(true);
-    expect(setAuthStorageSpy).toBeCalledWith(TokenResponse.fromJson(mockTokenResponseData));
+    expect(setAuthStorageSpy).toBeCalledWith(new TokenResponse(mockTokenResponseData));
   });
 
   describe.each([
