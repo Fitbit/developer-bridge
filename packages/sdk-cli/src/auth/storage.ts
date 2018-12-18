@@ -38,7 +38,7 @@ async function get(): Promise<TokenResponse | null> {
     await clear();
     return null;
   }
-  return TokenResponse.fromJson(authData);
+  return new TokenResponse(authData);
 }
 
 function clear() {

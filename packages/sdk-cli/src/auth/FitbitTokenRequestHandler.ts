@@ -15,7 +15,6 @@ import {
   TokenRequestHandler,
 } from '@openid/appauth/built/token_request_handler';
 import { BasicQueryStringUtils } from '@openid/appauth/built/query_string_utils';
-import { NodeRequestor } from '@openid/appauth/built/node_support/node_requestor';
 import * as t from 'io-ts';
 
 import environment from './environment';
@@ -54,7 +53,6 @@ const commonParams = {
 };
 
 export default class FitbitTokenRequestHandler implements TokenRequestHandler {
-  public readonly requestor = new NodeRequestor();
   public readonly utils = new BasicQueryStringUtils();
 
   performRevokeTokenRequest(
@@ -86,14 +84,17 @@ export default class FitbitTokenRequestHandler implements TokenRequestHandler {
     const responseJson = await response.json();
 
     if (response.status === 200 && FitbitTokenResponse.is(responseJson)) {
-      return TokenResponse.fromJson(responseJson);
+      return new TokenResponse(responseJson);
     }
 
     if (FitbitAuthErrorResponse.is(responseJson)) {
       const error = responseJson.errors[0];
       throw new AppAuthError(
         error.errorType,
-        new TokenError(error.errorType as ErrorType, error.message),
+        new TokenError({
+          error: error.errorType as ErrorType,
+          error_description: error.message,
+        }),
       );
     }
 

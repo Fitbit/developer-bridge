@@ -32,7 +32,7 @@ beforeEach(() => {
 
 describe('set()', () => {
   it('stores tokens', async () => {
-    await storage.set(TokenResponse.fromJson({
+    await storage.set(new TokenResponse({
       access_token: 'access',
       refresh_token: 'refresh',
     }));
