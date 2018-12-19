@@ -44,8 +44,8 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllTimers());
 
-async function init(capabilities: FDBTypes.HostCapabilities = {}) {
-  handler.method('initialize', FDBTypes.InitializeParams, () => ({ ...hostInfo, capabilities }));
+async function init(params?: Partial<FDBTypes.InitializeResult>) {
+  handler.method('initialize', FDBTypes.InitializeParams, () => ({ ...hostInfo, ...params }));
   const host = await RemoteHost.connect(mockStream, { timeout: 1000 });
   host.dispatcher.defaultNotificationHandler =
     (method: string, params?: { [key: string]: any } | any[]) => (
@@ -531,12 +531,12 @@ describe('when the host advertises the streamed screenshot capability', () => {
   let remoteHost: RemoteHost;
 
   beforeEach(async () => {
-    remoteHost = await init({ appHost: {
+    remoteHost = await init({ capabilities: { appHost: {
       screenshot: {
         imageFormats,
         stream: true,
       },
-    }});
+    }}});
   });
 
   it('returns true for canTakeScreenshot()', () => {
@@ -707,16 +707,26 @@ it('handles attempts to abort a nonexistent screenshot stream', async () => {
     }));
 });
 
-it('detects when the host supports eval', async () => {
-  const host = await init({ appHost: { debug: { app: { evalToString: { supported: true } } } } });
+const hostWithEvalSupport = (supported = true) => ({
+  capabilities: { appHost: { debug: { app: { evalToString: { supported } } } } },
+});
+
+it.each([
+  hostWithEvalSupport(),
+  { ...hostWithEvalSupport(), device: 'Higgs 27.31.2.30' },
+  { ...hostWithEvalSupport(), device: 'Meson 27.32.1.1' },
+])('detects when the host supports eval %#', async (response) => {
+  const host = await init(response);
   expect(host.hasEvalSupport()).toBe(true);
 });
 
 it.each([
   {},
-  { appHost: { debug: { app: { evalToString: { supported: false } } } } },
-])('detects when the host does not support eval %#', async (capabilities) => {
-  const host = await init(capabilities);
+  hostWithEvalSupport(false),
+  { ...hostWithEvalSupport(), device: 'Higgs 27.31.1.30' },
+  { ...hostWithEvalSupport(), device: 'Meson 27.31.1.31' },
+])('detects when the host does not support eval %#', async (response) => {
+  const host = await init(response);
   expect(host.hasEvalSupport()).toBe(false);
 });
 
@@ -809,7 +819,7 @@ describe('if the host does not support partial app installs', () => {
   let remoteHost: RemoteHost;
 
   beforeEach(async () => {
-    remoteHost = await init({ appHost: { install: { partialBundle: false } } });
+    remoteHost = await init({ capabilities: { appHost: { install: { partialBundle: false } } } });
   });
 
   test('supportsPartialAppInstall() returns false', () =>
@@ -844,7 +854,7 @@ describe('if the host supports partial app installs', () => {
   let remoteHost: RemoteHost;
 
   beforeEach(async () => {
-    remoteHost = await init({ appHost: { install: { partialBundle: true } } });
+    remoteHost = await init({ capabilities: { appHost: { install: { partialBundle: true } } } });
   });
 
   test('supportsPartialAppInstall() returns true', () =>

@@ -43,6 +43,8 @@ export interface ConsoleTrace {
   message: any[];
 }
 
+const FBOS3_EVAL_QUIRK = /^[a-zA-Z]+ \d+\.31\.1\.\d+$/;
+
 export class RemoteHost extends EventEmitter {
   static readonly CAPABILITIES = {
     protocol: { maxMessageSize: 1024 * 1024 },
@@ -441,7 +443,8 @@ export class RemoteHost extends EventEmitter {
 
   hasEvalSupport() {
     return this.hasCapability('appHost.debug.app.evalToString.supported') &&
-      this.info.capabilities.appHost!.debug!.app!.evalToString!.supported;
+      this.info.capabilities.appHost!.debug!.app!.evalToString!.supported &&
+      !FBOS3_EVAL_QUIRK.test(this.info.device);
   }
 
   eval(cmd: string) {
