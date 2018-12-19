@@ -712,8 +712,8 @@ const hostWithEvalSupport = (supported = true) => ({
 
 it.each([
   hostWithEvalSupport(),
-  { ...hostWithEvalSupport(), device: 'Higgs 27.31.2.30' },
-  { ...hostWithEvalSupport(), device: 'Meson 27.32.1.1' },
+  { ...hostWithEvalSupport(), device: 'Higgs 27.33.2.30' },
+  { ...hostWithEvalSupport(), device: 'Meson 27.34.1.1' },
 ])('detects when the host supports eval %#', async (response) => {
   const host = await init(response);
   expect(host.hasEvalSupport()).toBe(true);
@@ -722,8 +722,8 @@ it.each([
 it.each([
   {},
   hostWithEvalSupport(false),
-  { ...hostWithEvalSupport(), device: 'Higgs 27.31.1.30' },
-  { ...hostWithEvalSupport(), device: 'Meson 27.31.1.31' },
+  { ...hostWithEvalSupport(), device: 'Higgs 27.33.1.30' },
+  { ...hostWithEvalSupport(), device: 'Meson 27.33.1.31' },
 ])('detects when the host does not support eval %#', async (response) => {
   const host = await init(response);
   expect(host.hasEvalSupport()).toBe(false);

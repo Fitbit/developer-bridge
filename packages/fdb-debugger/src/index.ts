@@ -47,7 +47,7 @@ export interface ConsoleTrace {
  * Fitbit OS 3.0 does not fully support REPL despite claiming support via the capability
  * Fitbit developers see bug: FW-65649
  */
-const FBOS3_EVAL_QUIRK = /^[a-zA-Z]+ \d+\.31\.1\.\d+$/;
+const FBOS3_EVAL_QUIRK = /^[a-zA-Z]+ \d+\.33\.1\.\d+$/;
 
 export class RemoteHost extends EventEmitter {
   static readonly CAPABILITIES = {
