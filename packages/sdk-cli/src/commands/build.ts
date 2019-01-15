@@ -5,6 +5,19 @@ import fsExtra from 'fs-extra';
 import lodash from 'lodash';
 import vorpal from 'vorpal';
 
+export const buildProcess = () => {
+  return new Promise((resolve, reject) => {
+    const buildProcess = child_process.spawn(
+      'npm',
+      ['run-script', 'build'],
+      { stdio: 'inherit', shell: true },
+    );
+    buildProcess.on('exit', (code) => {
+      code === 0 ? resolve() : reject(code);
+    });
+  });
+};
+
 export const buildAction = async (cli: vorpal) => {
   const packageJSONPath = 'package.json';
   const packageJSON = await fsExtra.readJSON(packageJSONPath);
@@ -32,15 +45,7 @@ export const buildAction = async (cli: vorpal) => {
       { spaces: 2, EOL: os.EOL },
     );
   }
-
-  return new Promise((resolve) => {
-    const buildProcess = child_process.spawn(
-      'npm',
-      ['run-script', 'build'],
-      { stdio: 'inherit', shell: true },
-    );
-    buildProcess.on('exit', resolve);
-  });
+  return buildProcess();
 };
 
 export default function build(cli: vorpal) {
