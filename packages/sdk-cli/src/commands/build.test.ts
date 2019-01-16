@@ -15,15 +15,15 @@ beforeEach(() => {
   childProcessSpawnSpy.mockImplementationOnce(() => childProcessMock);
 });
 
-it('resolves if the build process exits with code 0', () => {
+it('resolves with the code and signal when the build process exits', () => {
   const buildPromise = buildProcess();
   expect(childProcessSpawnSpy).toBeCalled();
   childProcessMock.emit('exit', 0);
-  return expect(buildPromise).resolves.toBeUndefined();
+  return expect(buildPromise).resolves.toEqual({ code: 0 });
 });
 
-it('rejects if the build process exits with a non-zero code', () => {
+it('rejects if the build process emits an error', () => {
   const buildPromise = buildProcess();
-  childProcessMock.emit('exit', 5);
-  return expect(buildPromise).rejects.toBe(5);
+  childProcessMock.emit('error', 'some error');
+  return expect(buildPromise).rejects.toBe('some error');
 });

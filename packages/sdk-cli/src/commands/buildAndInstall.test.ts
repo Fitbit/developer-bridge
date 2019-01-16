@@ -57,8 +57,8 @@ it('can be called using the alias "bi"', async () => {
 
 it('does not call install if the build fails', async () => {
   buildActionSpy.mockReset();
-  buildActionSpy.mockRejectedValueOnce('build error');
-  await expect(cli.exec('build-and-install')).rejects.toBe('build error');
+  buildActionSpy.mockResolvedValueOnce(false);
+  await expect(cli.exec('build-and-install')).resolves.toBe(false);
   expect(buildActionSpy).toBeCalled();
   expect(installActionSpy).not.toBeCalled();
 });

@@ -17,8 +17,8 @@ export default function buildAndInstall(
     .command('build-and-install [packagePath]', 'Build and install an application')
     .alias('bi')
     .action(async (args: vorpal.Args & { packagePath?: string }) => {
-      await buildAction(cli);
-      return installAction(cli, stores, args);
+      if (await buildAction(cli)) return installAction(cli, stores, args);
+      return false;
     });
   };
 }
