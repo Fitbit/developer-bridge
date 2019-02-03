@@ -43,6 +43,8 @@ cli.use(screenshot({ hostConnections }));
 cli.use(setAppPackage({ appContext }));
 cli.use(logout);
 cli.use(repl({ hostConnections }));
+// @ts-ignore
+cli.parse(process.argv);
 
 if (enableQACommands) {
   cli.use(hosts);
