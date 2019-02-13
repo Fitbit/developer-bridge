@@ -117,6 +117,8 @@ export class RemoteHost extends EventEmitter {
     {
       userAgentSuffix = '',
       timeout = 10000,
+      postDeserializeTransform = new stream.PassThrough({ objectMode: true }),
+      preSerializeTransform = new stream.PassThrough({ objectMode: true }),
     } = {},
   ) {
     let userAgent = this.USER_AGENT;
@@ -127,7 +129,9 @@ export class RemoteHost extends EventEmitter {
     const host = new this(timeout);
     hostStream
       .pipe(new ParseJSON)
+      .pipe(postDeserializeTransform)
       .pipe(host.rpc)
+      .pipe(preSerializeTransform)
       .pipe(host.serializerTransform)
       .pipe(hostStream);
     const reqTime = Date.now();
