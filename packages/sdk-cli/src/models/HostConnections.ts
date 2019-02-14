@@ -16,13 +16,16 @@ export class HostConnection {
   ) {}
 
   static getDumpStreamTap() {
-    const dumpFileHandle = fs.openSync(process.env.FITBIT_DEVBRIDGE_DUMP_PATH as string, 'w');
+    const dumpLogFilePath = process.env.FITBIT_DEVBRIDGE_DUMP_PATH;
+    if (dumpLogFilePath === undefined) return undefined;
+
+    const dumpLogFileHandle = fs.openSync(dumpLogFilePath, 'w');
     const now = () => new Date().getTime();
     const epoch = now();
 
     function writeChunk(prefix: string) {
       return (chunk: any) => fs.writeSync(
-        dumpFileHandle,
+        dumpLogFileHandle,
         `[${prefix}][${now() - epoch}] ${JSON.stringify(chunk, undefined, 2)}\n`,
       );
     }
@@ -32,7 +35,10 @@ export class HostConnection {
       postDeserializeTransform: new StreamTap(writeChunk('recv')),
     };
 
-    stream.finished(transforms.postDeserializeTransform, () => fs.closeSync(dumpFileHandle));
+    stream.finished(
+      transforms.postDeserializeTransform,
+      () => fs.closeSync(dumpLogFileHandle),
+    );
 
     return transforms;
   }
@@ -43,7 +49,7 @@ export class HostConnection {
       ws,
       await RemoteHost.connect(
         ws,
-        process.env.FITBIT_DEVBRIDGE_DUMP_PATH ? this.getDumpStreamTap() : undefined,
+        this.getDumpStreamTap(),
       ),
     );
   }

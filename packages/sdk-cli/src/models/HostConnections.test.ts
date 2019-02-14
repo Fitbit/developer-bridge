@@ -52,7 +52,7 @@ describe.each([
     });
 
     it('creates a debugger client from the developer relay connection', () => {
-      expect(remoteHostSpy).toBeCalledWith(mockWS);
+      expect(remoteHostSpy).toBeCalledWith(mockWS, undefined);
     });
 
     it('stores the connection in the application state', () => {
