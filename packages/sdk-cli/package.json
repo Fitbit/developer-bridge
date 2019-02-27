@@ -45,7 +45,7 @@
     "@types/dateformat": "^1.0.1",
     "@types/error-subclass": "^2.2.0",
     "@types/fs-extra": "^5.0.4",
-    "@types/inquirer": "^0.0.43",
+    "@types/inquirer": "^0.0.44",
     "@types/jszip": "^3.1.4",
     "@types/keytar": "^4.0.1",
     "@types/lodash": "^4.14.110",
