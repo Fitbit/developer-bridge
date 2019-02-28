@@ -21,4 +21,4 @@ Commands that can be used within the shell
 
 #### Debugging
 
-You can capture all Developer Bridge protocol messages for debugging purposes by setting the `FITBIT_DEVBRIDGE_DUMP_PATH` environment variable to a file path before starting the debugger. It is often useful to include this information where possible when reporting bugs.
+You can capture all Developer Bridge protocol messages for debugging purposes by setting the `FITBIT_DEVBRIDGE_DUMP` environment variable to `1` before starting the debugger. A log file will be written to the working directory for each connection. It is often useful to include this information where possible when reporting bugs.

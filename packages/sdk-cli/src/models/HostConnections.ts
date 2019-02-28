@@ -1,4 +1,5 @@
 import { RemoteHost } from '@fitbit/fdb-debugger';
+import dateformat from 'dateformat';
 import fs from 'fs';
 import stream from 'stream';
 import { SyncEvent } from 'ts-events';
@@ -16,9 +17,10 @@ export class HostConnection {
   ) {}
 
   static getDumpStreamTap() {
-    const dumpLogFilePath = process.env.FITBIT_DEVBRIDGE_DUMP_PATH;
-    if (dumpLogFilePath === undefined) return undefined;
+    const shouldDumpLogFile = process.env.FITBIT_DEVBRIDGE_DUMP === '1';
+    if (!shouldDumpLogFile) return undefined;
 
+    const dumpLogFilePath = dateformat('"log" yyyy-mm-dd "at" H.MM.ss."txt"');
     const dumpLogFileHandle = fs.openSync(dumpLogFilePath, 'w');
     const now = () => new Date().getTime();
     const epoch = now();
