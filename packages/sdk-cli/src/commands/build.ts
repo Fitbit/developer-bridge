@@ -5,7 +5,7 @@ import fsExtra from 'fs-extra';
 import lodash from 'lodash';
 import vorpal from 'vorpal';
 
-export const buildProcess = (): Promise<{code?: number, signal?: string}> => {
+export const buildProcess = (): Promise<{code: number | null, signal: string | null}> => {
   return new Promise((resolve, reject) => {
     const buildProcess = child_process.spawn(
       'npm',

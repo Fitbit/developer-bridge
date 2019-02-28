@@ -96,6 +96,7 @@ describe('transformPosition()', () => {
       source: 'input.js',
       line: null,
       column: 5,
+      name: null,
     });
 
     expect(transformPosition(generated, sourceMapConsumers)).toEqual(generated);
@@ -107,6 +108,7 @@ describe('transformPosition()', () => {
       source: 'input.js',
       line: 10,
       column: null,
+      name: null,
     });
 
     expect(transformPosition(generated, sourceMapConsumers)).toEqual(generated);

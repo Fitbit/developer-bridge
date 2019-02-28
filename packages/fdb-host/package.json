@@ -21,12 +21,12 @@
   "dependencies": {
     "@fitbit/fdb-protocol": "^1.5.0-pre.6",
     "@fitbit/jsonrpc-ts": "^2.0.0",
-    "io-ts": "^1.5.0",
+    "io-ts": "^1.8.2",
     "tslib": "^1.9.0"
   },
   "devDependencies": {
-    "@types/duplexify": "^3.5.0",
-    "@types/node": "^10.12.0",
+    "@types/duplexify": "^3.6.0",
+    "@types/node": "^11.9.5",
     "duplexify": "^4.0.0"
   }
 }

@@ -5,7 +5,7 @@ import { buildProcess } from './build';
 
 jest.mock('child_process');
 
-let childProcessSpawnSpy: jest.MockInstance<typeof child_process.spawn>;
+let childProcessSpawnSpy: jest.SpyInstance;
 let childProcessMock: EventEmitter;
 
 beforeEach(() => {

@@ -7,7 +7,7 @@ jest.mock('@fitbit/app-package');
 const emptyZip = Buffer.from('UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA==', 'base64');
 
 let appContext: AppContext;
-let readFileSpy: jest.MockInstance<typeof promiseFs.readFile>;
+let readFileSpy: jest.SpyInstance;
 let appPackageLoadedSpy: jest.Mock;
 
 const mockPreviousApp = {

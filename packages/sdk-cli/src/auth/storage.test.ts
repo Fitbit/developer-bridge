@@ -19,9 +19,9 @@ jest.mock('keytar', () => {
   };
 });
 
-let getPasswordSpy: jest.MockInstance<typeof keytar.getPassword>;
-let setPasswordSpy: jest.MockInstance<typeof keytar.setPassword>;
-let delPasswordSpy: jest.MockInstance<typeof keytar.deletePassword>;
+let getPasswordSpy: jest.SpyInstance;
+let setPasswordSpy: jest.SpyInstance;
+let delPasswordSpy: jest.SpyInstance;
 
 beforeEach(() => {
   getPasswordSpy = jest.spyOn(keytar, 'getPassword');
