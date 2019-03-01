@@ -14,7 +14,7 @@ const mockApp = {
 let cli: vorpal;
 let mockLog: jest.Mock;
 let appContext: AppContext;
-let loadAppPackageSpy: jest.MockInstance<typeof appContext.loadAppPackage>;
+let loadAppPackageSpy: jest.SpyInstance;
 
 function doLoad() {
   return cli.exec('set-app-package app.fba');

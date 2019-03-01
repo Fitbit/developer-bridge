@@ -27,9 +27,9 @@ const mockTokenStorageData = {
   issued_at: mockTime,
 };
 
-let getAuthStorageSpy: jest.MockInstance<typeof storage.get>;
-let setAuthStorageSpy: jest.MockInstance<typeof storage.set>;
-let clearAuthStorageSpy: jest.MockInstance<typeof storage.clear>;
+let getAuthStorageSpy: jest.SpyInstance;
+let setAuthStorageSpy: jest.SpyInstance;
+let clearAuthStorageSpy: jest.SpyInstance;
 let callbackURLPromise: Promise<string>;
 
 function mockTokenResponse(code = 200, body: {} = mockTokenResponseData) {

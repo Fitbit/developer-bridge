@@ -14,8 +14,8 @@ jest.mock('./install');
 let cli: vorpal;
 let appContext: AppContext;
 let hostConnections: HostConnections;
-let buildActionSpy: jest.MockInstance<typeof build.buildAction>;
-let installActionSpy: jest.MockInstance<typeof install.installAction>;
+let buildActionSpy: jest.SpyInstance;
+let installActionSpy: jest.SpyInstance;
 
 beforeEach(() => {
   appContext = new AppContext();

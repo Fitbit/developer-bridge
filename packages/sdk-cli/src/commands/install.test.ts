@@ -72,8 +72,8 @@ const mockPhone = {
 
 let cli: vorpal;
 let mockLog: jest.Mock;
-let sideloadAppSpy: jest.MockInstance<typeof sideload.app>;
-let sideloadCompanionSpy: jest.MockInstance<typeof sideload.companion>;
+let sideloadAppSpy: jest.SpyInstance;
+let sideloadCompanionSpy: jest.SpyInstance;
 
 let appContext: AppContext;
 let hostConnections: HostConnections;
