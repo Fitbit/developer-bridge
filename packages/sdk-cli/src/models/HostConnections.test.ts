@@ -11,10 +11,10 @@ const mockHostID = 'mockHostID';
 const hostConnectedSpy = jest.fn();
 
 let hostConnections: HostConnections;
-let relayConnectSpy: jest.MockInstance<typeof developerRelay.connect>;
-let remoteHostSpy: jest.MockInstance<typeof RemoteHost.connect>;
+let relayConnectSpy: jest.SpyInstance;
+let remoteHostSpy: jest.SpyInstance;
 
-function mockSentinel<T>(spy: jest.MockInstance<T>) {
+function mockSentinel(spy: jest.SpyInstance) {
   const sentinel = {};
   spy.mockResolvedValueOnce(sentinel);
   return sentinel;

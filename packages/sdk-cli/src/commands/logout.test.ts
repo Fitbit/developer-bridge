@@ -8,7 +8,7 @@ jest.mock('../auth');
 
 let cli: vorpal;
 let mockLog: jest.Mock;
-let processExitSpy: jest.MockInstance<typeof process.exit>;
+let processExitSpy: jest.SpyInstance;
 
 beforeEach(() => {
   ({ cli, mockLog } = commandTestHarness(logout));

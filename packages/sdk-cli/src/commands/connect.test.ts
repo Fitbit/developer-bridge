@@ -55,8 +55,8 @@ let mockPrompt: jest.Mock;
 let mockWS: events.EventEmitter;
 
 let hostConnections: HostConnections;
-let relayHostsSpy: jest.MockInstance<typeof developerRelay.hosts>;
-let hostConnectSpy: jest.MockInstance<typeof hostConnections.connect>;
+let relayHostsSpy: jest.SpyInstance;
+let hostConnectSpy: jest.SpyInstance;
 
 const mockRelayHostsResponse = {
   device: (hosts: developerRelay.Host[]) =>

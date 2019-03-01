@@ -12,7 +12,7 @@ import {
   TypesafeRequestDispatcher,
 } from '@fitbit/jsonrpc-ts';
 
-import { Host, HostInfo } from '.';
+import { Host, HostInfo, InstallHandlerReturn } from '.';
 
 jest.useFakeTimers();
 
@@ -160,7 +160,7 @@ it('fails the ping request when the debugger takes too long to respond', async (
 
 describe('app install', () => {
   let host: Host;
-  let mockInstallHandler: jest.Mock<{}>;
+  let mockInstallHandler: jest.Mock<InstallHandlerReturn>;
   let stream: FDBTypes.StreamToken;
 
   beforeEach(async () => {

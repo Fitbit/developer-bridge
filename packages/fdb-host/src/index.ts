@@ -29,9 +29,9 @@ export interface InstallOptions {
   companionCompatibility?: FDBTypes.CompanionHostDescriptor;
 }
 
-type InstallHandlerReturn = FDBTypes.AppInstallResult | Promise<FDBTypes.AppInstallResult>;
+export type InstallHandlerReturn = FDBTypes.AppInstallResult | Promise<FDBTypes.AppInstallResult>;
 
-type InstallHandler = (appData: Buffer) => InstallHandlerReturn;
+export type InstallHandler = (appData: Buffer) => InstallHandlerReturn;
 
 export class Host extends EventEmitter {
   capabilities: FDBTypes.HostCapabilities;
