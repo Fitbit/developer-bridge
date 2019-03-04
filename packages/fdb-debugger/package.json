@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@fitbit/fdb-protocol": "^1.5.0-pre.6",
-    "@fitbit/jsonrpc-ts": "^2.0.0",
+    "@fitbit/jsonrpc-ts": "^2.1.0",
     "cbor": "^4.1.5",
     "io-ts": "^1.8.2",
     "jszip": "^3.2.0",

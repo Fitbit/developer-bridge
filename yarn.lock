@@ -149,10 +149,10 @@
     reflect-metadata "^0.1.12"
     tslib "^1.8.1"
 
-"@fitbit/jsonrpc-ts@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@fitbit/jsonrpc-ts/-/jsonrpc-ts-2.0.0.tgz#b8613adbd11f3d8b82ea93961041989ae3689ebc"
-  integrity sha512-WP8b3sjlG6KmEzlZQMvasYdcKzhzxStyEfYJYEAoAT6a4yG/IpbD2GkJ1hAHuczupSNhOlY8OhBsE6My2SCB4w==
+"@fitbit/jsonrpc-ts@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@fitbit/jsonrpc-ts/-/jsonrpc-ts-2.1.0.tgz#1d1e58d995ffb20589d3af32a512479591c9240b"
+  integrity sha512-Izjmv/5syWnx6u85GUHVq6yCX0knFgwuwzacrqGGXdxG5NH7qVniirCoSn/pwsfcs31f9C3Bu2BtlNUFNMv5iQ==
   dependencies:
     "@types/error-subclass" "^2.2.0"
     error-subclass "^2.2.0"
