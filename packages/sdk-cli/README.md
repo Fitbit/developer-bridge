@@ -18,3 +18,7 @@ Commands that can be used within the shell
   screenshot [path]      Capture a screenshot from the connected device
   logout                 Log out of your Fitbit account
 ```
+
+#### Debugging
+
+You can capture all Developer Bridge protocol messages for debugging purposes by setting the `FITBIT_DEVBRIDGE_DUMP` environment variable to `1` before starting the debugger. A log file will be written to the working directory for each connection. It is often useful to include this information where possible when reporting bugs.
