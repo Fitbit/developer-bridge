@@ -1,3 +1,5 @@
+import 'stream.finished/auto';
+
 import { RemoteHost } from '@fitbit/fdb-debugger';
 import dateformat from 'dateformat';
 import fs from 'fs';
