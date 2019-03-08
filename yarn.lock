@@ -2241,7 +2241,7 @@ defaults@^1.0.3:
   dependencies:
     clone "^1.0.2"
 
-define-properties@^1.1.2:
+define-properties@^1.1.2, define-properties@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/define-properties/-/define-properties-1.1.3.tgz#cf88da6cbee26fe6db7094f61d870cbd84cee9f1"
   dependencies:
@@ -6016,6 +6016,14 @@ stream-each@^1.1.0:
 stream-shift@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/stream-shift/-/stream-shift-1.0.0.tgz#d5c752825e5367e786f78e18e445ea223a155952"
+
+stream.finished@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/stream.finished/-/stream.finished-1.1.1.tgz#d139ae91c0deb3233d6da5a5870c324171f331a0"
+  integrity sha512-DfnzaysS7G3+Cgb8L8TE5sSjKAx2lgS7XCsoH9RbGVgza2HAxRk1Nrq0KBd4CVO07Zu0MIPWZ9mirDOA/7xtYA==
+  dependencies:
+    define-properties "^1.1.3"
+    function-bind "^1.1.1"
 
 string-length@^2.0.0:
   version "2.0.0"
