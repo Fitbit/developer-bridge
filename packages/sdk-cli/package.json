@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/sdk-cli",
-  "version": "1.6.0-pre.1",
+  "version": "1.6.0",
   "author": "Fitbit, Inc.",
   "license": "BSD-3-Clause",
   "description": "Command line tools for debugging Fitbit OS apps",
@@ -14,10 +14,10 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@fitbit/app-package": "^1.6.0-pre.0",
-    "@fitbit/fdb-debugger": "^1.6.0-pre.0",
-    "@fitbit/fdb-host": "^1.6.0-pre.0",
-    "@fitbit/fdb-protocol": "^1.6.0-pre.0",
+    "@fitbit/app-package": "^1.6.0",
+    "@fitbit/fdb-debugger": "^1.6.0",
+    "@fitbit/fdb-host": "^1.6.0",
+    "@fitbit/fdb-protocol": "^1.6.0",
     "@fitbit/jsonrpc-ts": "^2.1.0",
     "@fitbit/portable-pixmap": "^1.0.2",
     "@openid/appauth": "^1.2.1",
