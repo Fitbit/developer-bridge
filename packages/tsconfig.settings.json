@@ -6,7 +6,7 @@
         "sourceMap": true,
 
         "module": "commonjs",
-        "target": "es5",
+        "target": "es6",
         "lib": ["es2017", "dom"],
         "importHelpers": true,
         "strict": true,
