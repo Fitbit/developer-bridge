@@ -30,10 +30,10 @@
     "@types/node": "^11.9.5",
     "@types/semver": "^5.5.0",
     "@types/validator": "^10.9.0",
-    "io-ts": "^1.8.2"
+    "io-ts": "^1.8.3"
   },
   "peerDependencies": {
     "@fitbit/jsonrpc-ts": "2.1.0",
-    "io-ts": "1.8.2"
+    "io-ts": "1.8.3"
   }
 }

@@ -21,7 +21,7 @@
   "dependencies": {
     "@fitbit/fdb-protocol": "^1.6.0",
     "@fitbit/jsonrpc-ts": "^2.1.0",
-    "io-ts": "^1.8.2",
+    "io-ts": "^1.8.3",
     "tslib": "^1.9.0"
   },
   "devDependencies": {
