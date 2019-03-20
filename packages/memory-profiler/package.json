@@ -1,7 +1,7 @@
 {
-  "name": "@fitbit/fdb-protocol",
+  "name": "@fitbit/memory-profiler",
   "version": "1.6.0",
-  "description": "Fitbit Developer Bridge common protocol bits",
+  "description": "Tools for analyzing memory usage of Fitbit SDK applications",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
   ],
@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/Fitbit/developer-bridge/issues"
   },
-  "homepage": "https://github.com/Fitbit/developer-bridge/tree/master/packages/fdb-protocol#readme",
+  "homepage": "https://github.com/Fitbit/developer-bridge/tree/master/packages/memory-profiler#readme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -19,17 +19,19 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
+    "@fitbit/app-package": "^1.6.0",
+    "@fitbit/fdb-protocol": "^1.6.0",
     "@fitbit/jsonrpc-ts": "^2.1.0",
-    "invariant": "^2.2.2",
-    "io-ts": "^1.8.3",
-    "semver": "^5.6.0",
+    "cbor": "^4.1.5",
+    "jszip": "^3.2.0",
     "tslib": "^1.9.0",
-    "validator": "^10.11.0"
+    "yargs": "^13.2.2"
   },
   "devDependencies": {
-    "@types/invariant": "^2.2.29",
+    "@types/cbor": "^2.0.0",
+    "@types/jszip": "^3.1.5",
     "@types/node": "^11.9.5",
-    "@types/semver": "^5.5.0",
-    "@types/validator": "^10.9.0"
+    "@types/yargs": "^12.0.10",
+    "io-ts": "^1.8.3"
   }
 }
