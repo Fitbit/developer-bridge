@@ -37,7 +37,7 @@
     "stream.finished": "^1.1.1",
     "ts-events": "^3.2.1",
     "tslib": "^1.9.3",
-    "untildify": "^3.0.3",
+    "untildify": "^4.0.0",
     "update-notifier": "^2.5.0",
     "vorpal": "^1.12.0",
     "websocket-stream": "^5.1.2"
