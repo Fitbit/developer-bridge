@@ -3,6 +3,7 @@ import { InvalidParams, TypesafeRequestDispatcher } from '@fitbit/jsonrpc-ts';
 import { BulkData, BulkDataStream, FDBTypes } from '@fitbit/fdb-protocol';
 
 interface StreamContext {
+  openPromise: Promise<void>;
   stream: BulkDataStream;
   resolve: (buffer: Buffer) => void;
   reject: (reason: any) => void;
@@ -46,15 +47,15 @@ export default class BulkDataReceiver {
     // We create the stream and pass it into the executor so that we can
     // clean up the stream if the executor throws or rejects.
     const stream = this.bulkData.createWriteStream();
+
     return new Promise((resolve, reject) => {
-      new Promise(resolve => resolve(executor(stream)))
-        .then(() => {
-          this.contexts.set(stream.token, { stream, resolve, reject });
-        })
-        .catch((reason) => {
-          stream.finalize();
-          reject(reason);
-        });
+      const openPromise = executor(stream);
+      openPromise.catch((reason: unknown) => {
+        stream.finalize();
+        reject(reason);
+      });
+
+      this.contexts.set(stream.token, { openPromise, stream, resolve, reject });
     });
   }
 
@@ -70,15 +71,21 @@ export default class BulkDataReceiver {
     );
   }
 
-  finalizeStream = ({ stream }: FDBTypes.StreamCloseParams) => {
+  finalizeStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
     const context = this.popStreamContext(stream);
-    context.resolve(context.stream.finalize());
+    context.openPromise
+      .then(() => context.resolve(context.stream.finalize()))
+      .catch(context.reject);
   }
 
-  abortStream = ({ stream }: FDBTypes.StreamCloseParams) => {
+  abortStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
     const context = this.popStreamContext(stream);
-    context.stream.finalize();
-    context.reject('Aborted by host');
+    context.openPromise
+      .then(() => {
+        context.stream.finalize();
+        context.reject('Aborted by host');
+      })
+      .catch(context.reject);
   }
 
   /**
