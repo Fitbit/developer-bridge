@@ -58,34 +58,33 @@ export default class BulkDataReceiver {
       this.contexts.set(stream.token, { openPromise, stream, resolve, reject });
     });
   }
-
-  private popStreamContext(token: FDBTypes.StreamToken) {
+  private async popStreamContext(token: FDBTypes.StreamToken) {
     const context = this.contexts.get(token);
     if (context !== undefined) {
-      this.contexts.delete(token);
-      return context;
+      try {
+        await context.openPromise;
+        this.contexts.delete(token);
+        return context;
+      } catch (ex) {
+        // Fallthrough to throw below
+      }
     }
+
     throw new InvalidParams(
-      `Stream token does not match any open ${this.name} stream`,
+      `Stream token '${token}' does not match any open ${this.name} stream`,
       { stream: token },
     );
   }
 
   finalizeStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
-    const context = this.popStreamContext(stream);
-    context.openPromise
-      .then(() => context.resolve(context.stream.finalize()))
-      .catch(context.reject);
+    const context = await this.popStreamContext(stream);
+    context.resolve(context.stream.finalize());
   }
 
   abortStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
-    const context = this.popStreamContext(stream);
-    context.openPromise
-      .then(() => {
-        context.stream.finalize();
-        context.reject('Aborted by host');
-      })
-      .catch(context.reject);
+    const context = await this.popStreamContext(stream);
+    context.stream.finalize();
+    context.reject('Aborted by host');
   }
 
   /**
