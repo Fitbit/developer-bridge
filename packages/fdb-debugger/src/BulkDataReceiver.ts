@@ -65,9 +65,7 @@ export default class BulkDataReceiver {
         await context.openPromise;
         this.contexts.delete(token);
         return context;
-      } catch (ex) {
-        // Fallthrough to throw below
-      }
+      } catch {} // Fallthrough to throw below
     }
 
     throw new InvalidParams(
