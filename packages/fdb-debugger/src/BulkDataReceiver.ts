@@ -3,6 +3,7 @@ import { InvalidParams, TypesafeRequestDispatcher } from '@fitbit/jsonrpc-ts';
 import { BulkData, BulkDataStream, FDBTypes } from '@fitbit/fdb-protocol';
 
 interface StreamContext {
+  openPromise: Promise<void>;
   stream: BulkDataStream;
   resolve: (buffer: Buffer) => void;
   reject: (reason: any) => void;
@@ -46,37 +47,40 @@ export default class BulkDataReceiver {
     // We create the stream and pass it into the executor so that we can
     // clean up the stream if the executor throws or rejects.
     const stream = this.bulkData.createWriteStream();
+
     return new Promise((resolve, reject) => {
-      new Promise(resolve => resolve(executor(stream)))
-        .then(() => {
-          this.contexts.set(stream.token, { stream, resolve, reject });
-        })
-        .catch((reason) => {
-          stream.finalize();
-          reject(reason);
-        });
+      const openPromise = executor(stream);
+      openPromise.catch((reason: unknown) => {
+        stream.finalize();
+        reject(reason);
+      });
+
+      this.contexts.set(stream.token, { openPromise, stream, resolve, reject });
     });
   }
-
-  private popStreamContext(token: FDBTypes.StreamToken) {
+  private async popStreamContext(token: FDBTypes.StreamToken) {
     const context = this.contexts.get(token);
     if (context !== undefined) {
-      this.contexts.delete(token);
-      return context;
+      try {
+        await context.openPromise;
+        this.contexts.delete(token);
+        return context;
+      } catch {} // Fallthrough to throw below
     }
+
     throw new InvalidParams(
-      `Stream token does not match any open ${this.name} stream`,
+      `Stream token '${token}' does not match any open ${this.name} stream`,
       { stream: token },
     );
   }
 
-  finalizeStream = ({ stream }: FDBTypes.StreamCloseParams) => {
-    const context = this.popStreamContext(stream);
+  finalizeStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
+    const context = await this.popStreamContext(stream);
     context.resolve(context.stream.finalize());
   }
 
-  abortStream = ({ stream }: FDBTypes.StreamCloseParams) => {
-    const context = this.popStreamContext(stream);
+  abortStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
+    const context = await this.popStreamContext(stream);
     context.stream.finalize();
     context.reject('Aborted by host');
   }

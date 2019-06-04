@@ -695,7 +695,7 @@ it('handles attempts to finalize a nonexistent screenshot stream', async () => {
   await init();
   return expect(mockHost.callMethod('app.screenshot.stream.finalize', { stream: 'foo' }))
     .rejects.toEqual(expect.objectContaining({
-      message: 'Stream token does not match any open screenshot stream',
+      message: "Stream token 'foo' does not match any open screenshot stream",
     }));
 });
 
@@ -703,7 +703,7 @@ it('handles attempts to abort a nonexistent screenshot stream', async () => {
   await init();
   return expect(mockHost.callMethod('app.screenshot.stream.abort', { stream: 'foo' }))
     .rejects.toEqual(expect.objectContaining({
-      message: 'Stream token does not match any open screenshot stream',
+      message: "Stream token 'foo' does not match any open screenshot stream",
     }));
 });
 
