@@ -13,7 +13,7 @@
   "scripts": {
     "build": "rm -rf packages/*/lib && tsc -b packages",
     "test": "jest",
-    "test:coveralls": "yarn lint && jest --coverage --coverageReporters=text-lcov | coveralls",
+    "test:coveralls": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "lint": "tslint --project packages/tsconfig.settings.json --format code-frame",
     "publish": "yarn run test && lerna publish"
   },
