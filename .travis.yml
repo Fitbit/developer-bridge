@@ -21,6 +21,4 @@ script:
   # TypeScript runs out of memory on Node 8 otherwise.
   # https://stackoverflow.com/a/52390439
   - NODE_OPTIONS=--max_old_space_size=4096 yarn build
-  # --runInBand needed so tests don't time out.
-  # https://github.com/facebook/jest/issues/3855
-  - yarn test:coveralls --runInBand
+  - yarn test:coveralls
