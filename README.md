@@ -3,6 +3,8 @@ Fitbit Developer Bridge
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/Fitbit/developer-bridge.svg)](https://greenkeeper.io/)
 
+[![Coverage Status](https://coveralls.io/repos/github/Fitbit/developer-bridge/badge.svg?branch=master)](https://coveralls.io/github/Fitbit/developer-bridge?branch=master)
+
 This repo contains JavaScript implementations of the Fitbit Developer
 Bridge.
 

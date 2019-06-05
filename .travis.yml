@@ -23,4 +23,4 @@ script:
   - NODE_OPTIONS=--max_old_space_size=4096 yarn build
   # --runInBand needed so tests don't time out.
   # https://github.com/facebook/jest/issues/3855
-  - yarn test --runInBand
+  - yarn test:coveralls --runInBand

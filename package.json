@@ -13,11 +13,13 @@
   "scripts": {
     "build": "rm -rf packages/*/lib && tsc -b packages",
     "test": "jest",
+    "test:coveralls": "yarn lint && jest --coverage --coverageReporters=text-lcov | coveralls",
     "lint": "tslint --project packages/tsconfig.settings.json --format code-frame",
     "publish": "yarn run test && lerna publish"
   },
   "devDependencies": {
     "@types/jest": "^24.0.9",
+    "coveralls": "^3.0.3",
     "jest": "^24.1.0",
     "lerna": "^3.13.1",
     "ts-jest": "^24.0.0",
