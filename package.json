@@ -18,7 +18,7 @@
     "publish": "yarn run test && lerna publish"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.9",
+    "@types/jest": "^24.0.14",
     "coveralls": "^3.0.3",
     "jest": "^24.1.0",
     "lerna": "^3.13.1",
