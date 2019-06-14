@@ -41,10 +41,10 @@ describe('when everything should work', () => {
   it('writes the file to disk', () => expect(fs.existsSync('foo.png')).toBe(true));
 });
 
-describe.each([
+describe.each<[string, string[]]>([
   ['does not suppot screenshots', []],
   ['does not support PPM screenshots', ['GIF', 'WebP']],
-])('when the host %s', (_, screenshotFormats: string[]) => {
+])('when the host %s', (_, screenshotFormats) => {
   let result: Promise<void>;
 
   beforeEach(() => {

@@ -31,11 +31,11 @@ function doConnect(type: HostType) {
   return hostConnections.connect(type, mockHostID);
 }
 
-describe.each([
+describe.each<HostType>([
   'appHost',
   'companionHost',
 ])(
-  'when the host type argument is %s', (hostType: HostType) => {
+  'when the host type argument is %s', (hostType) => {
     let mockWS: jest.Mocked<stream.Duplex>;
     let mockRemoteHost: {};
 

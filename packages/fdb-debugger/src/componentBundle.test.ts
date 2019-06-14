@@ -22,7 +22,7 @@ describe('getAppUUID', () => {
     return expect(getAppUUID(zip)).rejects.toThrowError(SyntaxError);
   });
 
-  it.each([
+  it.each<[string, { uuid?: string[] | null }]>([
     ['missing uuid field', {}],
     ['with a null uuid', { uuid: null }],
     ['with "uuid" as an array', { uuid: ['foo'] }],

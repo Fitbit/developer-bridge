@@ -9,7 +9,7 @@ describe('assertJSON()', () => {
   ])('rejects on Content-Type header of %s', (contentType) => {
     return expect(
       fetchUtil.assertJSON()(
-        makeResponse({ headers: { 'Content-Type': contentType } }),
+        makeResponse({ headers: { 'Content-Type': contentType as string } }),
       ),
     ).rejects.toThrowErrorMatchingSnapshot();
   });

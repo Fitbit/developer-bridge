@@ -1,4 +1,4 @@
-import { fromJSZip } from '@fitbit/app-package';
+import { AppPackage, fromJSZip } from '@fitbit/app-package';
 import AppContext from '../models/AppContext';
 import * as promiseFs from '../util/promiseFs';
 
@@ -10,16 +10,16 @@ let appContext: AppContext;
 let readFileSpy: jest.SpyInstance;
 let appPackageLoadedSpy: jest.Mock;
 
-const mockPreviousApp = {
+const mockPreviousApp: AppPackage = {
   uuid: 'Old',
   buildId: 'app',
-};
+} as Partial<AppPackage> as AppPackage;
 
 function loadAppPackage() {
   return appContext.loadAppPackage('app.fba');
 }
 
-describe.each([
+describe.each<[string, AppPackage | undefined, string | undefined]>([
   ['when no app was previously loaded', undefined, undefined],
   ['when an app was already loaded', mockPreviousApp, 'previously/loaded.fba'],
 ])('%s', (_, previousAppPackage, previousAppPath) => {

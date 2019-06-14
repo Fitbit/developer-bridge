@@ -78,12 +78,12 @@ function doConnect(type: DeviceType) {
   return cli.exec(`connect ${type}`);
 }
 
-describe.each([
+describe.each<[DeviceType, HostType]>([
   ['device', 'appHost'],
   ['phone', 'companionHost'],
 ])(
   'when the device type argument is %s',
-  (deviceType: DeviceType, hostType: HostType) => {
+  (deviceType, hostType) => {
     it(`logs an error if no ${deviceType}s are connected`, async () => {
       mockRelayHostsResponse[deviceType]([]);
       await doConnect(deviceType);

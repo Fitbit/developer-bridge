@@ -392,7 +392,7 @@ it('successfully sideloads if the finalize response is slow', async () => {
   return expect(remoteHost.installApp('app', sourceBuffer)).resolves.toEqual(expectedInstallResult);
 });
 
-it.each([
+it.each<[FDBTypes.InstallType, FDBTypes.InstallType | undefined]>([
   ['full', undefined],
   ['full', 'full'],
   ['partial', 'partial'],
@@ -860,7 +860,7 @@ describe('if the host supports partial app installs', () => {
   test('supportsPartialAppInstall() returns true', () =>
     expect(remoteHost.supportsPartialAppInstall()).toBe(true));
 
-  const doInstall = (sourceBundle: Buffer, streamList: () => any) => {
+  const doInstall = (sourceBundle: Buffer, streamList?: () => any) => {
     const installBuffers: Buffer[] = [];
 
     return new Promise<Buffer>((resolve, reject) => {
@@ -883,7 +883,7 @@ describe('if the host supports partial app installs', () => {
     });
   };
 
-  it.each([
+  it.each<[string, () => Buffer | Promise<Buffer>, (() => any) | undefined]>([
     ['bundle is not a zip file', () => Buffer.from([1, 2, 3]), undefined],
     [
       'uuid cannot be read from bundle',
@@ -920,7 +920,7 @@ describe('if the host supports partial app installs', () => {
     ],
   ])(
       'falls back to full install if %s',
-      async (_, bundle: () => Buffer | Promise<Buffer>, streamList: () => any) => {
+      async (_, bundle, streamList) => {
         const sourceBundle = await bundle();
         expect((await doInstall(sourceBundle, streamList)).compare(sourceBundle)).toBe(0);
       });

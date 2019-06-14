@@ -24,7 +24,11 @@ it.each(testCases)('encodes data in %s', async (encoding, encoder) => {
   stream.setEncoder(encoding);
   const data = { a: 1 };
   stream.write(data);
-  expect(dataCallback).toBeCalledWith(Buffer.from(encoder(data)));
+
+  let expectedData: Buffer | string = encoder(data);
+  if (typeof expectedData === 'string') expectedData = Buffer.from(expectedData);
+
+  expect(dataCallback).toBeCalledWith(expectedData);
 });
 
 it.each(testCases)('exposes current encoding via encoder property', (encoding) => {

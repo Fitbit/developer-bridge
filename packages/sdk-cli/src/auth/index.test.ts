@@ -50,10 +50,10 @@ function mockTokenResponseError(status = 500, errorType = 'internal_error') {
   });
 }
 
-function mockRevokeResponse(code = 200, body = true) {
+function mockRevokeResponse(code = 200) {
   return nock(environment().config.apiUrl)
     .post('/oauth2/revoke')
-    .reply(code, body);
+    .reply(code);
 }
 
 function mockStoredAuthData(data = mockTokenStorageData) {
@@ -130,7 +130,6 @@ describe('getAccessToken()', () => {
       await expect(auth.getAccessToken()).rejects.toBeDefined();
       expect(clearAuthStorageSpy).toBeCalled();
     });
-
   });
 });
 
@@ -163,8 +162,8 @@ describe('login()', () => {
     'state=_invalid_&code=__valid_code__',
     'state=fixedstate&error=internal_error',
     'state=fixedstate&error=internal_error&error_description=Something+went+very_wrong',
-  ])('given authorization callback parameters %s', async (queryParams) => {
-    test('rejects', async () => {
+  ])('given authorization callback parameters %s', (queryParams) => {
+    it('rejects', async () => {
       const loginExpectPromise = expect(auth.login()).rejects.toThrowErrorMatchingSnapshot();
       await fetch(`${await callbackURLPromise}?${queryParams}`);
       return loginExpectPromise;
