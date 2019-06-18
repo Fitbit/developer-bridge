@@ -10,7 +10,7 @@
   },
   "homepage": "https://github.com/Fitbit/developer-bridge/tree/master/packages/sdk-cli#readme",
   "scripts": {
-    "build": "rm -rf lib && tsc -b",
+    "build": "rm -rf lib tsconfig.tsbuildinfo && tsc -b",
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
