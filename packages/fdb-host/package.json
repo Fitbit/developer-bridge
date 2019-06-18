@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/fdb-host",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Fitbit Developer Bridge host library",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
@@ -19,7 +19,7 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@fitbit/fdb-protocol": "^1.6.2",
+    "@fitbit/fdb-protocol": "^1.6.3",
     "@fitbit/jsonrpc-ts": "^2.1.0",
     "io-ts": "^1.9.0",
     "tslib": "^1.10.0"
