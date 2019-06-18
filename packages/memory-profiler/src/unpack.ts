@@ -39,7 +39,8 @@ function normalizeRawNode({ id, type, size, repr }: RawNode, rawNodes: RawNodeMa
         line,
         column,
         name: name || undefined,
-        source: typeof source === 'string' ? source : rawNodes[source].repr,
+        // TODO: this isn't right, but it was how it behaved before the TS update
+        source: typeof source === 'string' ? source : rawNodes[source].repr as string,
       },
     };
   }
