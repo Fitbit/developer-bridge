@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/fdb-debugger",
-  "version": "1.6.1-pre.1",
+  "version": "1.6.1",
   "description": "Fitbit Developer Bridge debugger library",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
@@ -19,7 +19,7 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@fitbit/fdb-protocol": "^1.6.1-pre.1",
+    "@fitbit/fdb-protocol": "^1.6.1",
     "@fitbit/jsonrpc-ts": "^2.1.0",
     "cbor": "^4.1.5",
     "io-ts": "^1.9.0",
