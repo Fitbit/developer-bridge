@@ -15,7 +15,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rm -rf lib && tsc -b",
+    "build": "rm -rf lib tsconfig.tsbuildinfo && tsc -b",
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {

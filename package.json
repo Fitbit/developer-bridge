@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/Fitbit/developer-bridge#readme",
   "scripts": {
-    "build": "rm -rf packages/*/lib && tsc -b packages",
+    "build": "rm -rf packages/*/lib && rm -rf packages/*/tsconfig.tsbuildinfo && tsc -b packages",
     "test": "jest",
     "test:coveralls": "jest --runInBand --coverage --coverageReporters=text-lcov | coveralls",
     "lint": "tslint --project packages/tsconfig.settings.json --format code-frame",

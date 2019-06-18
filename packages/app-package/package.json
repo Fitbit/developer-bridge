@@ -12,7 +12,7 @@
   "main": "lib/AppPackage.js",
   "types": "lib/AppPackage.d.ts",
   "scripts": {
-    "build": "rm -rf lib && tsc -b",
+    "build": "rm -rf lib tsconfig.tsbuildinfo && tsc -b",
     "prepublishOnly": "yarn run build"
   },
   "files": [

@@ -36,3 +36,5 @@ Thumbs.db
 packages/*/dist/**/*
 packages/*/lib/**/*
 packages/*/mod/**/*
+
+tsconfig.tsbuildinfo
