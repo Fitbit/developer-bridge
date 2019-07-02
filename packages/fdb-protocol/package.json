@@ -21,7 +21,7 @@
   "dependencies": {
     "@fitbit/jsonrpc-ts": "^2.1.0",
     "invariant": "^2.2.2",
-    "io-ts": "^1.9.0",
+    "io-ts": "^2.0.0",
     "semver": "^6.1.1",
     "tslib": "^1.10.0",
     "validator": "^11.0.0"
