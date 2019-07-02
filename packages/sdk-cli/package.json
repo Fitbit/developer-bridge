@@ -27,7 +27,7 @@
     "fetch-ponyfill": "^6.1.0",
     "fs-extra": "^8.0.1",
     "humanize-list": "^1.0.1",
-    "io-ts": "^1.9.0",
+    "io-ts": "^2.0.0",
     "jszip": "^3.2.1",
     "keytar": "^4.9.0",
     "lodash": "^4.17.10",
