@@ -78,8 +78,10 @@ let sideloadCompanionSpy: jest.SpyInstance;
 let appContext: AppContext;
 let hostConnections: HostConnections;
 
-function doInstall() {
-  return cli.exec('install');
+function doInstall({ skipLaunch } : { skipLaunch?: boolean } = {}) {
+  let cmd = 'install';
+  if (skipLaunch) cmd += ' --skipLaunch';
+  return cli.exec(cmd);
 }
 
 function expectConnect(deviceType: string) {
@@ -167,7 +169,7 @@ describe('when an app is loaded', () => {
     });
 
     describe('when sideloading is successful', () => {
-      beforeEach(doInstall);
+      beforeEach(() => doInstall());
 
       it('sideloads the app', () => {
         expect(sideloadAppSpy).toBeCalled();
@@ -184,6 +186,14 @@ describe('when an app is loaded', () => {
         mockDevice.host.info.capabilities.appHost.launch.appComponent.canLaunch = false;
         return doInstall();
       });
+      it('does not launch the app', () => {
+        expect(mockDevice.host.launchAppComponent).not.toBeCalled();
+      });
+    });
+
+    describe('when skipLaunch is specified', () => {
+      beforeEach(() => doInstall({ skipLaunch: true }));
+
       it('does not launch the app', () => {
         expect(mockDevice.host.launchAppComponent).not.toBeCalled();
       });
