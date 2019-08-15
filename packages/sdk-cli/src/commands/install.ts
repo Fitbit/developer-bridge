@@ -9,10 +9,17 @@ import * as sideload from '../models/sideload';
 import { connectAction } from './connect';
 import { setAppPackageAction } from './setAppPackage';
 
+type InstallArgs = vorpal.Args & {
+  packagePath?: string;
+  options: {
+    skipLaunch?: boolean;
+  };
+};
+
 export const installAction = async (
   cli: vorpal,
   stores: { hostConnections: HostConnections, appContext: AppContext },
-  args: vorpal.Args & { packagePath?: string },
+  args: InstallArgs,
 ) => {
   const makeProgressCallback = (componentType: string) => {
     cli.ui.redraw(`Sideloading ${componentType}: starting...`);
@@ -95,11 +102,13 @@ export const installAction = async (
     if (
       appHost.host.hasCapability('appHost.launch.appComponent')
       && appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch) {
-      cli.activeCommand.log('Launching app');
-      await appHost.host.launchAppComponent({
-        uuid: appPackage.uuid,
-        component: 'app',
-      });
+      if (args.options.skipLaunch !== true) {
+        cli.activeCommand.log('Launching app');
+        await appHost.host.launchAppComponent({
+          uuid: appPackage.uuid,
+          component: 'app',
+        });
+      }
     } else {
       cli.activeCommand.log('Device does not support launching app remotely');
     }
@@ -118,7 +127,8 @@ export default function install(
     cli
       .command('install [packagePath]', 'Install an app package')
       .types({ string: ['packagePath'] })
-      .action(async (args: vorpal.Args & { packagePath?: string }) =>
+      .option('--skipLaunch', "Don't launch the app after installing")
+      .action(async (args: InstallArgs) =>
         installAction(cli, stores, args));
   };
 }
