@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import mockdate from 'mockdate';
 import vorpal from 'vorpal';
-import openScreenshot from 'open';
+import { default as openScreenshot } from 'open';
 
 import screenshot from './screenshot';
 import captureScreenshot from '../models/captureScreenshot';
