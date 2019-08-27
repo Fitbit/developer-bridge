@@ -2,6 +2,7 @@ import * as path from 'path';
 
 import mockdate from 'mockdate';
 import vorpal from 'vorpal';
+import openScreenshot from 'open';
 
 import screenshot from './screenshot';
 import captureScreenshot from '../models/captureScreenshot';
@@ -10,6 +11,10 @@ import commandTestHarness from '../testUtils/commandTestHarness';
 import { homedir } from 'os';
 
 jest.mock('../models/captureScreenshot');
+jest.mock('open', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 const screenshotMock = captureScreenshot as jest.Mock<Promise<void>>;
 
@@ -47,10 +52,10 @@ it('prints screenshot capture errors to the console', async () => {
 // code as os.homedir(), path.cwd() and the like cannot be mocked.
 // https://github.com/facebook/jest/issues/2549
 
-async function expectDestPath(expected: string, arg?: string) {
+async function expectDestPath(expected: string, path?: string, open?: boolean) {
   hostConnections.appHost = { host: jest.fn() } as any;
   screenshotMock.mockResolvedValue(undefined);
-  await cli.exec('screenshot', { path: arg });
+  await cli.exec('screenshot', { path, open });
   const filePath = screenshotMock.mock.calls[0][1];
   expect(filePath).toBe(expected);
 }
@@ -69,6 +74,11 @@ it('logs the location of the file to the console', async () => {
   await expectDestPath(destPath, 'foo.png');
   expect(mockUIRedraw).toBeCalledWith(`Screenshot saved to ${destPath}`);
   expect(mockUIRedraw.done).toBeCalled();
+});
+
+it('opens the screenshot', async () => {
+  await expectDestPath(path.resolve('Screenshot 2018-03-04 at 15.06.07.png'), undefined, true);
+  await expect(openScreenshot).toBeCalled();
 });
 
 describe('during the screenshot capture', () => {
