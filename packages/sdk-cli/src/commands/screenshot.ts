@@ -3,7 +3,7 @@ import * as path from 'path';
 import dateformat from 'dateformat';
 import untildify from 'untildify';
 import vorpal from 'vorpal';
-import open from 'open';
+import { default as openScreenshot } from 'open';
 
 import HostConnections from '../models/HostConnections';
 import captureScreenshot from '../models/captureScreenshot';
@@ -17,7 +17,7 @@ export default function screenshot(
     cli.command('screenshot [path] [--open]', 'Capture a screenshot from the connected device')
       .types({ string: ['path'] })
       .option('-o, --open', 'Opens the screenshot using the native picture viewer')
-      .action(async (args: vorpal.Args & { path?: string }) => {
+      .action(async (args: vorpal.Args & { path?: string, open?: boolean }) => {
         const { appHost } = stores.hostConnections;
         if (!appHost) {
           cli.activeCommand.log('Not connected to a device');
@@ -43,8 +43,8 @@ export default function screenshot(
 
           cli.ui.redraw(`Screenshot saved to ${destPath}`);
 
-          if (args.options['open']) {
-            await open(destPath, { wait: false });
+          if (args.open) {
+            await openScreenshot(destPath, { wait: false });
           }
           return true;
         } catch (ex) {
