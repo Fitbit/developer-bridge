@@ -77,8 +77,9 @@ it('logs the location of the file to the console', async () => {
 });
 
 it('opens the screenshot', async () => {
-  await expectDestPath(path.resolve('Screenshot 2018-03-04 at 15.06.07.png'), undefined, true);
-  await expect(openScreenshot).toBeCalled();
+  const destPath = path.resolve('Screenshot 2018-03-04 at 15.06.07.png');
+  await expectDestPath(destPath, undefined, true);
+  await expect(openScreenshot).toBeCalledWith(destPath, { wait: false });
 });
 
 describe('during the screenshot capture', () => {
