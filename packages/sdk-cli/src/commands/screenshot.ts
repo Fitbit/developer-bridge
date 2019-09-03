@@ -3,7 +3,7 @@ import * as path from 'path';
 import dateformat from 'dateformat';
 import untildify from 'untildify';
 import vorpal from 'vorpal';
-import { default as openScreenshot } from 'open';
+import open from 'open';
 
 import HostConnections from '../models/HostConnections';
 import captureScreenshot from '../models/captureScreenshot';
@@ -44,7 +44,7 @@ export default function screenshot(
           cli.ui.redraw(`Screenshot saved to ${destPath}`);
 
           if (args.open) {
-            await openScreenshot(destPath, { wait: false });
+            await open(destPath, { wait: false });
           }
           return true;
         } catch (ex) {
