@@ -11,10 +11,7 @@ import commandTestHarness from '../testUtils/commandTestHarness';
 import { homedir } from 'os';
 
 jest.mock('../models/captureScreenshot');
-jest.mock('open', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
+jest.mock('open');
 
 const screenshotMock = captureScreenshot as jest.Mock<Promise<void>>;
 
