@@ -18,7 +18,7 @@
     "@fitbit/fdb-debugger": "^1.6.3",
     "@fitbit/fdb-host": "^1.6.3",
     "@fitbit/fdb-protocol": "^1.6.3",
-    "@fitbit/jsonrpc-ts": "^2.1.0",
+    "@fitbit/jsonrpc-ts": "^3.0.0",
     "@fitbit/portable-pixmap": "^1.0.2",
     "@openid/appauth": "^1.2.1",
     "chalk": "^2.4.2",
