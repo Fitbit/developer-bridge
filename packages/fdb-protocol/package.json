@@ -19,7 +19,7 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@fitbit/jsonrpc-ts": "^2.1.0",
+    "@fitbit/jsonrpc-ts": "^3.0.0",
     "invariant": "^2.2.2",
     "io-ts": "^1.9.0",
     "semver": "^6.1.1",
