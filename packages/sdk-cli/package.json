@@ -64,7 +64,7 @@
     "@types/ws": "^6.0.1",
     "mock-fs": "^4.10.1",
     "mockdate": "^2.0.2",
-    "nock": "^10.0.6"
+    "nock": "^11.1.0"
   },
   "bin": {
     "fitbit": "./lib/cli.js"
