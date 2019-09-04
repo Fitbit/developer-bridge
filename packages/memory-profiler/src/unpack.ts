@@ -4,6 +4,8 @@ import { ComponentSourceMaps } from '@fitbit/app-package';
 import * as cbor from 'cbor';
 import * as t from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import * as lodash from 'lodash';
 import { SourceMapConsumer, RawSourceMap } from 'source-map';
 
@@ -23,9 +25,15 @@ const mapValues = <T, U>(
   ).then(entries => entries.reduce((a, b) => ({ ...a, ...b }), {}));
 
 function validateOrThrow<A, O, I>(type: t.Type<A, O, I>, data: I): A {
-  return type.decode(data).getOrElseL((errors) => {
-    throw new Error(failure(errors).join('\n'));
-  });
+  return pipe(
+    type.decode(data),
+    fold(
+      (errors) => {
+        throw new Error(failure(errors).join('\n'));
+      },
+      validatedData => validatedData,
+    ),
+  );
 }
 
 function normalizeRawNode({ id, type, size, repr }: RawNode, rawNodes: RawNodeMap): Node {

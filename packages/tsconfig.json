@@ -5,6 +5,7 @@
     { "path": "fdb-protocol" },
     { "path": "fdb-host" },
     { "path": "fdb-debugger" },
+    { "path": "memory-profiler" },
     { "path": "sdk-cli" },
   ],
 }
