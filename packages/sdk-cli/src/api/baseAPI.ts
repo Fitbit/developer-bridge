@@ -1,4 +1,6 @@
 import * as t from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import { decode } from '@fitbit/jsonrpc-ts';
 
 import * as auth from '../auth';
@@ -23,11 +25,18 @@ export const assertAPIResponseOK = okOrElse((response) => {
       // tslint:disable-next-line:max-line-length
       new Error(`Fetch of ${response.url} returned status ${response.status} ${response.statusText}`),
     ))
-    .then(resObj => Promise.reject<Response>(new Error(APIErrorResponse.decode(resObj).fold(
-      // tslint:disable-next-line:max-line-length
-      () => `fetch of ${response.url} returned status ${response.status} ${response.statusText} with body: ${JSON.stringify(resObj, undefined, 2)}`,
-      errorObj => errorObj.errors.map(err => err.message).join('\n'),
-    ))));
+    .then(resObj => Promise.reject<Response>(
+      new Error(
+        pipe(
+          APIErrorResponse.decode(resObj),
+          fold(
+            // tslint:disable-next-line:max-line-length
+            () => `fetch of ${response.url} returned status ${response.status} ${response.statusText} with body: ${JSON.stringify(resObj, undefined, 2)}`,
+            ({ errors }: APIErrorResponse) => errors.map(err => err.message).join('\n'),
+          ),
+        ),
+      ),
+    ));
 });
 
 export const decodeJSON = <A, O, I>(endpointType: t.Type<A, O, I>) =>
