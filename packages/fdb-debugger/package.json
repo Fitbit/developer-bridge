@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/fdb-debugger",
-  "version": "1.6.3",
+  "version": "1.7.0-pre.0",
   "description": "Fitbit Developer Bridge debugger library",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
@@ -19,12 +19,13 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@fitbit/fdb-protocol": "^1.6.3",
-    "@fitbit/jsonrpc-ts": "^2.1.0",
-    "cbor": "^4.1.5",
-    "io-ts": "^1.9.0",
-    "jszip": "^3.2.1",
-    "lodash": "^4.17.4",
+    "@fitbit/fdb-protocol": "^1.7.0-pre.0",
+    "@fitbit/jsonrpc-ts": "^3.0.0",
+    "cbor": "^4.3.0",
+    "fp-ts": "^2.0.5",
+    "io-ts": "^2.0.1",
+    "jszip": "^3.2.2",
+    "lodash": "^4.17.15",
     "simple-sha256": "^1.0.0",
     "tslib": "^1.10.0"
   },
@@ -32,8 +33,8 @@
     "@types/cbor": "^2.0.0",
     "@types/duplexify": "^3.6.0",
     "@types/jszip": "^3.1.6",
-    "@types/lodash": "^4.14.134",
-    "@types/node": "^12.0.8",
+    "@types/lodash": "^4.14.138",
+    "@types/node": "^12.7.4",
     "duplexify": "^4.1.1"
   }
 }

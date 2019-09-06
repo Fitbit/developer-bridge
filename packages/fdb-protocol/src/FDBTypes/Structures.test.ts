@@ -1,4 +1,6 @@
 import { Type } from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold, isLeft } from 'fp-ts/lib/Either';
 
 import * as types from './Structures';
 
@@ -89,14 +91,20 @@ describe('Semver', () => {
   ])('given %j', (version, expected) => {
     it('is valid', () => expect(types.Semver.is(version)).toBe(true));
     it(`decodes to ${expected}`, () =>
-      expect(types.Semver.decode(version)
-        .getOrElseL((() => { throw new Error('decode error'); })),
+      expect(
+        pipe(
+          types.Semver.decode(version),
+          fold(
+            () => { throw new Error('decode error'); },
+            version => version,
+          ),
+        ),
       ).toBe(expected));
   });
 
   describe.each(['01.2.3', '', '1.2', 'asdf', 3])('rejects %j', (value) => {
     test('in .is()', () => expect(types.Semver.is(value)).toBe(false));
-    test('in .decode()', () => expect(types.Semver.decode(value).isLeft()).toBeTruthy());
+    test('in .decode()', () => expect(isLeft(types.Semver.decode(value))).toBeTruthy());
   });
 });
 

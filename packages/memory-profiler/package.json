@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/memory-profiler",
-  "version": "1.6.3",
+  "version": "1.7.0-pre.0",
   "description": "Tools for analyzing memory usage of Fitbit SDK applications",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
@@ -19,19 +19,20 @@
     "prepublishOnly": "yarn run build"
   },
   "dependencies": {
-    "@fitbit/app-package": "^1.6.3",
-    "@fitbit/fdb-protocol": "^1.6.3",
-    "@fitbit/jsonrpc-ts": "^2.1.0",
-    "cbor": "^4.1.5",
-    "jszip": "^3.2.1",
+    "@fitbit/app-package": "^1.7.0-pre.0",
+    "@fitbit/fdb-protocol": "^1.7.0-pre.0",
+    "@fitbit/jsonrpc-ts": "^3.0.0",
+    "cbor": "^4.3.0",
+    "fp-ts": "^2.0.5",
+    "jszip": "^3.2.2",
     "tslib": "^1.10.0",
-    "yargs": "^13.2.4"
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
     "@types/cbor": "^2.0.0",
     "@types/jszip": "^3.1.6",
-    "@types/node": "^12.0.8",
+    "@types/node": "^12.7.4",
     "@types/yargs": "^13.0.0",
-    "io-ts": "^1.9.0"
+    "io-ts": "^2.0.1"
   }
 }
