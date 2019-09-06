@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 import isUUID = require('validator/lib/isUUID');
 import * as semver from 'semver';
 
@@ -48,11 +49,14 @@ export type Timestamp = t.TypeOf<typeof Timestamp>;
 export const Semver = new t.Type<string>(
   'Semver',
   (value): value is string => t.string.is(value) && semver.valid(value) !== null,
-  (value, context) => t.string.validate(value, context).chain((str) => {
-    // Round-tripping through semver.valid ensures it's canonically formatted.
-    const version = semver.valid(str);
-    return version === null ? t.failure(str, context) : t.success(version);
-  }),
+  (value, context) => either.chain(
+      t.string.validate(value, context),
+      (str) => {
+        // Round-tripping through semver.valid ensures it's canonically formatted.
+        const version = semver.valid(str);
+        return version === null ? t.failure(str, context) : t.success(version);
+      },
+  ),
   t.identity,
 );
 export type Semver = t.TypeOf<typeof Semver>;
