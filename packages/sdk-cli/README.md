@@ -9,14 +9,14 @@ Install Fitbit SDK to your project and run `npx fitbit` to launch the CLI. It wi
 #### Commands
 Commands that can be used within the shell
 ```
-  help [command...]              Provides help for a given command.
-  exit                           Exits application.
-  build                          Build application
-  connect device                 Connect a device
-  connect phone                  Connect a phone
-  install [packagePath]          Install an app package
-  screenshot [path] [--open]     Capture a screenshot from the connected device
-  logout                         Log out of your Fitbit account
+  help [command...]                             Provides help for a given command.
+  exit                                          Exits application.
+  build                                         Build application
+  connect device                                Connect a device
+  connect phone                                 Connect a phone
+  install [packagePath] [--skipLaunch]          Install an app package
+  screenshot [path] [--open]                    Capture a screenshot from the connected device
+  logout                                        Log out of your Fitbit account
 ```
 
 #### Debugging
