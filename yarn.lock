@@ -240,6 +240,7 @@
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@fitbit/jsonrpc-ts/-/jsonrpc-ts-3.0.0.tgz#525a577dc88c81c3eab8c29ba96804105a0829ae"
   integrity sha512-kVcSknDLXy46XomDI2rUbUiRHPju48+9HRmNNdYj4no1zsCUGiaXXMIa1lrrT6T+Vz4hVMaiCrMYXX6xhU1BAQ==
+
   dependencies:
     "@types/error-subclass" "^2.2.0"
     error-subclass "^2.2.0"
@@ -1421,8 +1422,6 @@
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-6.0.3.tgz#b772375ba59d79066561c8d87500144d674ba6b3"
   integrity sha512-yBTM0P05Tx9iXGq00BbJPo37ox68R5vaGTXivs6RGh/BQ6QP5zqZDGWdAO6JbRE/iR1l80xeGAwCQS2nMV9S/w==
-  dependencies:
-    "@types/node" "*"
 
 "@types/yargs-parser@*":
   version "13.0.0"
@@ -1444,6 +1443,13 @@
     is-windows "^1.0.0"
     mkdirp-promise "^5.0.1"
     mz "^2.5.0"
+
+"@types/yargs@^13.0.0":
+  version "13.0.2"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-13.0.2.tgz#a64674fc0149574ecd90ba746e932b5a5f7b3653"
+  integrity sha512-lwwgizwk/bIIU+3ELORkyuOgDjCh7zuWDFqRtPPhhVgq9N1F7CvLNKg1TX4f2duwtKQ0p044Au9r1PLIXHrIzQ==
+  dependencies:
+    "@types/yargs-parser" "*"
 
 JSONStream@^1.0.4, JSONStream@^1.3.4:
   version "1.3.4"
@@ -7463,6 +7469,14 @@ yargs-parser@10.x, yargs-parser@^10.1.0:
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-10.1.0.tgz#7202265b89f7e9e9f2e5765e0fe735a905edbaa8"
   dependencies:
     camelcase "^4.1.0"
+
+yargs-parser@^13.1.1:
+  version "13.1.1"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-13.1.1.tgz#d26058532aa06d365fe091f6a1fc06b2f7e5eca0"
+  integrity sha512-oVAVsHz6uFrg3XQheFII8ESO2ssAf9luWuAd6Wexsu4F3OtIW0o8IribPXYrD4WC24LWtPrJlGy87y5udK+dxQ==
+  dependencies:
+    camelcase "^5.0.0"
+    decamelize "^1.2.0"
 
 yargs-parser@^13.1.1:
   version "13.1.1"

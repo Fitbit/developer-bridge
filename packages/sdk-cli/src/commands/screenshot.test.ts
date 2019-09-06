@@ -52,7 +52,7 @@ it('prints screenshot capture errors to the console', async () => {
 async function expectCaptureScreenshotCall(expected: string, path?: string, open?: boolean) {
   hostConnections.appHost = { host: jest.fn() } as any;
   screenshotMock.mockResolvedValue(undefined);
-  await cli.exec('screenshot', { path, open });
+  await cli.exec('screenshot', { path, options: { open } });
   const filePath = screenshotMock.mock.calls[0][1];
   expect(filePath).toBe(expected);
 }
@@ -76,6 +76,7 @@ it('logs the location of the file to the console', async () => {
 it('opens the screenshot', async () => {
   const destPath = path.resolve('Screenshot 2018-03-04 at 15.06.07.png');
   await expectCaptureScreenshotCall(destPath, undefined, true);
+
   await expect(openScreenshot).toBeCalledWith(destPath, { wait: false });
 });
 

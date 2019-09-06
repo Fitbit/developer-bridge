@@ -43,7 +43,7 @@ export default function screenshot(
 
           cli.ui.redraw(`Screenshot saved to ${destPath}`);
 
-          if (args.open) {
+          if (args.options.open) {
             await open(destPath, { wait: false });
           }
           return true;
