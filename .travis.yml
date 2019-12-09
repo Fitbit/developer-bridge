@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - "8.6.0"
   - "10.0.0"
+  - "12.0.0"
 
 os:
   - linux
@@ -18,7 +18,5 @@ addons:
 
 script:
   - yarn lint
-  # TypeScript runs out of memory on Node 8 otherwise.
-  # https://stackoverflow.com/a/52390439
-  - NODE_OPTIONS=--max_old_space_size=4096 yarn build
+  - yarn build
   - yarn test:coveralls

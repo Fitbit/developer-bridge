@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
-import isUUID = require('validator/lib/isUUID');
+import isUUID from 'validator/lib/isUUID';
 import * as semver from 'semver';
 
 // Runtime types are variables which are used like types, which is

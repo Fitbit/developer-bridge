@@ -1,6 +1,6 @@
 import { InvalidParams, TypesafeRequestDispatcher } from '@fitbit/jsonrpc-ts';
 import invariant = require('invariant');
-import isBase64 = require('validator/lib/isBase64');
+import isBase64 from 'validator/lib/isBase64';
 
 import * as types from './FDBTypes';
 
