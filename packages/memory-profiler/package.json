@@ -21,18 +21,18 @@
   "dependencies": {
     "@fitbit/app-package": "^1.7.0",
     "@fitbit/fdb-protocol": "^1.7.0",
-    "@fitbit/jsonrpc-ts": "^3.0.0",
-    "cbor": "^4.3.0",
-    "fp-ts": "^2.0.5",
+    "@fitbit/jsonrpc-ts": "^3.0.2",
+    "cbor": "^5.0.1",
+    "fp-ts": "^2.2.0",
     "jszip": "^3.2.2",
     "tslib": "^1.10.0",
-    "yargs": "^14.0.0"
+    "yargs": "^15.0.2"
   },
   "devDependencies": {
     "@types/cbor": "^2.0.0",
     "@types/jszip": "^3.1.6",
-    "@types/node": "^12.7.4",
-    "@types/yargs": "^13.0.0",
+    "@types/node": "^12.12.15",
+    "@types/yargs": "^13.0.3",
     "io-ts": "^2.0.1"
   }
 }

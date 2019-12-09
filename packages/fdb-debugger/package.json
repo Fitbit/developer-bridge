@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@fitbit/fdb-protocol": "^1.7.0",
-    "@fitbit/jsonrpc-ts": "^3.0.0",
-    "cbor": "^4.3.0",
-    "fp-ts": "^2.0.5",
+    "@fitbit/jsonrpc-ts": "^3.0.2",
+    "cbor": "^5.0.1",
+    "fp-ts": "^2.2.0",
     "io-ts": "^2.0.1",
     "jszip": "^3.2.2",
     "lodash": "^4.17.15",
@@ -33,8 +33,8 @@
     "@types/cbor": "^2.0.0",
     "@types/duplexify": "^3.6.0",
     "@types/jszip": "^3.1.6",
-    "@types/lodash": "^4.14.138",
-    "@types/node": "^12.7.4",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12.12.15",
     "duplexify": "^4.1.1"
   }
 }

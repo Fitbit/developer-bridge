@@ -90,7 +90,7 @@ describe('addSourcePadding()', () => {
   });
 
   it('adds no padding when the terminal width is not defined', () => {
-    process.stdout.columns = undefined;
+    (process.stdout.columns as any) = undefined;
     expectPaddedString('someString', '');
   });
 });
