@@ -30,7 +30,7 @@
     "tslib": "^1.10.0"
   },
   "devDependencies": {
-    "@types/cbor": "^2.0.0",
+    "@types/cbor": "^5.0.0",
     "@types/duplexify": "^3.6.0",
     "@types/jszip": "^3.1.6",
     "@types/lodash": "^4.14.149",
