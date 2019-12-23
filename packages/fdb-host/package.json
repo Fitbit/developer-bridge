@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/duplexify": "^3.6.0",
-    "@types/node": "^12.12.15",
+    "@types/node": "^13.1.0",
     "duplexify": "^4.1.1"
   }
 }
