@@ -5,6 +5,7 @@ import { IOCapabilities } from './BulkData';
 import { ConsoleDebuggerCapabilities } from './Console';
 import { EvalToStringCapability } from './Eval';
 import { HeapSnapshotCapability } from './HeapSnapshot';
+import { InputCapabilities } from './Input';
 import { LaunchCapabilities } from './Launch';
 import { ProtocolCapabilities } from './Meta';
 import { ScreenshotCapabilities } from './Screenshot';
@@ -84,6 +85,7 @@ export const ApplicationHostCapabilities = t.partial(
     launch: LaunchCapabilities,
     screenshot: ScreenshotCapabilities,
     debug: DebugCapabilities,
+    input: InputCapabilities,
   },
   'ApplicationHostCapabilities',
 );

@@ -182,3 +182,15 @@ export const ComponentBundleKind = t.union([
   t.literal('companion'),
 ]);
 export type ComponentBundleKind = t.TypeOf<typeof ComponentBundleKind>;
+
+/**
+ * Describes a point on the simulated device's screen, relative to the top-left corner at (0,0).
+ */
+export const Point = t.interface(
+  {
+    x: NonNegativeInteger,
+    y: NonNegativeInteger,
+  },
+  'Point',
+);
+export type Point = t.TypeOf<typeof Point>;

@@ -449,14 +449,53 @@ export class RemoteHost extends EventEmitter {
     FDBTypes.AppDebugEvalResult,
   );
 
+  private sendButtonInput = this.bindMethod(
+    'input.button',
+    FDBTypes.ButtonInput,
+    t.null,
+  );
+
+  private sendTouchInput = this.bindMethod(
+    'input.touch',
+    FDBTypes.TouchInput,
+    t.null,
+  );
+
   hasEvalSupport() {
     return this.hasCapability('appHost.debug.app.evalToString.supported') &&
       this.info.capabilities.appHost!.debug!.app!.evalToString!.supported &&
       !FBOS3_EVAL_QUIRK.test(this.info.device);
   }
 
+  hasTouchInputSupport() {
+    return this.hasCapability('appHost.input.touch') &&
+      this.info.capabilities.appHost!.input!.touch!;
+  }
+
+  hasButtonInputSupport() {
+    return this.hasCapability('appHost.input.buttons') &&
+      this.info.capabilities.appHost!.input!.buttons! &&
+      this.info.capabilities.appHost!.input!.buttons!.length > 0;
+  }
+
+  buttons() {
+    if (!this.hasButtonInputSupport) return [];
+    return this.info.capabilities.appHost!.input!.buttons!;
+  }
+
   eval(cmd: string) {
     return this.sendEvalCmd({ cmd });
+  }
+
+  simulateButtonPress(button: FDBTypes.Button) {
+    return this.sendButtonInput({ button });
+  }
+
+  simulateTouch(location: FDBTypes.Point, state: FDBTypes.TouchState) {
+    return this.sendTouchInput({
+      location,
+      state,
+    });
   }
 
   supportsPartialAppInstall() {

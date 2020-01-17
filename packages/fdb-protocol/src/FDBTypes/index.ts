@@ -6,6 +6,7 @@ export * from './ContentsList';
 export * from './Eval';
 export * from './HeapSnapshot';
 export * from './Initialize';
+export * from './Input';
 export * from './Launch';
 export * from './Meta';
 export * from './Screenshot';
