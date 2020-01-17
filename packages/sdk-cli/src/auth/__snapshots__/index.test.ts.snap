@@ -1,11 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`login() given authorization callback parameters state=_invalid_&code=__valid_code__ rejects 1`] = `"Authorization error: Mismatched state"`;
+exports[`loginAuthCodeFlow() given authorization callback parameters state=_invalid_&code=__valid_code__ rejects 1`] = `"Authorization error: Mismatched state"`;
 
-exports[`login() given authorization callback parameters state=fixedstate&error=internal_error rejects 1`] = `"Authorization error: internal_error"`;
+exports[`loginAuthCodeFlow() given authorization callback parameters state=fixedstate&error=internal_error rejects 1`] = `"Authorization error: internal_error"`;
 
-exports[`login() given authorization callback parameters state=fixedstate&error=internal_error&error_description=Something+went+very_wrong rejects 1`] = `"Authorization error: internal_error: Something went very_wrong"`;
+exports[`loginAuthCodeFlow() given authorization callback parameters state=fixedstate&error=internal_error&error_description=Something+went+very_wrong rejects 1`] = `"Authorization error: internal_error: Something went very_wrong"`;
 
-exports[`login() rejects if token response is empty 1`] = `"Unexpected response format for status 200: {}"`;
+exports[`loginAuthCodeFlow() rejects if token response is empty 1`] = `"Unexpected response format for status 200: {}"`;
 
-exports[`login() rejects if token response returns a 500 status code 1`] = `"internal_error"`;
+exports[`loginAuthCodeFlow() rejects if token response returns a 500 status code 1`] = `"internal_error"`;
+
+exports[`loginResourceOwnerFlow() rejects if token response is empty 1`] = `"Unexpected response format for status 200: {}"`;
+
+exports[`loginResourceOwnerFlow() rejects if token response returns a 500 status code 1`] = `"internal_error"`;

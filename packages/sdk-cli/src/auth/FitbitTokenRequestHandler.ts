@@ -9,9 +9,6 @@ import {
   TokenResponse,
 } from '@openid/appauth/built/token_response';
 import {
-  TokenRequest,
-} from '@openid/appauth/built/token_request';
-import {
   TokenRequestHandler,
 } from '@openid/appauth/built/token_request_handler';
 import { BasicQueryStringUtils } from '@openid/appauth/built/query_string_utils';
@@ -72,7 +69,9 @@ export default class FitbitTokenRequestHandler implements TokenRequestHandler {
 
   async performTokenRequest(
     configuration: AuthorizationServiceConfiguration,
-    request: TokenRequest,
+    request: {
+      toStringMap: () => Record<string, string>,
+    },
   ): Promise<TokenResponse> {
     const response = await fetch(
       configuration.tokenEndpoint,

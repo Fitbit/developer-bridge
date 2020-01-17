@@ -13,6 +13,9 @@ import { NodeCrypto } from '@openid/appauth/built/node_support';
 jest.mock('./storage');
 jest.mock('opener');
 
+const mockUsername = 'test@example.com';
+const mockPassword = 'p@ssw0rd';
+
 const mockTime = 1529366247520;
 
 const mockTokenResponseData: TokenResponseJson = {
@@ -133,7 +136,7 @@ describe('getAccessToken()', () => {
   });
 });
 
-describe('login()', () => {
+describe('loginAuthCodeFlow()', () => {
   beforeEach(() => {
     jest.spyOn(NodeCrypto.prototype, 'generateRandom')
       .mockReturnValue('fixedstate');
@@ -150,7 +153,7 @@ describe('login()', () => {
 
   it('retrieves and stores an auth token', async () => {
     const mockTokenEndpoint = mockTokenResponse();
-    const loginPromise = auth.login();
+    const loginPromise = auth.loginAuthCodeFlow();
     await fetch(`${await callbackURLPromise}?state=fixedstate&code=__valid_code__`);
     await loginPromise;
 
@@ -164,7 +167,8 @@ describe('login()', () => {
     'state=fixedstate&error=internal_error&error_description=Something+went+very_wrong',
   ])('given authorization callback parameters %s', (queryParams) => {
     it('rejects', async () => {
-      const loginExpectPromise = expect(auth.login()).rejects.toThrowErrorMatchingSnapshot();
+      const loginExpectPromise = expect(auth.loginAuthCodeFlow()).rejects
+        .toThrowErrorMatchingSnapshot();
       await fetch(`${await callbackURLPromise}?${queryParams}`);
       return loginExpectPromise;
     });
@@ -172,15 +176,38 @@ describe('login()', () => {
 
   it('rejects if token response returns a 500 status code', async () => {
     mockTokenResponseError();
-    const loginPromise = auth.login();
+    const loginPromise = auth.loginAuthCodeFlow();
     await fetch(`${await callbackURLPromise}?state=fixedstate&code=__valid_code__`);
     return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('rejects if token response is empty', async () => {
     mockTokenResponse(200, {});
-    const loginPromise = auth.login();
+    const loginPromise = auth.loginAuthCodeFlow();
     await fetch(`${await callbackURLPromise}?state=fixedstate&code=__valid_code__`);
+    return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('loginResourceOwnerFlow()', () => {
+  it('retrieves and stores an auth token', async () => {
+    const mockTokenEndpoint = mockTokenResponse();
+    const loginPromise = auth.loginResourceOwnerFlow(mockUsername, mockPassword);
+    await expect(loginPromise).resolves.toBeUndefined();
+
+    expect(mockTokenEndpoint.isDone()).toBe(true);
+    expect(setAuthStorageSpy).toBeCalledWith(new TokenResponse(mockTokenResponseData));
+  });
+
+  it('rejects if token response returns a 500 status code', async () => {
+    mockTokenResponseError();
+    const loginPromise = auth.loginResourceOwnerFlow(mockUsername, mockPassword);
+    return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('rejects if token response is empty', async () => {
+    mockTokenResponse(200, {});
+    const loginPromise = auth.loginResourceOwnerFlow(mockUsername, mockPassword);
     return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
   });
 });

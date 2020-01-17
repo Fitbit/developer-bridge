@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-import os from 'os';
 import process from 'process';
 
 import updateNotifier from 'update-notifier';
 import vorpal from 'vorpal';
 
-import * as auth from './auth';
 import checkForUpdate from './checkForUpdate';
+import checkLogin from './checkLogin';
 import userProfile from './api/userProfile';
 
 import AppContext from './models/AppContext';
@@ -58,30 +57,7 @@ new LogConsumer({
 async function main() {
   checkForUpdate(updateNotifier);
 
-  let accessToken;
-  try {
-    // Returns null if no token is present, so any exception
-    // thrown is a fatal error.
-    accessToken = await auth.getAccessToken();
-  } catch (ex) {
-    console.error(`Failed to read auth token from keychain: ${ex}`);
-    if (os.platform() === 'darwin') {
-      console.error(
-        'Try locking and then unlocking your \'login\' keychain using the Keychain Access app.',
-      );
-    }
-    process.exit(1);
-  }
-
-  if (accessToken === null) {
-    console.log('No login information, starting login...');
-    try {
-      await auth.login();
-    } catch (ex) {
-      console.error(`Login failed: ${ex.message}`);
-      process.exit(1);
-    }
-  }
+  await checkLogin();
 
   const user = await userProfile();
   console.log(`Logged in as ${user.fullName} <${user.email}>`);
