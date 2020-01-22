@@ -19,9 +19,12 @@ import {
 import environment from './environment';
 import storage from './storage';
 import FitbitTokenRequestHandler from './FitbitTokenRequestHandler';
+import ResourceOwnerPasswordRequest from './ResourceOwnerPasswordRequest';
 
 // TODO: PR against AppAuth to make this properly configurable
 (appAuthFlags as any).IS_LOG = false;
+
+const SCOPES = ['profile'];
 
 const tokenHandler = new FitbitTokenRequestHandler();
 
@@ -93,7 +96,7 @@ async function authorize() {
       {
         client_id: clientId,
         redirect_uri: redirectUri,
-        scope: 'profile',
+        scope: SCOPES.join(','),
         response_type: AuthorizationRequest.RESPONSE_TYPE_CODE,
       },
       new NodeCrypto(),
@@ -117,7 +120,7 @@ async function revoke(token: string) {
   );
 }
 
-export async function login() {
+export async function loginAuthCodeFlow() {
   const { clientId } = environment().config;
 
   const { code, pkceVerifier, redirectUri } = await authorize();
@@ -129,6 +132,24 @@ export async function login() {
       redirect_uri: redirectUri,
       grant_type: GRANT_TYPE_AUTHORIZATION_CODE,
       extras: { code_verifier: pkceVerifier },
+    }),
+  );
+  await storage.set(response);
+}
+
+export async function loginResourceOwnerFlow(username: string, password: string) {
+  const { clientId } = environment().config;
+
+  const response = await tokenHandler.performTokenRequest(
+    getAuthConfiguration(),
+    new ResourceOwnerPasswordRequest({
+      username,
+      password,
+      client_id: clientId,
+      grant_type: 'password',
+      extras: {
+        scope: SCOPES.join(','),
+      },
     }),
   );
   await storage.set(response);
