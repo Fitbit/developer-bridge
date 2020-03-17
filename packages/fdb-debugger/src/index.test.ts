@@ -360,7 +360,7 @@ describe('fails the sideload if the install finalize method call', () => {
 
   it('never returns', () => {
     handler.method('app.install.stream.finalize', t.any, () => {
-      setImmediate(() => jest.runOnlyPendingTimers());
+      process.nextTick(() => jest.runOnlyPendingTimers());
       return new Promise(() => {});
     });
     return expect(remoteHost.installApp('app', sourceBuffer))
