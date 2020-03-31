@@ -21,8 +21,8 @@ beforeEach(() => {
 });
 
 describe.each([
-  'qa2',
-  'qa1',
+  'int',
+  'stage',
   'production',
 ])('given an FITBIT_SDK_ENVIRONMENT value of "%s"', (env) => {
   test('returns environment data', () => isValidEnv(env));
