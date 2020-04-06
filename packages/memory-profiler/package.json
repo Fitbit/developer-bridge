@@ -23,7 +23,8 @@
     "@fitbit/fdb-protocol": "^1.7.2-pre.1",
     "@fitbit/jsonrpc-ts": "^3.1.1",
     "cbor": "^5.0.1",
-    "fp-ts": "^2.5.3",
+    "io-ts": "2.1.2",
+    "fp-ts": "2.5.3",
     "jszip": "^3.2.2",
     "tslib": "^1.11.1",
     "yargs": "^15.3.1"
@@ -32,7 +33,6 @@
     "@types/cbor": "^5.0.0",
     "@types/jszip": "^3.1.7",
     "@types/node": "^13.9.1",
-    "@types/yargs": "^15.0.4",
-    "io-ts": "^2.1.2"
+    "@types/yargs": "^15.0.4"
   }
 }
