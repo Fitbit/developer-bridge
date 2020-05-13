@@ -21,7 +21,7 @@
   "dependencies": {
     "apr-map": "^3.0.3",
     "lodash": "^4.17.15",
-    "tslib": "^1.11.1"
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@types/jszip": "^3.1.7",
