@@ -24,7 +24,7 @@
     "tslib": "^1.11.1"
   },
   "devDependencies": {
-    "@types/jszip": "^3.1.7",
+    "@types/jszip": "^3.4.1",
     "@types/lodash": "^4.14.149",
     "@types/node": "^13.9.1",
     "jszip": "^3.2.2"
