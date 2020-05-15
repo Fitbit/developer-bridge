@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/cbor": "^5.0.0",
     "@types/duplexify": "^3.6.0",
-    "@types/jszip": "^3.1.7",
+    "@types/jszip": "^3.4.1",
     "@types/lodash": "^4.14.149",
     "@types/node": "^13.9.1",
     "duplexify": "^4.1.1"
