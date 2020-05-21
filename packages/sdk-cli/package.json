@@ -61,7 +61,7 @@
     "@types/update-notifier": "^4.1.0",
     "@types/ws": "^7.2.2",
     "mock-fs": "^4.11.0",
-    "mockdate": "^2.0.5",
+    "mockdate": "^3.0.2",
     "nock": "^12.0.3"
   },
   "bin": {
