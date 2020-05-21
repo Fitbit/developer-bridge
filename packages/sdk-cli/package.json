@@ -54,7 +54,7 @@
     "@types/minimist": "^1.2.0",
     "@types/mock-fs": "^4.10.0",
     "@types/mockdate": "^2.0.0",
-    "@types/node": "^13.9.1",
+    "@types/node": "^14.0.5",
     "@types/opener": "^1.4.0",
     "@types/pngjs": "^3.4.1",
     "@types/semver": "^7.1.0",
