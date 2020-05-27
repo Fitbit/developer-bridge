@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@fitbit/jsonrpc-ts": "^3.1.1",
-    "fp-ts": "2.5.3",
+    "fp-ts": "2.6.2",
     "invariant": "^2.2.2",
     "io-ts": "2.1.2",
     "semver": "^7.1.3",
