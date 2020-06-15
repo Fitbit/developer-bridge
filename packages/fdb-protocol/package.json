@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/fdb-protocol",
-  "version": "1.7.2-pre.1",
+  "version": "1.7.2",
   "description": "Fitbit Developer Bridge common protocol bits",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
