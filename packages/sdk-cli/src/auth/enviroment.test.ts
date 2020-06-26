@@ -17,7 +17,6 @@ function isInvalidEnv(env: string) {
 beforeEach(() => {
   delete process.env.FITBIT_SDK_ENVIRONMENT;
   delete process.env.FITBIT_SDK_CLIENT_ID;
-  delete process.env.FITBIT_SDK_CLIENT_SECRET;
 });
 
 describe.each([
@@ -42,30 +41,17 @@ it('defaults to the production environment', () => {
   );
 });
 
-it('uses FITBIT_SDK_CLIENT_ID and FITBIT_SDK_CLIENT_SECRET if provided', () => {
+it('uses FITBIT_SDK_CLIENT_ID if provided', () => {
   const clientId = '_fake_client_id_';
-  const clientSecret = '_fake_client_secret_';
 
   process.env.FITBIT_SDK_CLIENT_ID = clientId;
-  process.env.FITBIT_SDK_CLIENT_SECRET = clientSecret;
 
   expect(environment()).toEqual(
     {
       config: expect.objectContaining({
         clientId,
-        clientSecret,
       }),
       environment: 'production',
     },
   );
-});
-
-it('throws an error if only FITBIT_SDK_CLIENT_ID is set', () => {
-  process.env.FITBIT_SDK_CLIENT_ID = '_fake_client_id_';
-  expect(environment).toThrowErrorMatchingSnapshot();
-});
-
-it('throws an error if only FITBIT_SDK_CLIENT_SECRET is set', () => {
-  process.env.FITBIT_SDK_CLIENT_SECRET = '_fake_client_secret_';
-  expect(environment).toThrowErrorMatchingSnapshot();
 });

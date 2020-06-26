@@ -14,10 +14,7 @@ import {
 import { BasicQueryStringUtils } from '@openid/appauth/built/query_string_utils';
 import * as t from 'io-ts';
 
-import environment from './environment';
 import fetch from '../fetch';
-
-const { clientId, clientSecret } = environment().config;
 
 // Fitbit's error responses are non-standard per
 // https://tools.ietf.org/html/rfc6749#section-5.2
@@ -45,7 +42,6 @@ const commonParams = {
   method: 'POST',
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded',
-    Authorization: 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
   },
 };
 

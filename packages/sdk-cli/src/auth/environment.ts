@@ -15,15 +15,9 @@ export default () => {
   const config = environments[environment];
 
   const clientId = process.env.FITBIT_SDK_CLIENT_ID;
-  const clientSecret = process.env.FITBIT_SDK_CLIENT_SECRET;
 
-  if (clientId || clientSecret) {
-    if (!clientId || !clientSecret) {
-      throw new Error('Both FITBIT_SDK_CLIENT_ID and FITBIT_SDK_CLIENT_SECRET must be specified');
-    }
-
+  if (clientId) {
     config.clientId = clientId;
-    config.clientSecret = clientSecret;
   }
 
   return {
