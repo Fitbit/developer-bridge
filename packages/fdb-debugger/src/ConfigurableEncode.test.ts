@@ -7,6 +7,10 @@ let stream: ConfigurableEncode;
 let dataCallback: jest.Mock;
 let errorCallback: jest.Mock;
 
+jest.mock('cbor', () => ({
+  encode: jest.fn(jest.requireActual('cbor').encode),
+}));
+
 beforeEach(() => {
   stream = new ConfigurableEncode();
   dataCallback = jest.fn();
@@ -36,9 +40,17 @@ it.each(testCases)('exposes current encoding via encoder property', (encoding) =
   expect(stream.encoder).toBe(encoding);
 });
 
-it('emits an error if encoding fails', () => {
-  // Forcing an encoding error by trying to CBOR encode a function (which will throw)
+it('emits an error if encoding fails', async () => {
+  jest.spyOn(cbor, 'encode')
+    .mockImplementation(() => { throw new Error('encoding failed :('); });
+
+  const errorPromise = new Promise((resolve) => {
+    stream.on('error', resolve);
+  });
+
   stream.setEncoder('cbor-definite');
-  stream.write({ func: () => {} });
+  stream.write({});
+  await errorPromise;
+
   expect(errorCallback).toBeCalledWith(expect.any(Error));
 });
