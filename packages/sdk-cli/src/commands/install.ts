@@ -13,6 +13,7 @@ type InstallArgs = vorpal.Args & {
   packagePath?: string;
   options: {
     skipLaunch?: boolean;
+    useDevice?: string;
   };
 };
 
@@ -79,10 +80,19 @@ export const installAction = async (
 
   try {
     if (hasApp && appHost) {
+      const { useDevice } = args.options;
+      if (useDevice && appPackage.components.device[useDevice] === undefined) {
+        cli.activeCommand.log(
+          `Requested '${useDevice}' bundle to be used, but it isn't present within the app package`,
+        );
+        return false;
+      }
+
       await sideload.app(
         appHost.host,
         appPackage,
         makeProgressCallback('app'),
+        useDevice,
       ).then(printCompletionStatus('App'));
     }
 
@@ -126,8 +136,9 @@ export default function install(
   return (cli: vorpal) => {
     cli
       .command('install [packagePath]', 'Install an app package')
-      .types({ string: ['packagePath'] })
+      .types({ string: ['packagePath', 'useDevice'] })
       .option('--skipLaunch', "Don't launch the app after installing")
+      .option('--useDevice <device>', 'Install a device bundle for a specific device (eg higgs, mira)')
       .action(async (args: InstallArgs) =>
         installAction(cli, stores, args));
   };

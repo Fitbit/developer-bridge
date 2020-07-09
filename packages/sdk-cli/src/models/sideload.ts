@@ -9,8 +9,8 @@ export function app(
   host: RemoteHost,
   appPackage: AppPackage,
   onProgress: ProgressCallback,
+  family = compatibility.findCompatibleAppComponent(appPackage, host.info),
 ) {
-  const family = compatibility.findCompatibleAppComponent(appPackage, host.info);
   return host.installApp(
     'app',
     appPackage.components.device[family].artifact,
