@@ -1,7 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`given an FITBIT_SDK_ENVIRONMENT value of "__bad_env__" throws 1`] = `"Invalid environment specified: __bad_env__"`;
-
-exports[`throws an error if only FITBIT_SDK_CLIENT_ID is set 1`] = `"Both FITBIT_SDK_CLIENT_ID and FITBIT_SDK_CLIENT_SECRET must be specified"`;
-
-exports[`throws an error if only FITBIT_SDK_CLIENT_SECRET is set 1`] = `"Both FITBIT_SDK_CLIENT_ID and FITBIT_SDK_CLIENT_SECRET must be specified"`;
