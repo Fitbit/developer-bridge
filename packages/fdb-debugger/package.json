@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/fdb-debugger",
-  "version": "1.7.2",
+  "version": "1.7.3-pre.0",
   "description": "Fitbit Developer Bridge debugger library",
   "files": [
     "/lib/**/!(*.test|*.spec).{js,d.ts}"
