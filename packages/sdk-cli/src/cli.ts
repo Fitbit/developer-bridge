@@ -3,7 +3,7 @@
 import process from 'process';
 
 import updateNotifier from 'update-notifier';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import checkForUpdate from './checkForUpdate';
 import checkLogin from './checkLogin';

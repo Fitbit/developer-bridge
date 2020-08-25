@@ -1,4 +1,4 @@
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 export default function commandTestHarness(extension: (cli: vorpal) => void) {
   const cli = new vorpal();

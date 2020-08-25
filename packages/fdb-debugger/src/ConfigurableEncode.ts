@@ -3,9 +3,9 @@ import { Transform } from 'stream';
 import { FDBTypes } from '@fitbit/fdb-protocol';
 import * as cbor from 'cbor';
 
-export type EncoderCallback = (data: any) => Buffer | string;
+export type EncoderCallback = (data: any) => ArrayBufferView | string;
 
-const encoders: {[key in FDBTypes.SerializationType]: (data: any) => Buffer | string} = {
+const encoders: {[key in FDBTypes.SerializationType]: EncoderCallback} = {
   'cbor-definite': cbor.encode,
   json: JSON.stringify,
 };
@@ -28,7 +28,7 @@ export default class ConfigurableEncode extends Transform {
     // This looks a bit weird, but if we do the write callback inside the try catch,
     // we end up calling the write callback twice and masking the original error
     // with a "you called write twice" error.
-    let encodedChunk: Buffer | string;
+    let encodedChunk: ArrayBufferView | string;
     try {
       encodedChunk = encoders[this.encoder](chunk);
     } catch (e) {

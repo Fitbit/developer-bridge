@@ -69,7 +69,7 @@ describe('makePartialBundle', () => {
     if (partial) {
       const partialZip = await JSZip.loadAsync(partial);
       expect(partialZip.file('manifest.json')).not.toBeNull();
-      const partialManifest = JSON.parse(await partialZip.file('.partial.json').async('text'));
+      const partialManifest = JSON.parse(await partialZip.file('.partial.json')!.async('text'));
       expect(partialManifest.delete).not.toContain('manifest.json');
     }
   });
@@ -154,7 +154,7 @@ describe('makePartialBundle', () => {
       expect(partialBinary).not.toBeNull();
       if (partialBinary) {
         partialZip = await JSZip.loadAsync(partialBinary);
-        partialManifest = JSON.parse(await partialZip.file('.partial.json').async('text'));
+        partialManifest = JSON.parse(await partialZip.file('.partial.json')!.async('text'));
       }
     });
 

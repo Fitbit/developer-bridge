@@ -3,7 +3,7 @@ import os from 'os';
 
 import fsExtra from 'fs-extra';
 import lodash from 'lodash';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 export const buildProcess = (): Promise<{code: number | null, signal: string | null}> => {
   return new Promise((resolve, reject) => {

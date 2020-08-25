@@ -1,4 +1,4 @@
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import AppContext from '../models/AppContext';
 import commandTestHarness from '../testUtils/commandTestHarness';

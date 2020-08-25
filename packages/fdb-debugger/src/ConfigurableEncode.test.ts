@@ -29,7 +29,7 @@ it.each(testCases)('encodes data in %s', async (encoding, encoder) => {
   const data = { a: 1 };
   stream.write(data);
 
-  let expectedData: Buffer | string = encoder(data);
+  let expectedData: ArrayBufferView | string = encoder(data);
   if (typeof expectedData === 'string') expectedData = Buffer.from(expectedData);
 
   expect(dataCallback).toBeCalledWith(expectedData);

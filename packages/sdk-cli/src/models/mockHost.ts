@@ -35,7 +35,10 @@ function makeInstallCapabilities(
 
 async function getBundleInfo(bundleData: Buffer) {
   const bundleZip = await jszip.loadAsync(bundleData);
-  const manifestStr = await bundleZip.file('manifest.json').async('text');
+  const manifestFile = bundleZip.file('manifest.json');
+  if (manifestFile === null) throw new Error('manifest.json is missing from bundle');
+
+  const manifestStr = await manifestFile.async('text');
   const manifest = JSON.parse(manifestStr);
   return {
     uuid: manifest.uuid,

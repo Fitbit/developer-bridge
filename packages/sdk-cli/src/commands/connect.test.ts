@@ -1,6 +1,6 @@
 import events from 'events';
 
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import connect, { DeviceType } from './connect';
 import commandTestHarness from '../testUtils/commandTestHarness';

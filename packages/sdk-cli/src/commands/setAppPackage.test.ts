@@ -1,6 +1,6 @@
 import os from 'os';
 
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import AppContext from '../models/AppContext';
 import setAppPackage, { defaultAppPath } from './setAppPackage';

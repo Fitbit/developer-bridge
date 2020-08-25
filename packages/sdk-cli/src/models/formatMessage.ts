@@ -2,7 +2,7 @@ import util from 'util';
 
 import chalk, { Chalk } from 'chalk';
 import lodash from 'lodash';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import { ConsoleMessage, ConsoleTrace } from '@fitbit/fdb-debugger';
 import { FDBTypes } from '@fitbit/fdb-protocol';

@@ -1,4 +1,4 @@
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 import untildify from 'untildify';
 
 import AppContext from '../models/AppContext';

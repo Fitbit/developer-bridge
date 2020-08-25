@@ -1,7 +1,7 @@
 // Typedoc definitions taken and modified from vorpal source https://github.com/dthree/vorpal
 
 /// <reference types="inquirer" />
-declare module 'vorpal' {
+declare module '@moleculer/vorpal' {
   import { EventEmitter } from 'events';
   import { Inquirer } from 'inquirer';
 

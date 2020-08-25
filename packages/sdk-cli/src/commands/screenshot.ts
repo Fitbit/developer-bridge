@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import dateformat from 'dateformat';
 import untildify from 'untildify';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 import open from 'open';
 
 import HostConnections from '../models/HostConnections';
