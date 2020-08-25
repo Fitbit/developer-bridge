@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/app-package",
-  "version": "1.7.2",
+  "version": "1.7.3-pre.1",
   "author": "Fitbit, Inc.",
   "license": "BSD-3-Clause",
   "description": "Utilities for reading FBA files",
