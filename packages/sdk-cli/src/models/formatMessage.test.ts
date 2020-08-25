@@ -1,9 +1,9 @@
 import chalk from 'chalk';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import { addSourcePadding, formatMessage, createPrefixedLog } from './formatMessage';
 
-jest.mock('vorpal');
+jest.mock('@moleculer/vorpal');
 
 type ComponentType = 'app' | 'companion' | 'settings';
 type MessageKind = 'log' | 'info' | 'warn' | 'error';

@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import lodash from 'lodash';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import AppContext from '../models/AppContext';
 import HostConnections from '../models/HostConnections';

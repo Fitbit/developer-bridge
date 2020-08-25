@@ -1,4 +1,4 @@
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import * as auth from '../auth';
 import logout from './logout';

@@ -1,5 +1,5 @@
 import { startCase } from 'lodash';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import * as developerRelay from '../api/developerRelay';
 import HostConnections from '../models/HostConnections';

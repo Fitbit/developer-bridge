@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import mockdate from 'mockdate';
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 import { default as openScreenshot } from 'open';
 
 import screenshot from './screenshot';

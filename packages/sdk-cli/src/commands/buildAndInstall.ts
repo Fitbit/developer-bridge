@@ -1,4 +1,4 @@
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import { buildAction } from './build';
 import { installAction } from './install';

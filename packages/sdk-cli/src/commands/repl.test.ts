@@ -1,4 +1,4 @@
-import vorpal from 'vorpal';
+import vorpal from '@moleculer/vorpal';
 
 import repl from './repl';
 import HostConnections from '../models/HostConnections';
