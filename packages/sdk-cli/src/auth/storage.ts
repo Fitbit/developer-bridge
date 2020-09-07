@@ -12,7 +12,7 @@ const AuthStorage = t.interface({
   access_token: t.string,
   refresh_token: t.string,
   issued_at: t.number,
-  expires_in: t.number,
+  expires_in: t.string,
 });
 type AuthStorage = t.TypeOf<typeof AuthStorage>;
 

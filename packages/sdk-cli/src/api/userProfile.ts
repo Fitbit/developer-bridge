@@ -6,10 +6,14 @@ import { apiFetch, decodeJSON } from './baseAPI';
 // tslint:disable-next-line:variable-name
 const UserProfileResponse = t.type(
   {
-    user: t.type({
-      email: t.string,
-      fullName: t.string,
-    }),
+    user: t.intersection([
+      t.type({
+        email: t.string,
+      }),
+      t.partial({
+        fullName: t.string,
+      }),
+    ]),
   },
   'UserProfileResponse',
 );

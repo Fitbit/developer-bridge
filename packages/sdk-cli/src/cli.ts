@@ -60,7 +60,12 @@ async function main() {
   await checkLogin();
 
   const user = await userProfile();
-  console.log(`Logged in as ${user.fullName} <${user.email}>`);
+
+  if (user.fullName) {
+    console.log(`Logged in as ${user.fullName} <${user.email}>`);
+  } else {
+    console.log(`Logged in as ${user.email}`);
+  }
 
   cli
     .delimiter('fitbit$')
