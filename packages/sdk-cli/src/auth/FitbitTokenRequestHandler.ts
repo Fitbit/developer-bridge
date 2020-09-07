@@ -35,8 +35,13 @@ const FitbitTokenResponse = t.interface({
   access_token: t.string,
   refresh_token: t.string,
   expires_in: t.number,
+  token_type: t.union([
+    t.literal('bearer'),
+    t.literal('mac'),
+    t.undefined,
+  ]),
 });
-type FitbitTokenResponse = t.TypeOf<typeof FitbitTokenResponse>;
+export type FitbitTokenResponse = t.TypeOf<typeof FitbitTokenResponse>;
 
 const commonParams = {
   method: 'POST',
@@ -78,8 +83,14 @@ export default class FitbitTokenRequestHandler implements TokenRequestHandler {
     );
     const responseJson = await response.json();
 
+    // AppAuth types insist this is lower case, but it's title-cased by Fitbit
+    if (responseJson.token_type) responseJson.token_type = responseJson.token_type.toLowerCase();
+
     if (response.status === 200 && FitbitTokenResponse.is(responseJson)) {
-      return new TokenResponse(responseJson);
+      return new TokenResponse({
+        ...responseJson,
+        expires_in: String(responseJson.expires_in),
+      });
     }
 
     if (FitbitAuthErrorResponse.is(responseJson)) {

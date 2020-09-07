@@ -1,4 +1,4 @@
-import { TokenResponse, TokenResponseJson } from '@openid/appauth/built/token_response';
+import { TokenResponse } from '@openid/appauth/built/token_response';
 import nock from 'nock';
 import opener from 'opener';
 import url from 'url';
@@ -8,6 +8,7 @@ import environment from './environment';
 import fetch from '../fetch';
 import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
 import storage from './storage';
+import { FitbitTokenResponse } from './FitbitTokenRequestHandler';
 import { NodeCrypto } from '@openid/appauth/built/node_support';
 
 jest.mock('./storage');
@@ -18,7 +19,7 @@ const mockPassword = 'p@ssw0rd';
 
 const mockTime = 1529366247520;
 
-const mockTokenResponseData: TokenResponseJson = {
+const mockTokenResponseData: FitbitTokenResponse = {
   access_token: 'newAccess',
   refresh_token: 'newRefresh',
   token_type: 'bearer',
@@ -59,10 +60,17 @@ function mockRevokeResponse(code = 200) {
     .reply(code);
 }
 
+function mockFitbitTokenResponse(data: FitbitTokenResponse) {
+  return new TokenResponse({
+    ...data,
+    expires_in: String(data.expires_in),
+  });
+}
+
 function mockStoredAuthData(data = mockTokenStorageData) {
   getAuthStorageSpy.mockReset();
   getAuthStorageSpy.mockResolvedValueOnce(
-    new TokenResponse(data),
+    mockFitbitTokenResponse(data),
   );
 }
 
@@ -125,7 +133,7 @@ describe('getAccessToken()', () => {
     it('stores newly refreshed tokens', async () => {
       mockTokenResponse();
       await auth.getAccessToken();
-      expect(setAuthStorageSpy).toBeCalledWith(new TokenResponse(mockTokenResponseData));
+      expect(setAuthStorageSpy).toBeCalledWith(mockFitbitTokenResponse(mockTokenResponseData));
     });
 
     it('clears auth storage if refresh fails', async () => {
@@ -158,7 +166,7 @@ describe('loginAuthCodeFlow()', () => {
     await loginPromise;
 
     expect(mockTokenEndpoint.isDone()).toBe(true);
-    expect(setAuthStorageSpy).toBeCalledWith(new TokenResponse(mockTokenResponseData));
+    expect(setAuthStorageSpy).toBeCalledWith(mockFitbitTokenResponse(mockTokenResponseData));
   });
 
   describe.each([
@@ -196,7 +204,7 @@ describe('loginResourceOwnerFlow()', () => {
     await expect(loginPromise).resolves.toBeUndefined();
 
     expect(mockTokenEndpoint.isDone()).toBe(true);
-    expect(setAuthStorageSpy).toBeCalledWith(new TokenResponse(mockTokenResponseData));
+    expect(setAuthStorageSpy).toBeCalledWith(mockFitbitTokenResponse(mockTokenResponseData));
   });
 
   it('rejects if token response returns a 500 status code', async () => {

@@ -8,7 +8,7 @@ const mockTokenData = {
   access_token: 'access',
   refresh_token: 'refresh',
   issued_at: mockTime,
-  expires_in: 3600,
+  expires_in: '3600',
 };
 
 jest.mock('keytar', () => {
