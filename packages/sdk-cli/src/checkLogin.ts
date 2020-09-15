@@ -32,7 +32,7 @@ async function checkStoredLogin() {
     // thrown is a fatal error.
     accessToken = await auth.getAccessToken();
   } catch (ex) {
-    console.error(`Failed to read auth token from keychain: ${ex}`);
+    console.error(`Failed to read auth token from keychain: ${ex.message}`);
     if (os.platform() === 'darwin') {
       console.error(
         'Try locking and then unlocking your \'login\' keychain using the Keychain Access app.',
