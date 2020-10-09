@@ -455,8 +455,8 @@ export class RemoteHost extends EventEmitter {
       !FBOS3_EVAL_QUIRK.test(this.info.device);
   }
 
-  eval(cmd: string) {
-    return this.sendEvalCmd({ cmd });
+  eval(cmd: string, uuid?: FDBTypes.UUID) {
+    return this.sendEvalCmd(uuid ? { cmd, uuid } : { cmd });
   }
 
   supportsPartialAppInstall() {
@@ -504,9 +504,11 @@ export class RemoteHost extends EventEmitter {
     t.any,
   );
 
-  captureHeapSnapshot(format: string) {
+  captureHeapSnapshot(format: string, uuid?: FDBTypes.UUID) {
     return this.heapSnapshotReceiver.receiveFromStream(
-      stream => this.beginHeapSnapshotCapture({ format, stream: stream.token }),
+      stream => this.beginHeapSnapshotCapture(
+        uuid ? { format, uuid, stream: stream.token } : { format, stream: stream.token },
+      ),
     );
   }
 }

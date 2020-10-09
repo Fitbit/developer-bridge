@@ -2,6 +2,10 @@ import vorpal from '@moleculer/vorpal';
 
 import HostConnections, { HostConnection } from '../models/HostConnections';
 
+type REPLArgs = vorpal.Args & {
+  uuid?: string;
+};
+
 export default function repl(stores: { hostConnections: HostConnections }) {
   return (cli: vorpal) => {
     const { hostConnections } = stores;
@@ -15,11 +19,14 @@ export default function repl(stores: { hostConnections: HostConnections }) {
       });
     };
 
+    let uuid: string | undefined;
+
     cli
-      .mode('repl device')
+      .mode('repl device [uuid]')
+      .types({ string: ['uuid'] })
       .description('Enter into a REPL with the connected device')
       .delimiter('repl$')
-      .init(async () => {
+      .init((async (args: REPLArgs) => {
         const hostConnection = stores.hostConnections.appHost;
 
         if (!isHostConnected(hostConnection)) {
@@ -29,8 +36,13 @@ export default function repl(stores: { hostConnections: HostConnections }) {
           return exitWithError('Connected device does not support REPL');
         }
 
+        uuid = args.uuid;
+        if (uuid) {
+          cli.activeCommand.log(`Targeting REPL to UUID: ${uuid}`);
+        }
+
         cli.activeCommand.log('Entering REPL mode, type "exit" to quit');
-      })
+      }) as any as () => void)
       .action(async (command: string) => {
         const hostConnection = hostConnections.appHost;
 
@@ -41,7 +53,7 @@ export default function repl(stores: { hostConnections: HostConnections }) {
         }
 
         try {
-          const result = await hostConnection!.host.eval(command);
+          const result = await hostConnection!.host.eval(command, uuid);
           // No log on failure since a log/trace will be emitted
           if (result.success) cli.activeCommand.log(result.value);
         } catch (ex) {

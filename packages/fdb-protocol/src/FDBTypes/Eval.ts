@@ -1,5 +1,6 @@
 import * as t from 'io-ts';
 import { DebugCapability } from './AppDebug';
+import { UUID } from './Structures';
 
 // Runtime types are variables which are used like types, which is
 // reflected in their PascalCase naming scheme.
@@ -8,13 +9,22 @@ import { DebugCapability } from './AppDebug';
 export const EvalToStringCapability = DebugCapability;
 export type EvalToStringCapability = t.TypeOf<typeof EvalToStringCapability>;
 
-export const AppDebugEvalParams = t.interface(
-  {
-    /**
-     * The string which the host should evaluate.
-     */
-    cmd: t.string,
-  },
+export const AppDebugEvalParams = t.intersection(
+  [
+    t.interface({
+      /**
+       * The string which the host should evaluate.
+       */
+      cmd: t.string,
+    }),
+    t.partial({
+      /**
+       * The UUID which uniquely identifies the app to execute a REPL commmand for.
+       * If not set, the currently foregrounded application is used.
+       */
+      uuid: UUID,
+    }),
+  ],
   'AppDebugEvalParams',
 );
 export type AppDebugEvalParams =
