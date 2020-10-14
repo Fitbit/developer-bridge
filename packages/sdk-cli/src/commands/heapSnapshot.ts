@@ -7,6 +7,10 @@ import vorpal from '@moleculer/vorpal';
 import HostConnections from '../models/HostConnections';
 import captureHeapSnapshot from '../models/captureHeapSnapshot';
 
+type HeapSnapshotArgs = vorpal.Args & {
+  uuid?: string;
+};
+
 export default function install(
   stores: {
     hostConnections: HostConnections,
@@ -15,7 +19,7 @@ export default function install(
   return (cli: vorpal) => {
     cli
       .command(
-        'heap-snapshot [path]',
+        'heap-snapshot [path] [uuid]',
         // tslint:disable-next-line:max-line-length
         'Capture a JS heap snapshot from the connected device and write the raw data to a file (experimental)',
       )
@@ -27,8 +31,8 @@ export default function install(
           if (!stores.hostConnections.appHost) return [];
           return stores.hostConnections.appHost.host.getHeapSnapshotSupport().formats;
         })
-      .types({ string: ['f', 'format', 'path'] })
-      .action(async (args: vorpal.Args & { path?: string }) => {
+      .types({ string: ['f', 'format', 'path', 'uuid'] })
+      .action(async (args: HeapSnapshotArgs & { path?: string }) => {
         const { appHost } = stores.hostConnections;
         if (!appHost) {
           cli.activeCommand.log('Not connected to a device');
@@ -71,7 +75,7 @@ export default function install(
         );
 
         try {
-          await captureHeapSnapshot(appHost.host, format, destPath);
+          await captureHeapSnapshot(appHost.host, format, destPath, args.uuid);
           cli.activeCommand.log(`JS heap snapshot saved to ${destPath}`);
           return true;
         } catch (ex) {
