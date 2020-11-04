@@ -64,12 +64,7 @@ export const HeapSnapshot = t.interface(
        * Array of node and edge types included in this snapshot.
        * Index into this array when decoding an item's type field.
        */
-      types: t.array(
-        t.union([
-          NodeTypes,
-          EdgeTypes,
-        ]),
-      ),
+      types: t.array(t.union([NodeTypes, EdgeTypes])),
 
       /**
        * List of node field names, in the order they will appear in the representation.

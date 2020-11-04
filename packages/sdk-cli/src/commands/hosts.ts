@@ -3,9 +3,7 @@ import vorpal from '@moleculer/vorpal';
 import { hosts } from '../api/developerRelay';
 
 export default (cli: vorpal) => {
-  cli
-  .command('hosts', 'lists hosts and their status')
-  .action(async () => {
+  cli.command('hosts', 'lists hosts and their status').action(async () => {
     const { appHost, companionHost } = await hosts();
 
     cli.activeCommand.log('Devices:');

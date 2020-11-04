@@ -12,13 +12,15 @@ beforeEach(() => {
 });
 
 it('registers the io.write method with a strict params type definition', () => {
-  expect(() => handler.onRequest('io.write', { stream: [1] }))
-    .toThrow(/Invalid parameters/);
+  expect(() => handler.onRequest('io.write', { stream: [1] })).toThrow(
+    /Invalid parameters/,
+  );
 });
 
 it('rejects writes to nonexistent streams', () => {
-  expect(() => handler.onRequest('io.write', { stream: 'foo', data: 'bar' }))
-    .toThrow(/Unknown bulk data stream/);
+  expect(() =>
+    handler.onRequest('io.write', { stream: 'foo', data: 'bar' }),
+  ).toThrow(/Unknown bulk data stream/);
 });
 
 describe('when writing to a stream', () => {
@@ -30,9 +32,8 @@ describe('when writing to a stream', () => {
     stream = uut.createWriteStream(onWrite);
   });
 
-  const ioWrite = (data: string | Buffer, encoding?: string) => (
-    handler.onRequest('io.write', { data, encoding, stream: stream.token })
-  );
+  const ioWrite = (data: string | Buffer, encoding?: string) =>
+    handler.onRequest('io.write', { data, encoding, stream: stream.token });
 
   it('stores data written to it', () => {
     ioWrite('SGVsbG8sIHdvcmxkIQ==');
@@ -51,7 +52,9 @@ describe('when writing to a stream', () => {
   });
 
   it('rejects invalid base64 data', () => {
-    expect(() => ioWrite('Not base64.')).toThrow(/Data is not valid for encoding/);
+    expect(() => ioWrite('Not base64.')).toThrow(
+      /Data is not valid for encoding/,
+    );
   });
 
   it('does not corrupt the stream when a malformed write is received', () => {
@@ -76,17 +79,21 @@ describe('when writing to a stream', () => {
   });
 
   it('rejects writes with unknown encodings', () => {
-    expect(() => ioWrite('f17b17', 'hex')).toThrow(/Invalid parameters for method io.write/);
+    expect(() => ioWrite('f17b17', 'hex')).toThrow(
+      /Invalid parameters for method io.write/,
+    );
   });
 
   it('rejects writes that contain raw data with encoding', () => {
-    expect(() => ioWrite(Buffer.from('abcdef'), 'base64'))
-      .toThrow(/Data is not valid for encoding/);
+    expect(() => ioWrite(Buffer.from('abcdef'), 'base64')).toThrow(
+      /Data is not valid for encoding/,
+    );
   });
 
   it('rejects writes that contain string data with no encoding', () => {
-    expect(() => ioWrite('abcdef', 'none'))
-      .toThrow(/Data is not valid for encoding/);
+    expect(() => ioWrite('abcdef', 'none')).toThrow(
+      /Data is not valid for encoding/,
+    );
   });
 });
 
@@ -111,8 +118,9 @@ it('handles multiple concurrent streams independently', () => {
   const streamAData = streamA.finalize();
   handler.onRequest('io.write', { stream: streamB.token, data: 'YmF6' });
 
-  expect(() => handler.onRequest('io.write', { stream: streamA.token, data: 'asdf' }))
-    .toThrow(/Unknown bulk data stream/);
+  expect(() =>
+    handler.onRequest('io.write', { stream: streamA.token, data: 'asdf' }),
+  ).toThrow(/Unknown bulk data stream/);
   expect(streamAData).toEqual(Buffer.from('foo'));
   expect(streamB.finalize()).toEqual(Buffer.from('barbaz'));
 });

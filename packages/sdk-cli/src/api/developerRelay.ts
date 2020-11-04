@@ -11,10 +11,7 @@ export const Host = t.type(
     id: t.string,
     displayName: t.string,
     roles: t.array(t.string),
-    state: t.union([
-      t.literal('available'),
-      t.literal('busy'),
-    ]),
+    state: t.union([t.literal('available'), t.literal('busy')]),
   },
   'Host',
 );
@@ -29,13 +26,14 @@ const HostsResponse = t.type(
 );
 
 async function getConnectionURL(hostID: string) {
-  const response = await apiFetch(
-    `1/user/-/developer-relay/hosts/${hostID}`,
-    { method: 'POST' },
-  ).then(assertAPIResponseOK).then(assertContentType('text/uri-list'));
+  const response = await apiFetch(`1/user/-/developer-relay/hosts/${hostID}`, {
+    method: 'POST',
+  })
+    .then(assertAPIResponseOK)
+    .then(assertContentType('text/uri-list'));
   const uriList = (await response.text())
     .split('\r\n')
-    .filter(line => line[0] !== '#');
+    .filter((line) => line[0] !== '#');
   return uriList[0];
 }
 
@@ -43,7 +41,7 @@ function createWebSocket(uri: string) {
   return new Promise<stream.Duplex>((resolve, reject) => {
     const ws = websocketStream(uri, { objectMode: true });
     ws.on('connect', () => resolve(ws));
-    ws.on('error', e => reject(e));
+    ws.on('error', (e) => reject(e));
   });
 }
 
@@ -53,11 +51,12 @@ export async function connect(hostID: string) {
 }
 
 export async function hosts() {
-  const response = await apiFetch('1/user/-/developer-relay/hosts.json')
-    .then(decodeJSON(HostsResponse));
+  const response = await apiFetch('1/user/-/developer-relay/hosts.json').then(
+    decodeJSON(HostsResponse),
+  );
 
   const hostsWithRole = (role: string) =>
-    response.hosts.filter(host => host.roles.includes(role));
+    response.hosts.filter((host) => host.roles.includes(role));
 
   return {
     appHost: hostsWithRole('APP_HOST'),

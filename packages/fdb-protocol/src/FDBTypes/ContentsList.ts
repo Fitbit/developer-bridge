@@ -29,7 +29,9 @@ export const AppComponentContentsList = t.interface(
   },
   'AppComponentContentsList',
 );
-export type AppComponentContentsList = t.TypeOf<typeof AppComponentContentsList>;
+export type AppComponentContentsList = t.TypeOf<
+  typeof AppComponentContentsList
+>;
 
 export const AppComponentContentsRequest = t.interface(
   {
@@ -51,4 +53,6 @@ export const AppComponentContentsRequest = t.interface(
   },
   'AppComponentContentsRequest',
 );
-export type AppComponentContentsRequest = t.TypeOf<typeof AppComponentContentsRequest>;
+export type AppComponentContentsRequest = t.TypeOf<
+  typeof AppComponentContentsRequest
+>;

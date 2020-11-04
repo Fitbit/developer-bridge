@@ -5,13 +5,15 @@ import fsExtra from 'fs-extra';
 import lodash from 'lodash';
 import vorpal from '@moleculer/vorpal';
 
-export const buildProcess = (): Promise<{code: number | null, signal: string | null}> => {
+export const buildProcess = (): Promise<{
+  code: number | null;
+  signal: string | null;
+}> => {
   return new Promise((resolve, reject) => {
-    const buildProcess = child_process.spawn(
-      'npm',
-      ['run-script', 'build'],
-      { stdio: 'inherit', shell: true },
-    );
+    const buildProcess = child_process.spawn('npm', ['run-script', 'build'], {
+      stdio: 'inherit',
+      shell: true,
+    });
     buildProcess.on('exit', (code, signal) => resolve({ code, signal }));
     buildProcess.on('error', reject);
   });
@@ -23,14 +25,15 @@ export const buildAction = async (cli: vorpal) => {
   const buildScriptKey = 'scripts.build';
 
   if (!lodash.get(packageJSON, buildScriptKey)) {
-    const { addBuildScript } = await cli.activeCommand.prompt<{ addBuildScript: boolean }>(
-      {
-        name: 'addBuildScript',
-        type: 'confirm',
-        message: 'No build script is configured, would you like to use the default?',
-        default: false,
-      },
-    );
+    const { addBuildScript } = await cli.activeCommand.prompt<{
+      addBuildScript: boolean;
+    }>({
+      name: 'addBuildScript',
+      type: 'confirm',
+      message:
+        'No build script is configured, would you like to use the default?',
+      default: false,
+    });
 
     if (!addBuildScript) {
       cli.activeCommand.log('Cannot build, no build script available.');
@@ -38,11 +41,10 @@ export const buildAction = async (cli: vorpal) => {
     }
 
     lodash.set(packageJSON, buildScriptKey, 'fitbit-build');
-    await fsExtra.writeJSON(
-      packageJSONPath,
-      packageJSON,
-      { spaces: 2, EOL: os.EOL },
-    );
+    await fsExtra.writeJSON(packageJSONPath, packageJSON, {
+      spaces: 2,
+      EOL: os.EOL,
+    });
   }
 
   return buildProcess()

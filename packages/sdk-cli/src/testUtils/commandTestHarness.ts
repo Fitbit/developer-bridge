@@ -20,13 +20,10 @@ export default function commandTestHarness(extension: (cli: vorpal) => void) {
     },
   });
 
-  const mockUIRedraw: vorpal.Redraw = Object.assign(
-    jest.fn(),
-    {
-      clear: jest.fn(),
-      done: jest.fn(),
-    },
-  );
+  const mockUIRedraw: vorpal.Redraw = Object.assign(jest.fn(), {
+    clear: jest.fn(),
+    done: jest.fn(),
+  });
 
   cli.ui.redraw = mockUIRedraw;
   cli.ui.log = mockLog;

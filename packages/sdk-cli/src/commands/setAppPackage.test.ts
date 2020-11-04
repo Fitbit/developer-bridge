@@ -28,8 +28,9 @@ beforeEach(() => {
 });
 
 it('logs an error if the package fails to load', async () => {
-  loadAppPackageSpy
-    .mockImplementationOnce(() => { throw new Error('Failed to load package'); });
+  loadAppPackageSpy.mockImplementationOnce(() => {
+    throw new Error('Failed to load package');
+  });
   await doLoad();
   expect(mockLog.mock.calls[0]).toMatchSnapshot();
 });
@@ -49,7 +50,7 @@ describe('when called with no package path', () => {
     beforeEach(() => cli.exec('set-app-package'));
 
     it('logs that it is using the default', () =>
-        expect(mockLog.mock.calls).toMatchSnapshot());
+      expect(mockLog.mock.calls).toMatchSnapshot());
 
     it('loads the default app package', () =>
       expect(loadAppPackageSpy).toBeCalledWith(defaultAppPath));

@@ -86,7 +86,10 @@ declare module '@moleculer/vorpal' {
      * @return {Promise}
      * @api public
      */
-    exec<T>(cmd: string, args: { [k: string]: any, sessionId?: string }): Promise<T>;
+    exec<T>(
+      cmd: string,
+      args: { [k: string]: any; sessionId?: string },
+    ): Promise<T>;
     exec<T>(cmd: string): Promise<T>;
 
     /**
@@ -128,8 +131,12 @@ declare module '@moleculer/vorpal' {
        * @return {Command}
        * @api public
        */
-      action<T>(actionFn: (this: CommandInstance, args: Args) => void | Promise<T>): this;
-      action<T>(actionFn: (this: CommandInstance, command: string) => void | Promise<T>): this;
+      action<T>(
+        actionFn: (this: CommandInstance, args: Args) => void | Promise<T>,
+      ): this;
+      action<T>(
+        actionFn: (this: CommandInstance, command: string) => void | Promise<T>,
+      ): this;
 
       /**
        * Provides an alias to the command
@@ -194,7 +201,11 @@ declare module '@moleculer/vorpal' {
        * @return {Command}
        * @api public
        */
-      option(flags: string, description: string, autocomplete?: Autocomplete): this;
+      option(
+        flags: string,
+        description: string,
+        autocomplete?: Autocomplete,
+      ): this;
 
       /**
        * Defines a function to be called when the
@@ -209,9 +220,9 @@ declare module '@moleculer/vorpal' {
     }
 
     type Autocomplete =
-      string[] |
-      ((input: string) => string[] | Promise<string>) |
-      ((input: string, callback: (completions: string[]) => void) => void);
+      | string[]
+      | ((input: string) => string[] | Promise<string>)
+      | ((input: string, callback: (completions: string[]) => void) => void);
 
     interface Args {
       options: {

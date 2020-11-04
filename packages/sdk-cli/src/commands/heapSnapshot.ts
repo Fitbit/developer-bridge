@@ -11,11 +11,7 @@ type HeapSnapshotArgs = vorpal.Args & {
   uuid?: string;
 };
 
-export default function install(
-  stores: {
-    hostConnections: HostConnections,
-  },
-) {
+export default function install(stores: { hostConnections: HostConnections }) {
   return (cli: vorpal) => {
     cli
       .command(
@@ -24,13 +20,11 @@ export default function install(
         'Capture a JS heap snapshot from the connected device and write the raw data to a file (experimental)',
       )
       .hidden()
-      .option(
-        '-f, --format <fmt>',
-        'heap snapshot format to request',
-        () => {
-          if (!stores.hostConnections.appHost) return [];
-          return stores.hostConnections.appHost.host.getHeapSnapshotSupport().formats;
-        })
+      .option('-f, --format <fmt>', 'heap snapshot format to request', () => {
+        if (!stores.hostConnections.appHost) return [];
+        return stores.hostConnections.appHost.host.getHeapSnapshotSupport()
+          .formats;
+      })
       .types({ string: ['f', 'format', 'path', 'uuid'] })
       .action(async (args: HeapSnapshotArgs & { path?: string }) => {
         const { appHost } = stores.hostConnections;
@@ -42,7 +36,9 @@ export default function install(
         const { supported, formats } = appHost.host.getHeapSnapshotSupport();
 
         if (!supported) {
-          cli.activeCommand.log('Device does not support capturing JS heap snapshots');
+          cli.activeCommand.log(
+            'Device does not support capturing JS heap snapshots',
+          );
           return false;
         }
 
@@ -50,21 +46,28 @@ export default function install(
 
         if (!format) {
           if (formats.length === 0) {
-            cli.activeCommand.log('Device does not support any heap snapshot formats');
+            cli.activeCommand.log(
+              'Device does not support any heap snapshot formats',
+            );
             return false;
           }
           if (formats.length === 1) {
             format = formats[0];
             cli.activeCommand.log(
-              `Requesting a JS heap snapshot in ${JSON.stringify(format)} format`,
+              `Requesting a JS heap snapshot in ${JSON.stringify(
+                format,
+              )} format`,
             );
           } else {
-            format = (await cli.activeCommand.prompt<{ format: string }>({
-              type: 'list',
-              name: 'format',
-              message: 'Which format would you like the JS heap snapshot to be in?',
-              choices: formats,
-            })).format;
+            format = (
+              await cli.activeCommand.prompt<{ format: string }>({
+                type: 'list',
+                name: 'format',
+                message:
+                  'Which format would you like the JS heap snapshot to be in?',
+                choices: formats,
+              })
+            ).format;
           }
         }
 

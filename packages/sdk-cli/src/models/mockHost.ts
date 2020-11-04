@@ -36,7 +36,9 @@ function makeInstallCapabilities(
 async function getBundleInfo(bundleData: Buffer) {
   const bundleZip = await jszip.loadAsync(bundleData);
   const manifestFile = bundleZip.file('manifest.json');
-  if (manifestFile === null) throw new Error('manifest.json is missing from bundle');
+  if (manifestFile === null) {
+    throw new Error('manifest.json is missing from bundle');
+  }
 
   const manifestStr = await manifestFile.async('text');
   const manifest = JSON.parse(manifestStr);
@@ -58,21 +60,21 @@ export async function createMockHost(
       install: makeInstallCapabilities(hostType, hostProperties),
     },
   };
-  const { closePromise, host, close } = await createDebuggerHost(hostDescriptor, handleLog);
-
-  host.setInstallHandler(
-    async (bundleData) => {
-      const bundleInfo = await getBundleInfo(bundleData);
-      handleLog(
-        `Sideload received with appID:${bundleInfo.uuid} buildID:${bundleInfo.buildID}`,
-      );
-      return {
-        app: bundleInfo,
-        components: [hostType],
-      };
-    },
-    hostDescriptor.capabilities.install,
+  const { closePromise, host, close } = await createDebuggerHost(
+    hostDescriptor,
+    handleLog,
   );
+
+  host.setInstallHandler(async (bundleData) => {
+    const bundleInfo = await getBundleInfo(bundleData);
+    handleLog(
+      `Sideload received with appID:${bundleInfo.uuid} buildID:${bundleInfo.buildID}`,
+    );
+    return {
+      app: bundleInfo,
+      components: [hostType],
+    };
+  }, hostDescriptor.capabilities.install);
 
   return { closePromise, close };
 }

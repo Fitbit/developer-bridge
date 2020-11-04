@@ -17,8 +17,8 @@ import { Host, HostInfo, InstallHandlerReturn } from '.';
 jest.useFakeTimers();
 
 function wrapPeer(peer: Peer) {
-  const parser = new ParseJSON;
-  const stringifier = new StringifyJSON;
+  const parser = new ParseJSON();
+  const stringifier = new StringifyJSON();
   parser.pipe(peer).pipe(stringifier);
   return duplexify(parser, stringifier);
 }
@@ -46,7 +46,7 @@ function createMockHost() {
 }
 
 beforeEach(() => {
-  handler = new TypesafeRequestDispatcher;
+  handler = new TypesafeRequestDispatcher();
   mockDebugger = new Peer(handler);
   mockStream = wrapPeer(mockDebugger);
 });
@@ -56,10 +56,17 @@ afterEach(() => jest.clearAllTimers());
 async function init(capabilities: FDBTypes.HostCapabilities = {}) {
   const host = createMockHost();
   await mockDebugger.callMethod('initialize', { capabilities: {} });
-  host.dispatcher.defaultNotificationHandler =
-    (method: string, params?: { [key: string]: any } | any[]) => (
-      // tslint:disable-next-line:max-line-length
-      fail(`RemoteHost failed to handle notification '${method}' with params\n${JSON.stringify(params, undefined, 2)}`)
+  host.dispatcher.defaultNotificationHandler = (
+    method: string,
+    params?: { [key: string]: any } | any[],
+  ) =>
+    // tslint:disable-next-line:max-line-length
+    fail(
+      `RemoteHost failed to handle notification '${method}' with params\n${JSON.stringify(
+        params,
+        undefined,
+        2,
+      )}`,
     );
   return host;
 }
@@ -107,11 +114,13 @@ describe('setInstallHandler', () => {
     const installOptions = {
       appBundle: true,
       companionBundle: true,
-      appCompatibility: [{
-        family: 'higgs',
-        version: '32.1.2',
-        maxAPIVersion: '1.0.0',
-      }],
+      appCompatibility: [
+        {
+          family: 'higgs',
+          version: '32.1.2',
+          maxAPIVersion: '1.0.0',
+        },
+      ],
       companionCompatibility: {
         maxAPIVersion: '1.2.0',
       },
@@ -130,14 +139,11 @@ it('responds to ping requests from the debugger', async () => {
 });
 
 it('handles ping requests', async () => {
-  const pingReceived = new Promise(resolve => (
-    handler.method('ping', t.undefined, resolve)
-  ));
+  const pingReceived = new Promise((resolve) =>
+    handler.method('ping', t.undefined, resolve),
+  );
   const host = await init();
-  return Promise.all([
-    host.ping(),
-    pingReceived,
-  ]);
+  return Promise.all([host.ping(), pingReceived]);
 });
 
 it('fails the ping request when the debugger sends an error response', async () => {
@@ -185,9 +191,12 @@ describe('app install', () => {
   describe('finalize', () => {
     it('throws if no install handler has been set', () => {
       const host = createMockHost();
-      const streamOpenResponse = host.handleAppInstallBegin({ componentBundle: 'app' });
-      return expect(host.handleAppInstallFinalize({ stream: streamOpenResponse.stream }))
-        .rejects.toMatchSnapshot();
+      const streamOpenResponse = host.handleAppInstallBegin({
+        componentBundle: 'app',
+      });
+      return expect(
+        host.handleAppInstallFinalize({ stream: streamOpenResponse.stream }),
+      ).rejects.toMatchSnapshot();
     });
 
     it('calls the install handler with the finalized stream', async () => {
@@ -197,7 +206,8 @@ describe('app install', () => {
 
     it('can start a new install after it has successfully finalized', async () => {
       await host.handleAppInstallFinalize({ stream });
-      const newStream = host.handleAppInstallBegin({ componentBundle: 'app' }).stream;
+      const newStream = host.handleAppInstallBegin({ componentBundle: 'app' })
+        .stream;
       expect(newStream).not.toEqual(stream);
     });
   });
@@ -210,12 +220,15 @@ describe('app install', () => {
 
     it('deletes the current app install stream', () => {
       host.handleAppInstallAbort({ stream });
-      expect(() => { host.validateAppInstallStream(stream); }).toThrowErrorMatchingSnapshot();
+      expect(() => {
+        host.validateAppInstallStream(stream);
+      }).toThrowErrorMatchingSnapshot();
     });
 
     it('can start a new install after it has aborted', async () => {
       await host.handleAppInstallAbort({ stream });
-      const newStream = host.handleAppInstallBegin({ componentBundle: 'app' }).stream;
+      const newStream = host.handleAppInstallBegin({ componentBundle: 'app' })
+        .stream;
       expect(newStream).not.toEqual(stream);
     });
   });
@@ -223,11 +236,15 @@ describe('app install', () => {
   describe('validate app install stream', () => {
     it('throws if there is no current app install stream', () => {
       const host = createMockHost();
-      expect(() => { host.validateAppInstallStream('someToken'); }).toThrowErrorMatchingSnapshot();
+      expect(() => {
+        host.validateAppInstallStream('someToken');
+      }).toThrowErrorMatchingSnapshot();
     });
 
     it('throws if the stream token does not match current app install stream', () => {
-      expect(() => { host.validateAppInstallStream('badToken'); }).toThrowErrorMatchingSnapshot();
+      expect(() => {
+        host.validateAppInstallStream('badToken');
+      }).toThrowErrorMatchingSnapshot();
     });
   });
 });
@@ -239,9 +256,9 @@ const emittedBy: FDBTypes.InstalledAppComponent = {
 };
 
 it('sends a console messages', async () => {
-  const messageReceived = new Promise(resolve => (
-    handler.notification('console.message', FDBTypes.ConsoleMessage, resolve)
-  ));
+  const messageReceived = new Promise((resolve) =>
+    handler.notification('console.message', FDBTypes.ConsoleMessage, resolve),
+  );
   const baseLog: FDBTypes.ConsoleMessage = {
     emittedBy,
     kind: 'info',
@@ -255,9 +272,13 @@ it('sends a console messages', async () => {
 });
 
 it('sends a trace messages', async () => {
-  const traceReceived = new Promise(resolve => (
-    handler.notification('console.traceMessage', FDBTypes.TraceMessage, resolve)
-  ));
+  const traceReceived = new Promise((resolve) =>
+    handler.notification(
+      'console.traceMessage',
+      FDBTypes.TraceMessage,
+      resolve,
+    ),
+  );
   const baseTrace: FDBTypes.TraceMessage = {
     emittedBy,
     stack: [],

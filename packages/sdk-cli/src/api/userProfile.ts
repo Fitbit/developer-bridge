@@ -1,4 +1,3 @@
-
 import * as t from 'io-ts';
 
 import { apiFetch, decodeJSON } from './baseAPI';
@@ -19,7 +18,8 @@ const UserProfileResponse = t.type(
 );
 
 export default async function userProfile() {
-  const response = await apiFetch('1/user/-/profile.json')
-    .then(decodeJSON(UserProfileResponse));
+  const response = await apiFetch('1/user/-/profile.json').then(
+    decodeJSON(UserProfileResponse),
+  );
   return response.user;
 }

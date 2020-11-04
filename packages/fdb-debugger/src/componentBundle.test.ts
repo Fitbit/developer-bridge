@@ -1,7 +1,10 @@
 import crypto = require('crypto');
 
 import JSZip = require('jszip');
-import { getAppUUID, makePartialBundle } from '@fitbit/fdb-debugger/src/componentBundle';
+import {
+  getAppUUID,
+  makePartialBundle,
+} from '@fitbit/fdb-debugger/src/componentBundle';
 
 describe('getAppUUID', () => {
   it('loads the app UUID from the component zip file', () => {
@@ -69,7 +72,9 @@ describe('makePartialBundle', () => {
     if (partial) {
       const partialZip = await JSZip.loadAsync(partial);
       expect(partialZip.file('manifest.json')).not.toBeNull();
-      const partialManifest = JSON.parse(await partialZip.file('.partial.json')!.async('text'));
+      const partialManifest = JSON.parse(
+        await partialZip.file('.partial.json')!.async('text'),
+      );
       expect(partialManifest.delete).not.toContain('manifest.json');
     }
   });
@@ -82,15 +87,16 @@ describe('makePartialBundle', () => {
     };
 
     const existingFileList = {
-      files:
-        Object.entries(files)
-          .map(([path, contents]) => ({ [path]: sha256(contents) }))
-          .reduce((a, b) => Object.assign(a, b)),
+      files: Object.entries(files)
+        .map(([path, contents]) => ({ [path]: sha256(contents) }))
+        .reduce((a, b) => Object.assign(a, b)),
     };
 
     const zip = new JSZip();
     zip.folder('folder');
-    Object.entries(files).forEach(([path, contents]) => zip.file(path, contents));
+    Object.entries(files).forEach(([path, contents]) =>
+      zip.file(path, contents),
+    );
     return expect(makePartialBundle(zip, existingFileList)).resolves.toBeNull();
   });
 
@@ -140,45 +146,54 @@ describe('makePartialBundle', () => {
 
     beforeAll(async () => {
       const existingFileList = {
-        files:
-          Object.entries(filesOnDevice)
-            .map(([path, contents]) => ({ [path]: sha256U(contents) }))
-            .reduce((a, b) => Object.assign(a, b)),
+        files: Object.entries(filesOnDevice)
+          .map(([path, contents]) => ({ [path]: sha256U(contents) }))
+          .reduce((a, b) => Object.assign(a, b)),
       };
 
       const zip = new JSZip();
-      Object.entries(filesInZip).forEach(([path, contents]) => zip.file(path, contents));
+      Object.entries(filesInZip).forEach(([path, contents]) =>
+        zip.file(path, contents),
+      );
       zip.folder('emptyfolder');
 
       const partialBinary = await makePartialBundle(zip, existingFileList);
       expect(partialBinary).not.toBeNull();
       if (partialBinary) {
         partialZip = await JSZip.loadAsync(partialBinary);
-        partialManifest = JSON.parse(await partialZip.file('.partial.json')!.async('text'));
+        partialManifest = JSON.parse(
+          await partialZip.file('.partial.json')!.async('text'),
+        );
       }
     });
 
     it('ignores folders in the zip bundle', () => {
-      expect(partialManifest.delete).not.toContainEqual(expect.stringContaining('emptyfolder'));
+      expect(partialManifest.delete).not.toContainEqual(
+        expect.stringContaining('emptyfolder'),
+      );
     });
 
     it('keeps only files that differ in the partial bundle', () => {
       const files: string[] = [];
-      partialZip.forEach((path, file) => { if (!file.dir) files.push(path); });
-      expect(files.sort()).toEqual([
-        'manifest.json',
-        '.partial.json',
-        'new.js',
-        'updated.js',
-        'resources/index.gui',
-        'resources/new-resource.txt',
-      ].sort());
+      partialZip.forEach((path, file) => {
+        if (!file.dir) files.push(path);
+      });
+      expect(files.sort()).toEqual(
+        [
+          'manifest.json',
+          '.partial.json',
+          'new.js',
+          'updated.js',
+          'resources/index.gui',
+          'resources/new-resource.txt',
+        ].sort(),
+      );
     });
 
     it('lists all the files that should be deleted from the device', () => {
-      expect(partialManifest.delete.sort()).toEqual([
-        'prune.js', 'resources/prune.txt',
-      ].sort());
+      expect(partialManifest.delete.sort()).toEqual(
+        ['prune.js', 'resources/prune.txt'].sort(),
+      );
     });
   });
 });

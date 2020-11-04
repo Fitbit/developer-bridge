@@ -13,7 +13,8 @@ beforeEach(() => {
   ({ cli, mockLog } = commandTestHarness(repl({ hostConnections })));
 });
 
-const run = (uuid?: string) => uuid ? cli.exec(`repl device ${uuid}`) : cli.exec('repl device');
+const run = (uuid?: string) =>
+  uuid ? cli.exec(`repl device ${uuid}`) : cli.exec('repl device');
 const cliMode = () => (cli.session as any)._mode;
 
 const mockHost = ({ hasEvalSupport }: { hasEvalSupport: boolean }) => {
@@ -66,7 +67,10 @@ describe('connected device supports REPL', () => {
 
     it('sends the statement to the device with UUID', async () => {
       await cli.exec('console');
-      expect(hostConnections.appHost!.host.eval).toBeCalledWith('console', uuid);
+      expect(hostConnections.appHost!.host.eval).toBeCalledWith(
+        'console',
+        uuid,
+      );
     });
   });
 
@@ -86,7 +90,10 @@ describe('connected device supports REPL', () => {
 
       it('sends the statement to the device', async () => {
         await cli.exec('console');
-        expect(hostConnections.appHost!.host.eval).toBeCalledWith('console', undefined);
+        expect(hostConnections.appHost!.host.eval).toBeCalledWith(
+          'console',
+          undefined,
+        );
       });
 
       it('logs the result on success', async () => {
@@ -108,9 +115,7 @@ describe('connected device supports REPL', () => {
       });
 
       it('logs if an error occurs during eval', async () => {
-        mockEval().mockRejectedValueOnce(
-          new Error('something went wrong :('),
-        );
+        mockEval().mockRejectedValueOnce(new Error('something went wrong :('));
         await cli.exec('console');
         expect(mockLog.mock.calls[0][0]).toMatchSnapshot();
       });
@@ -121,7 +126,8 @@ describe('connected device supports REPL', () => {
           return cli.exec('console');
         });
 
-        it('logs an error', () => expect(mockLog.mock.calls[0][0]).toMatchSnapshot());
+        it('logs an error', () =>
+          expect(mockLog.mock.calls[0][0]).toMatchSnapshot());
         it('exits the REPL', () => expect(cliMode()).toEqual(false));
       });
     });

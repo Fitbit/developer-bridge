@@ -21,8 +21,8 @@ import { ConsoleMessage, ConsoleTrace, RemoteHost } from '.';
 jest.useFakeTimers();
 
 function wrapPeer(peer: Peer) {
-  const parser = new ParseJSON;
-  const stringifier = new StringifyJSON;
+  const parser = new ParseJSON();
+  const stringifier = new StringifyJSON();
   parser.pipe(peer).pipe(stringifier);
   return duplexify(parser, stringifier);
 }
@@ -37,7 +37,7 @@ let mockHost: Peer;
 let mockStream: stream.Duplex;
 
 beforeEach(() => {
-  handler = new TypesafeRequestDispatcher;
+  handler = new TypesafeRequestDispatcher();
   mockHost = new Peer(handler);
   mockStream = wrapPeer(mockHost);
 });
@@ -45,24 +45,34 @@ beforeEach(() => {
 afterEach(() => jest.clearAllTimers());
 
 async function init(params?: Partial<FDBTypes.InitializeResult>) {
-  handler.method('initialize', FDBTypes.InitializeParams, () => ({ ...hostInfo, ...params }));
+  handler.method('initialize', FDBTypes.InitializeParams, () => ({
+    ...hostInfo,
+    ...params,
+  }));
   const host = await RemoteHost.connect(mockStream, { timeout: 1000 });
-  host.dispatcher.defaultNotificationHandler =
-    (method: string, params?: { [key: string]: any } | any[]) => (
-      // tslint:disable-next-line:max-line-length
-      fail(`RemoteHost failed to handle notification '${method}' with params\n${JSON.stringify(params, undefined, 2)}`)
+  host.dispatcher.defaultNotificationHandler = (
+    method: string,
+    params?: { [key: string]: any } | any[],
+  ) =>
+    // tslint:disable-next-line:max-line-length
+    fail(
+      `RemoteHost failed to handle notification '${method}' with params\n${JSON.stringify(
+        params,
+        undefined,
+        2,
+      )}`,
     );
   return host;
 }
 
 describe('connect()', () => {
   function waitInit(info: FDBTypes.InitializeResult = hostInfo) {
-    return new Promise(resolve => (
+    return new Promise((resolve) =>
       handler.method('initialize', FDBTypes.InitializeParams, (params) => {
         resolve(params);
         return info;
-      })
-    ));
+      }),
+    );
   }
 
   it('sends an initialize message', () => {
@@ -70,9 +80,11 @@ describe('connect()', () => {
       expect(RemoteHost.connect(mockStream)).resolves.toEqual(
         expect.objectContaining({ info: hostInfo }),
       ),
-      expect(waitInit()).resolves.toEqual(expect.objectContaining({
-        userAgent: expect.stringMatching(/^fdb-debugger\/\d+/),
-      })),
+      expect(waitInit()).resolves.toEqual(
+        expect.objectContaining({
+          userAgent: expect.stringMatching(/^fdb-debugger\/\d+/),
+        }),
+      ),
     ]);
   });
 
@@ -90,22 +102,25 @@ describe('connect()', () => {
       RemoteHost.connect(mockStream, {
         userAgentSuffix: 'my-custom-UA/3.14',
       }),
-      expect(waitInit()).resolves.toEqual(expect.objectContaining({
-        userAgent: expect.stringMatching(
-          /^fdb-debugger\/.+ my-custom-UA\/3.14$/,
-        ),
-      })),
+      expect(waitInit()).resolves.toEqual(
+        expect.objectContaining({
+          userAgent: expect.stringMatching(
+            /^fdb-debugger\/.+ my-custom-UA\/3.14$/,
+          ),
+        }),
+      ),
     ]);
   });
 
-  it('rejects a bad initialize response gracefully', () => Promise.all([
-    waitInit({ bad: 'result' } as any),
-    expect(RemoteHost.connect(mockStream)).rejects.toThrow(DecodeError),
-  ]));
+  it('rejects a bad initialize response gracefully', () =>
+    Promise.all([
+      waitInit({ bad: 'result' } as any),
+      expect(RemoteHost.connect(mockStream)).rejects.toThrow(DecodeError),
+    ]));
 
   it('switches to CBOR serialization if peer supports it', async () => {
-    const changeSerializationParams = new Promise(
-      resolve => handler.notification('protocol.serialization.change', t.any, resolve),
+    const changeSerializationParams = new Promise((resolve) =>
+      handler.notification('protocol.serialization.change', t.any, resolve),
     );
 
     waitInit({
@@ -130,14 +145,11 @@ it('responds to ping requests from the host', async () => {
 });
 
 it('handles ping requests', async () => {
-  const pingReceived = new Promise(resolve => (
-    handler.method('ping', t.undefined, resolve)
-  ));
+  const pingReceived = new Promise((resolve) =>
+    handler.method('ping', t.undefined, resolve),
+  );
   const remoteHost = await init();
-  return Promise.all([
-    remoteHost.ping(),
-    pingReceived,
-  ]);
+  return Promise.all([remoteHost.ping(), pingReceived]);
 });
 
 it('fails the ping request when the host sends an error response', async () => {
@@ -173,26 +185,37 @@ it('sideloads an app', async () => {
 
   let writeNumber = 0;
   handler
-    .method('app.install.stream.begin', FDBTypes.AppInstallStreamBeginParams, (params) => {
-      expect(params).toEqual({ componentBundle: 'app' });
-      events.push('begin');
-      return { stream: 'abcdefg' };
-    })
-    .method('app.install.stream.finalize', FDBTypes.StreamCloseParams, (params) => {
-      events.push('finalize');
-      expect(params).toEqual({ stream: 'abcdefg' });
-      return expectedInstallResult;
-    })
+    .method(
+      'app.install.stream.begin',
+      FDBTypes.AppInstallStreamBeginParams,
+      (params) => {
+        expect(params).toEqual({ componentBundle: 'app' });
+        events.push('begin');
+        return { stream: 'abcdefg' };
+      },
+    )
+    .method(
+      'app.install.stream.finalize',
+      FDBTypes.StreamCloseParams,
+      (params) => {
+        events.push('finalize');
+        expect(params).toEqual({ stream: 'abcdefg' });
+        return expectedInstallResult;
+      },
+    )
     .method('app.install.stream.abort', FDBTypes.StreamCloseParams, () => {
       events.push('abort');
     })
     .method('io.write', FDBTypes.IOWriteParams, (params) => {
       writeNumber += 1;
       expect(params.stream).toBe('abcdefg');
-      destBuffers.push(Buffer.isBuffer(params.data) ?
-        params.data : Buffer.from(params.data, 'base64'));
+      destBuffers.push(
+        Buffer.isBuffer(params.data)
+          ? params.data
+          : Buffer.from(params.data, 'base64'),
+      );
       // Simulate slow but steady write progress.
-      return new Promise(resolve => setTimeout(resolve, writeNumber * 900));
+      return new Promise((resolve) => setTimeout(resolve, writeNumber * 900));
     });
 
   let lastBytesWritten = 0;
@@ -208,7 +231,7 @@ it('sideloads an app', async () => {
   // Pump the promise queue in between timers so that timer-triggered
   // promises get a chance to run before the next set of timers expire.
   for (let i = 0; i < 250; i += 1) {
-    await new Promise(resolve => setImmediate(resolve));
+    await new Promise((resolve) => setImmediate(resolve));
     await jest.runTimersToTime(100);
   }
   await expect(install).resolves.toEqual(expectedInstallResult);
@@ -218,17 +241,15 @@ it('sideloads an app', async () => {
 });
 
 it('forwards the hostID hint to the host when sideloading', async () => {
-  const streamBeginParams = new Promise(
-    resolve => handler.method('app.install.stream.begin', t.any, (params) => {
+  const streamBeginParams = new Promise((resolve) =>
+    handler.method('app.install.stream.begin', t.any, (params) => {
       resolve(params);
       throw new RPCError('nah');
     }),
   );
 
   const remoteHost = await init();
-  remoteHost
-    .installApp('companion', Buffer.alloc(0))
-    .catch(() => {});
+  remoteHost.installApp('companion', Buffer.alloc(0)).catch(() => {});
 
   expect(streamBeginParams).resolves.toEqual({
     componentBundle: 'companion',
@@ -241,7 +262,9 @@ describe('cancels the sideload if the install begin method call', () => {
   beforeEach(async () => {
     handler
       .method('io.write', t.any, () => fail('io.write called'))
-      .method('app.install.stream.finalize', t.any, () => fail('finalize called'))
+      .method('app.install.stream.finalize', t.any, () =>
+        fail('finalize called'),
+      )
       .method('app.install.stream.abort', t.any, () => fail('abort called'));
     remoteHost = await init();
   });
@@ -251,12 +274,17 @@ describe('cancels the sideload if the install begin method call', () => {
       throw new RPCError('nope');
     });
 
-    return expect(remoteHost.installApp('app', sourceBuffer))
-      .rejects.toEqual(new Error('nope'));
+    return expect(remoteHost.installApp('app', sourceBuffer)).rejects.toEqual(
+      new Error('nope'),
+    );
   });
 
   it('never returns', () => {
-    handler.method('app.install.stream.begin', t.any, () => new Promise(() => {}));
+    handler.method(
+      'app.install.stream.begin',
+      t.any,
+      () => new Promise(() => {}),
+    );
     const install = remoteHost.installApp('app', sourceBuffer);
     jest.runOnlyPendingTimers();
     return expect(install).rejects.toThrow(MethodCallTimeout);
@@ -268,11 +296,11 @@ describe('aborts the sideload if', () => {
   let aborted: Promise<{}>;
   let remoteHost: RemoteHost;
   beforeEach(async () => {
-    aborted = new Promise((resolve, reject) => (
+    aborted = new Promise((resolve, reject) =>
       handler
         .method('app.install.stream.abort', FDBTypes.StreamCloseParams, resolve)
-        .method('app.install.stream.finalize', t.any, reject)
-    ));
+        .method('app.install.stream.finalize', t.any, reject),
+    );
     handler.method('app.install.stream.begin', t.any, () => ({ stream: 1 }));
 
     remoteHost = await init();
@@ -285,8 +313,9 @@ describe('aborts the sideload if', () => {
       });
 
       return Promise.all([
-        expect(remoteHost.installApp('app', sourceBuffer))
-          .rejects.toEqual(new Error('write failed for some reason')),
+        expect(remoteHost.installApp('app', sourceBuffer)).rejects.toEqual(
+          new Error('write failed for some reason'),
+        ),
         aborted,
       ]);
     });
@@ -298,8 +327,9 @@ describe('aborts the sideload if', () => {
       });
 
       return Promise.all([
-        expect(remoteHost.installApp('app', sourceBuffer))
-          .rejects.toEqual(new Error('io.write timed out')),
+        expect(remoteHost.installApp('app', sourceBuffer)).rejects.toEqual(
+          new Error('io.write timed out'),
+        ),
         aborted,
       ]);
     });
@@ -314,8 +344,9 @@ describe('aborts the sideload if', () => {
       });
 
       return Promise.all([
-        expect(remoteHost.installApp('app', sourceBuffer))
-          .rejects.toEqual(new Error('write fail')),
+        expect(remoteHost.installApp('app', sourceBuffer)).rejects.toEqual(
+          new Error('write fail'),
+        ),
         aborted,
       ]);
     });
@@ -331,8 +362,9 @@ describe('aborts the sideload if', () => {
       });
 
       return Promise.all([
-        expect(remoteHost.installApp('app', sourceBuffer))
-          .rejects.toEqual(new Error('io.write timed out')),
+        expect(remoteHost.installApp('app', sourceBuffer)).rejects.toEqual(
+          new Error('io.write timed out'),
+        ),
         aborted,
       ]);
     });
@@ -354,8 +386,9 @@ describe('fails the sideload if the install finalize method call', () => {
     handler.method('app.install.stream.finalize', t.any, () => {
       throw new RPCError('Could not finalize');
     });
-    return expect(remoteHost.installApp('app', sourceBuffer))
-      .rejects.toEqual(new Error('Could not finalize'));
+    return expect(remoteHost.installApp('app', sourceBuffer)).rejects.toEqual(
+      new Error('Could not finalize'),
+    );
   });
 
   it('never returns', () => {
@@ -363,8 +396,9 @@ describe('fails the sideload if the install finalize method call', () => {
       process.nextTick(() => jest.runOnlyPendingTimers());
       return new Promise(() => {});
     });
-    return expect(remoteHost.installApp('app', sourceBuffer))
-      .rejects.toThrow(MethodCallTimeout);
+    return expect(remoteHost.installApp('app', sourceBuffer)).rejects.toThrow(
+      MethodCallTimeout,
+    );
   });
 });
 
@@ -382,14 +416,21 @@ it('successfully sideloads if the finalize response is slow', async () => {
     .method('app.install.stream.begin', t.any, () => ({ stream: 1 }))
     .method('io.write', t.any, () => {})
     .method('app.install.stream.abort', t.any, () => fail('abort called'))
-    .method('app.install.stream.finalize', t.any, () => new Promise(
-      resolve => setImmediate(() => {
-        jest.runTimersToTime(25000);
-        resolve(expectedInstallResult);
-      }),
-    ));
+    .method(
+      'app.install.stream.finalize',
+      t.any,
+      () =>
+        new Promise((resolve) =>
+          setImmediate(() => {
+            jest.runTimersToTime(25000);
+            resolve(expectedInstallResult);
+          }),
+        ),
+    );
   const remoteHost = await init();
-  return expect(remoteHost.installApp('app', sourceBuffer)).resolves.toEqual(expectedInstallResult);
+  return expect(remoteHost.installApp('app', sourceBuffer)).resolves.toEqual(
+    expectedInstallResult,
+  );
 });
 
 it.each<[FDBTypes.InstallType, FDBTypes.InstallType | undefined]>([
@@ -412,9 +453,15 @@ it.each<[FDBTypes.InstallType, FDBTypes.InstallType | undefined]>([
       .method('app.install.stream.begin', t.any, () => ({ stream: 1 }))
       .method('io.write', t.any, () => {})
       .method('app.install.stream.abort', t.any, () => fail('abort called'))
-      .method('app.install.stream.finalize', t.any, () => expectedInstallResult);
+      .method(
+        'app.install.stream.finalize',
+        t.any,
+        () => expectedInstallResult,
+      );
     const remoteHost = await init();
-    return expect(remoteHost.installApp('app', sourceBuffer)).resolves.toMatchObject({
+    return expect(
+      remoteHost.installApp('app', sourceBuffer),
+    ).resolves.toMatchObject({
       installType: expected,
     });
   },
@@ -435,8 +482,9 @@ it('gracefully handles the install abort method call never returning', async () 
     .method('app.install.stream.abort', t.any, abortMethod);
 
   const remoteHost = await init();
-  await expect(remoteHost.installApp('app', Buffer.alloc(128)))
-    .rejects.toEqual(new Error('Write not happening today'));
+  await expect(remoteHost.installApp('app', Buffer.alloc(128))).rejects.toEqual(
+    new Error('Write not happening today'),
+  );
   expect(abortMethod).toHaveBeenCalled();
 });
 
@@ -451,9 +499,9 @@ describe('emits console messages', () => {
   beforeEach(async () => {
     const remoteHost = await init();
     remoteHost.epoch = new Date(2000, 1, 1);
-    logEvent = new Promise<ConsoleMessage>(resolve => (
-      remoteHost.once('consoleMessage', resolve)
-    ));
+    logEvent = new Promise<ConsoleMessage>((resolve) =>
+      remoteHost.once('consoleMessage', resolve),
+    );
   });
 
   const baseLog = {
@@ -472,9 +520,11 @@ describe('emits console messages', () => {
       ...baseLog,
       timestamp: 301.2,
     });
-    return expect(logEvent).resolves.toEqual(expect.objectContaining({
-      timestamp: new Date(2000, 1, 1, 0, 5, 1, 200),
-    }));
+    return expect(logEvent).resolves.toEqual(
+      expect.objectContaining({
+        timestamp: new Date(2000, 1, 1, 0, 5, 1, 200),
+      }),
+    );
   });
 });
 
@@ -483,9 +533,9 @@ describe('emits trace messages', () => {
   beforeEach(async () => {
     const remoteHost = await init();
     remoteHost.epoch = new Date(2000, 1, 1);
-    traceEvent = new Promise<ConsoleTrace>(resolve => (
-      remoteHost.once('consoleTrace', resolve)
-    ));
+    traceEvent = new Promise<ConsoleTrace>((resolve) =>
+      remoteHost.once('consoleTrace', resolve),
+    );
   });
 
   const baseTrace = {
@@ -505,9 +555,11 @@ describe('emits trace messages', () => {
       ...baseTrace,
       timestamp: 2 * 3600 + 15 * 60 + 32 + 0.5,
     });
-    return expect(traceEvent).resolves.toEqual(expect.objectContaining({
-      timestamp: new Date(2000, 1, 1, 2, 15, 32, 500),
-    }));
+    return expect(traceEvent).resolves.toEqual(
+      expect.objectContaining({
+        timestamp: new Date(2000, 1, 1, 2, 15, 32, 500),
+      }),
+    );
   });
 });
 
@@ -531,12 +583,16 @@ describe('when the host advertises the streamed screenshot capability', () => {
   let remoteHost: RemoteHost;
 
   beforeEach(async () => {
-    remoteHost = await init({ capabilities: { appHost: {
-      screenshot: {
-        imageFormats,
-        stream: true,
+    remoteHost = await init({
+      capabilities: {
+        appHost: {
+          screenshot: {
+            imageFormats,
+            stream: true,
+          },
+        },
       },
-    }}});
+    });
   });
 
   it('returns true for canTakeScreenshot()', () => {
@@ -559,20 +615,25 @@ describe('when a screenshot stream capture request returns an error response', (
       ({ stream }: FDBTypes.AppScreenshotStreamCaptureParams) => {
         streamToken = stream;
         throw new RPCError('Camera shy');
-      });
+      },
+    );
     remoteHost = await init();
   });
 
-  it('rejects the screenshot promise', () => (
-    expect(remoteHost.takeScreenshot('aaa')).rejects.toEqual(new RPCError('Camera shy'))
-  ));
+  it('rejects the screenshot promise', () =>
+    expect(remoteHost.takeScreenshot('aaa')).rejects.toEqual(
+      new RPCError('Camera shy'),
+    ));
 
   it('closes the stream', async () => {
     try {
       await remoteHost.takeScreenshot('foo');
     } catch (e) {}
-    return expect(mockHost.callMethod('io.write', { stream: streamToken, data: '' }))
-      .rejects.toEqual(expect.objectContaining({ message: 'Unknown bulk data stream' }));
+    return expect(
+      mockHost.callMethod('io.write', { stream: streamToken, data: '' }),
+    ).rejects.toEqual(
+      expect.objectContaining({ message: 'Unknown bulk data stream' }),
+    );
   });
 });
 
@@ -587,17 +648,19 @@ describe('when taking a screenshot', () => {
     let screenshot: Promise<Buffer>;
 
     const capture = new Promise<{
-      stream: FDBTypes.StreamToken,
-      screenshot: Promise<Buffer>,
-    }>(
-      resolve => handler.method(
+      stream: FDBTypes.StreamToken;
+      screenshot: Promise<Buffer>;
+    }>((resolve) =>
+      handler.method(
         'app.screenshot.stream.capture',
         FDBTypes.AppScreenshotStreamCaptureParams,
         (params: FDBTypes.AppScreenshotStreamCaptureParams) => {
-          setImmediate(() => resolve({
-            screenshot,
-            stream: params.stream,
-          }));
+          setImmediate(() =>
+            resolve({
+              screenshot,
+              stream: params.stream,
+            }),
+          );
           return { length };
         },
       ),
@@ -640,8 +703,8 @@ describe('when taking a screenshot', () => {
     beforeEach(async () => {
       ({ stream, screenshot } = await beginCapture());
       await Promise.all(
-        ['foo', 'bar', 'baz'].map(
-          str => mockHost.callMethod('io.write', {
+        ['foo', 'bar', 'baz'].map((str) =>
+          mockHost.callMethod('io.write', {
             stream,
             data: Buffer.from(str).toString('base64'),
           }),
@@ -650,18 +713,18 @@ describe('when taking a screenshot', () => {
       await mockHost.callMethod('app.screenshot.stream.finalize', { stream });
     });
 
-    it('resolves the promise', () => (
-      expect(screenshot).resolves.toEqual(Buffer.from('foobarbaz'))
-    ));
+    it('resolves the promise', () =>
+      expect(screenshot).resolves.toEqual(Buffer.from('foobarbaz')));
 
     it('cleans up the bulk transfer stream', async () => {
       await screenshot;
-      return expect(mockHost.callMethod('io.write', { stream, data: '' }))
-        .rejects.toEqual(
-          expect.objectContaining({
-            message: 'Unknown bulk data stream',
-          }),
-        );
+      return expect(
+        mockHost.callMethod('io.write', { stream, data: '' }),
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: 'Unknown bulk data stream',
+        }),
+      );
     });
   });
 
@@ -675,40 +738,50 @@ describe('when taking a screenshot', () => {
       await mockHost.callMethod('app.screenshot.stream.abort', { stream });
     });
 
-    it('rejects the promise', () => (
-      expect(screenshot).rejects.toEqual('Aborted by host')
-    ));
+    it('rejects the promise', () =>
+      expect(screenshot).rejects.toEqual('Aborted by host'));
 
     it('cleans up the bulk transfer stream', async () => {
-      try { await screenshot; } catch (e) {}
-      return expect(mockHost.callMethod('io.write', { stream, data: '' }))
-        .rejects.toEqual(
-          expect.objectContaining({
-            message: 'Unknown bulk data stream',
-          }),
-        );
+      try {
+        await screenshot;
+      } catch (e) {}
+      return expect(
+        mockHost.callMethod('io.write', { stream, data: '' }),
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: 'Unknown bulk data stream',
+        }),
+      );
     });
   });
 });
 
 it('handles attempts to finalize a nonexistent screenshot stream', async () => {
   await init();
-  return expect(mockHost.callMethod('app.screenshot.stream.finalize', { stream: 'foo' }))
-    .rejects.toEqual(expect.objectContaining({
+  return expect(
+    mockHost.callMethod('app.screenshot.stream.finalize', { stream: 'foo' }),
+  ).rejects.toEqual(
+    expect.objectContaining({
       message: "Stream token 'foo' does not match any open screenshot stream",
-    }));
+    }),
+  );
 });
 
 it('handles attempts to abort a nonexistent screenshot stream', async () => {
   await init();
-  return expect(mockHost.callMethod('app.screenshot.stream.abort', { stream: 'foo' }))
-    .rejects.toEqual(expect.objectContaining({
+  return expect(
+    mockHost.callMethod('app.screenshot.stream.abort', { stream: 'foo' }),
+  ).rejects.toEqual(
+    expect.objectContaining({
       message: "Stream token 'foo' does not match any open screenshot stream",
-    }));
+    }),
+  );
 });
 
 const hostWithEvalSupport = (supported = true) => ({
-  capabilities: { appHost: { debug: { app: { evalToString: { supported } } } } },
+  capabilities: {
+    appHost: { debug: { app: { evalToString: { supported } } } },
+  },
 });
 
 it.each([
@@ -739,15 +812,18 @@ describe('when fetching an app contents list', () => {
   beforeEach(async () => {
     remoteHost = await init();
     const fetcher = new Promise<FDBTypes.AppComponentContentsRequest>(
-      resolve => handler.method(
-        'app.contents.stream.list',
-        FDBTypes.AppComponentContentsRequest,
-        resolve,
-      ),
+      (resolve) =>
+        handler.method(
+          'app.contents.stream.list',
+          FDBTypes.AppComponentContentsRequest,
+          resolve,
+        ),
     );
 
     contents = remoteHost.getInstalledAppContents(mockUUID, 'app');
-    return fetcher.then((req) => { fetchRequest = req; });
+    return fetcher.then((req) => {
+      fetchRequest = req;
+    });
   });
 
   const write = async (data: string) => {
@@ -755,7 +831,9 @@ describe('when fetching an app contents list', () => {
       stream: fetchRequest.stream,
       data: Buffer.from(data).toString('base64'),
     });
-    await mockHost.callMethod('app.contents.stream.finalize', { stream: fetchRequest.stream });
+    await mockHost.callMethod('app.contents.stream.finalize', {
+      stream: fetchRequest.stream,
+    });
   };
 
   it('passes through the request params', () => {
@@ -803,23 +881,24 @@ describe('when fetching the contents list of an app that is not installed', () =
 
   beforeEach(async () => {
     remoteHost = await init();
-    handler.method(
-      'app.contents.stream.list',
-      t.any,
-      () => Promise.reject(new RPCError('That app is not installed', -1)),
+    handler.method('app.contents.stream.list', t.any, () =>
+      Promise.reject(new RPCError('That app is not installed', -1)),
     );
   });
 
   it('rejects with a useful error', () =>
-    expect(remoteHost.getInstalledAppContents('some-uuid', 'app'))
-      .rejects.toThrowError('That app is not installed'));
+    expect(
+      remoteHost.getInstalledAppContents('some-uuid', 'app'),
+    ).rejects.toThrowError('That app is not installed'));
 });
 
 describe('if the host does not support partial app installs', () => {
   let remoteHost: RemoteHost;
 
   beforeEach(async () => {
-    remoteHost = await init({ capabilities: { appHost: { install: { partialBundle: false } } } });
+    remoteHost = await init({
+      capabilities: { appHost: { install: { partialBundle: false } } },
+    });
   });
 
   test('supportsPartialAppInstall() returns false', () =>
@@ -827,26 +906,24 @@ describe('if the host does not support partial app installs', () => {
 
   it('makes no attempt to get installed app contents before installing', (done) => {
     handler
-      .method(
-        'app.contents.stream.list',
-        t.any,
-        () => done.fail('Unexpected call to app.contents.stream.list method'),
+      .method('app.contents.stream.list', t.any, () =>
+        done.fail('Unexpected call to app.contents.stream.list method'),
       )
-      .method(
-        'app.install.stream.begin',
-        t.any,
-        () => done(),
-      );
+      .method('app.install.stream.begin', t.any, () => done());
 
     const appZip = new JSZip();
     appZip.file('manifest.json', JSON.stringify({ uuid: 'some-uuid' }));
-    appZip.generateAsync({ type: 'nodebuffer' })
-      .then(bundle => remoteHost.installApp('app', bundle).catch(() => {}));
+    appZip
+      .generateAsync({ type: 'nodebuffer' })
+      .then((bundle) => remoteHost.installApp('app', bundle).catch(() => {}));
   });
 });
 
 const mockAppInstallResult: FDBTypes.AppInstallResult = {
-  app: { uuid: 'f058fd00-80f4-4097-be75-e726c9d7e624', buildID: '0123456789abcdef' },
+  app: {
+    uuid: 'f058fd00-80f4-4097-be75-e726c9d7e624',
+    buildID: '0123456789abcdef',
+  },
   components: [],
 };
 
@@ -854,7 +931,9 @@ describe('if the host supports partial app installs', () => {
   let remoteHost: RemoteHost;
 
   beforeEach(async () => {
-    remoteHost = await init({ capabilities: { appHost: { install: { partialBundle: true } } } });
+    remoteHost = await init({
+      capabilities: { appHost: { install: { partialBundle: true } } },
+    });
   });
 
   test('supportsPartialAppInstall() returns true', () =>
@@ -865,7 +944,7 @@ describe('if the host supports partial app installs', () => {
 
     return new Promise<Buffer>((resolve, reject) => {
       remoteHost.getInstalledAppContents = () => {
-        if (streamList) return new Promise(resolve => resolve(streamList()));
+        if (streamList) return new Promise((resolve) => resolve(streamList()));
         reject('unexpected call to getInstalledAppContents');
         return Promise.reject(new Error('unexpected call'));
       };
@@ -873,7 +952,10 @@ describe('if the host supports partial app installs', () => {
       handler
         .method('app.install.stream.begin', t.any, () => ({ stream: 1 }))
         .method('io.write', FDBTypes.IOWriteParams, ({ data }) =>
-          installBuffers.push(Buffer.isBuffer(data) ? data : Buffer.from(data, 'base64')))
+          installBuffers.push(
+            Buffer.isBuffer(data) ? data : Buffer.from(data, 'base64'),
+          ),
+        )
         .method('app.install.stream.finalize', t.any, () => {
           resolve(Buffer.concat(installBuffers));
           return mockAppInstallResult;
@@ -916,18 +998,22 @@ describe('if the host supports partial app installs', () => {
         zip.file('manifest.json', JSON.stringify({ uuid: 'foo' }));
         return zip.generateAsync({ type: 'nodebuffer' });
       },
-      () => { throw new RPCError('no such app', -1); },
+      () => {
+        throw new RPCError('no such app', -1);
+      },
     ],
-  ])(
-      'falls back to full install if %s',
-      async (_, bundle, streamList) => {
-        const sourceBundle = await bundle();
-        expect((await doInstall(sourceBundle, streamList)).compare(sourceBundle)).toBe(0);
-      });
+  ])('falls back to full install if %s', async (_, bundle, streamList) => {
+    const sourceBundle = await bundle();
+    expect(
+      (await doInstall(sourceBundle, streamList)).compare(sourceBundle),
+    ).toBe(0);
+  });
 
   it('elides the install if the install would be a no-op', async () => {
     const fileContents = JSON.stringify({ uuid: 'the-uuid' });
-    const fileInfo = { sha256: crypto.createHash('sha256').update(fileContents).digest('hex') };
+    const fileInfo = {
+      sha256: crypto.createHash('sha256').update(fileContents).digest('hex'),
+    };
     const contentsList = {
       files: {
         'manifest.json': fileInfo,
@@ -949,7 +1035,9 @@ describe('if the host supports partial app installs', () => {
 
   it('installs the partial bundle', async () => {
     const fileContents = JSON.stringify({ uuid: 'the-uuid' });
-    const fileInfo = { sha256: crypto.createHash('sha256').update(fileContents).digest('hex') };
+    const fileInfo = {
+      sha256: crypto.createHash('sha256').update(fileContents).digest('hex'),
+    };
     const contentsList = {
       files: {
         'manifest.json': fileInfo,
@@ -968,11 +1056,11 @@ describe('if the host supports partial app installs', () => {
 
     const installedZip = await JSZip.loadAsync(installedBundle);
     const installedFiles: string[] = [];
-    installedZip.forEach((path, file) => { if (!file.dir) installedFiles.push(path); });
-    expect(installedFiles.sort()).toEqual([
-      '.partial.json',
-      'manifest.json',
-      'new.js',
-    ].sort());
+    installedZip.forEach((path, file) => {
+      if (!file.dir) installedFiles.push(path);
+    });
+    expect(installedFiles.sort()).toEqual(
+      ['.partial.json', 'manifest.json', 'new.js'].sort(),
+    );
   });
 });

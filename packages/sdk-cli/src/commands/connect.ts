@@ -26,40 +26,47 @@ export const connectAction = async (
     return false;
   }
 
-  const hostTypes: {[key: string]: keyof typeof hosts} = {
+  const hostTypes: { [key: string]: keyof typeof hosts } = {
     device: 'appHost',
     phone: 'companionHost',
   };
 
   const hostType = hostTypes[deviceType];
-  const matchedHosts = hosts[hostType].filter(host => host.state === 'available');
+  const matchedHosts = hosts[hostType].filter(
+    (host) => host.state === 'available',
+  );
 
   if (matchedHosts.length === 0) {
     cli.activeCommand.log(`No ${deviceType}s are connected and available`);
     return false;
   }
 
-  let host: { id: string, displayName: string };
+  let host: { id: string; displayName: string };
   if (matchedHosts.length === 1) {
     host = matchedHosts[0];
     cli.activeCommand.log(
       `Auto-connecting only known ${deviceType}: ${host.displayName}`,
     );
   } else {
-    host = (await cli.activeCommand.prompt<{ hostID: { id: string, displayName: string } }>({
-      type: 'list',
-      name: 'hostID',
-      message: `Which ${deviceType} do you wish to sideload to?`,
-      choices: matchedHosts.map(host => ({
-        name: host.displayName,
-        value: { id: host.id, displayName: host.displayName },
-      })),
-    })).hostID;
+    host = (
+      await cli.activeCommand.prompt<{
+        hostID: { id: string; displayName: string };
+      }>({
+        type: 'list',
+        name: 'hostID',
+        message: `Which ${deviceType} do you wish to sideload to?`,
+        choices: matchedHosts.map((host) => ({
+          name: host.displayName,
+          value: { id: host.id, displayName: host.displayName },
+        })),
+      })
+    ).hostID;
   }
 
   const connection = await hostConnections.connect(hostType, host.id);
   connection.ws.once('finish', () =>
-    cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`));
+    cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`),
+  );
 
   return true;
 };
@@ -69,8 +76,10 @@ export default function (stores: { hostConnections: HostConnections }) {
     const deviceTypes: DeviceType[] = ['device', 'phone'];
     for (const deviceType of deviceTypes) {
       cli
-      .command(`connect ${deviceType}`, `Connect a ${deviceType}`)
-      .action(async () => connectAction(cli, deviceType, stores.hostConnections));
+        .command(`connect ${deviceType}`, `Connect a ${deviceType}`)
+        .action(async () =>
+          connectAction(cli, deviceType, stores.hostConnections),
+        );
     }
   };
 }

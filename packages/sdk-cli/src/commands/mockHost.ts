@@ -14,7 +14,7 @@ export default function mockHost(cli: vorpal) {
     const { closePromise, close } = await createMockHost(
       hostType,
       { maxAPIVersion },
-      msg => cli.activeCommand.log(msg),
+      (msg) => cli.activeCommand.log(msg),
     );
 
     onCancel.then(close);
@@ -24,12 +24,12 @@ export default function mockHost(cli: vorpal) {
   const hostTypes: HostType[] = ['app', 'companion'];
   for (const hostType of hostTypes) {
     cli
-    .command(
-      `mock-host ${hostType}`,
-      `Create a fake developer bridge ${hostType} host (for testing)`,
-    )
-    .option('--maxAPIVersion <version>', 'Set the advertised max API version')
-    .action(args => mockHostAction(hostType, args))
-    .cancel(() => handleCancel());
+      .command(
+        `mock-host ${hostType}`,
+        `Create a fake developer bridge ${hostType} host (for testing)`,
+      )
+      .option('--maxAPIVersion <version>', 'Set the advertised max API version')
+      .action((args) => mockHostAction(hostType, args))
+      .cancel(() => handleCancel());
   }
 }

@@ -10,11 +10,7 @@ import {
   TypesafeRequestDispatcher,
 } from '@fitbit/jsonrpc-ts';
 
-import {
-  BulkData,
-  BulkDataStream,
-  FDBTypes,
-} from '@fitbit/fdb-protocol';
+import { BulkData, BulkDataStream, FDBTypes } from '@fitbit/fdb-protocol';
 
 export interface HostInfo {
   device: string;
@@ -29,7 +25,9 @@ export interface InstallOptions {
   companionCompatibility?: FDBTypes.CompanionHostDescriptor;
 }
 
-export type InstallHandlerReturn = FDBTypes.AppInstallResult | Promise<FDBTypes.AppInstallResult>;
+export type InstallHandlerReturn =
+  | FDBTypes.AppInstallResult
+  | Promise<FDBTypes.AppInstallResult>;
 
 export type InstallHandler = (appData: Buffer) => InstallHandlerReturn;
 
@@ -73,11 +71,7 @@ export class Host extends EventEmitter {
 
     this.dispatcher
       .method('ping', t.undefined, () => {})
-      .method(
-        'initialize',
-        FDBTypes.InitializeParams,
-        this.handleInitialize,
-      )
+      .method('initialize', FDBTypes.InitializeParams, this.handleInitialize)
       .method(
         'app.install.stream.begin',
         FDBTypes.AppInstallStreamBeginParams,
@@ -106,22 +100,22 @@ export class Host extends EventEmitter {
   static create(
     debuggerStream: stream.Duplex,
     hostInfo: HostInfo,
-    {
-      timeout = 10000,
-    } = {},
+    { timeout = 10000 } = {},
   ) {
-
     const host = new this(hostInfo, timeout);
     debuggerStream
-      .pipe(new ParseJSON)
+      .pipe(new ParseJSON())
       .pipe(host.rpc)
-      .pipe(new StringifyJSON)
+      .pipe(new StringifyJSON())
       .pipe(debuggerStream);
 
     return host;
   }
 
-  setInstallHandler = (installHandler: InstallHandler, installOptions?: InstallOptions) => {
+  setInstallHandler = (
+    installHandler: InstallHandler,
+    installOptions?: InstallOptions,
+  ) => {
     this.installHandler = installHandler;
     this.capabilities.io = {
       write: true,
@@ -132,7 +126,7 @@ export class Host extends EventEmitter {
         sideloadStream: true,
       },
     };
-  }
+  };
 
   handleInitialize = (params: FDBTypes.InitializeParams) => {
     this.info = params;
@@ -145,9 +139,9 @@ export class Host extends EventEmitter {
       hostKind: this.hostInfo.hostKind,
       capabilities: this.capabilities,
     };
-  }
+  };
 
-  handleAppInstallBegin = (params: FDBTypes.AppInstallStreamBeginParams)  => {
+  handleAppInstallBegin = (params: FDBTypes.AppInstallStreamBeginParams) => {
     const stream = this.bulkDataStreams.createWriteStream();
     if (this.appInstallStream != null) {
       throw new InvalidParams('App install stream is currently being used');
@@ -158,7 +152,7 @@ export class Host extends EventEmitter {
     return {
       stream: stream.token,
     };
-  }
+  };
 
   validateAppInstallStream(stream: FDBTypes.StreamToken) {
     if (!this.appInstallStream) {
@@ -183,23 +177,24 @@ export class Host extends EventEmitter {
     this.appInstallStream = undefined;
 
     return this.installHandler(finalizedBuffer);
-  }
+  };
 
   handleAppInstallAbort = ({ stream }: FDBTypes.StreamCloseParams) => {
     this.validateAppInstallStream(stream);
     this.appInstallStream!.finalize();
     this.appInstallStream = undefined;
-  }
+  };
 
   /**
    * Ping the remote debugger.
    *
    * @param timeout milliseconds to wait for a response
    */
-  ping = (timeout = 10000): Promise<void> => this.rpc.callMethod('ping', undefined, { timeout });
+  ping = (timeout = 10000): Promise<void> =>
+    this.rpc.callMethod('ping', undefined, { timeout });
 
   consoleMessage = (args: FDBTypes.ConsoleMessage) =>
-    this.rpc.sendNotification('console.message', args)
+    this.rpc.sendNotification('console.message', args);
   consoleTrace = (args: FDBTypes.TraceMessage) =>
-    this.rpc.sendNotification('console.traceMessage', args)
+    this.rpc.sendNotification('console.traceMessage', args);
 }

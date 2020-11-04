@@ -1,3 +1,3 @@
 declare function humanizeList(list: string[]): string;
-declare namespace humanizeList { }
+declare namespace humanizeList {}
 export = humanizeList;

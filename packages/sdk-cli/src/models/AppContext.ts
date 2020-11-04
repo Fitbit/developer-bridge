@@ -15,7 +15,9 @@ class AppContext implements AppPackageStore {
   public appPackagePath?: string;
 
   async loadAppPackage(packagePath: string) {
-    const appPackage = await readFile(packagePath).then(JSZip.loadAsync).then(fromJSZip);
+    const appPackage = await readFile(packagePath)
+      .then(JSZip.loadAsync)
+      .then(fromJSZip);
 
     this.appPackage = appPackage;
     this.appPackagePath = packagePath;

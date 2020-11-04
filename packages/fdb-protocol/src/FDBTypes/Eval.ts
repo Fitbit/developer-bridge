@@ -27,8 +27,7 @@ export const AppDebugEvalParams = t.intersection(
   ],
   'AppDebugEvalParams',
 );
-export type AppDebugEvalParams =
-   t.TypeOf<typeof AppDebugEvalParams>;
+export type AppDebugEvalParams = t.TypeOf<typeof AppDebugEvalParams>;
 
 export const AppDebugEvalValueResult = t.interface(
   {
@@ -37,8 +36,7 @@ export const AppDebugEvalValueResult = t.interface(
   },
   'AppDebugEvalValueResult',
 );
-export type AppDebugEvalValueResult =
-    t.TypeOf<typeof AppDebugEvalValueResult>;
+export type AppDebugEvalValueResult = t.TypeOf<typeof AppDebugEvalValueResult>;
 
 export const AppDebugEvalFailureResult = t.interface(
   {
@@ -46,15 +44,12 @@ export const AppDebugEvalFailureResult = t.interface(
   },
   'AppDebugEvalFailureResult',
 );
-export type AppDebugEvalFailureResult =
-    t.TypeOf<typeof AppDebugEvalFailureResult>;
+export type AppDebugEvalFailureResult = t.TypeOf<
+  typeof AppDebugEvalFailureResult
+>;
 
 export const AppDebugEvalResult = t.union(
-  [
-    AppDebugEvalValueResult,
-    AppDebugEvalFailureResult,
-  ],
+  [AppDebugEvalValueResult, AppDebugEvalFailureResult],
   'AppDebugEvalResult',
 );
-export type AppDebugEvalResult =
-    t.TypeOf<typeof AppDebugEvalResult>;
+export type AppDebugEvalResult = t.TypeOf<typeof AppDebugEvalResult>;
