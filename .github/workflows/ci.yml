@@ -1,0 +1,51 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        node_version: [10, 12, 14]
+    name: ${{ matrix.os }} / Node v${{ matrix.node_version }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v2
+      - name: Install libsecret
+        if: runner.os == 'Linux'
+        run: sudo apt-get install libsecret-1-dev
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node_version }}
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Restore yarn cache
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-node${{ matrix.node_version }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node${{ matrix.node_version }}-yarn-
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+      - name: Check code style (tslint)
+        run: yarn lint
+      - name: Check code style (Prettier)
+        run: yarn checkstyle
+      - name: Build
+        run: yarn build
+      - name: Run tests
+        run: yarn test --coverage
+      - name: Upload coverage
+        uses: coverallsapp/github-action@v1.1.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

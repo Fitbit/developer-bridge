@@ -84,7 +84,7 @@ describe('when destPath is an existing file', () => {
 
   it('rejects', () => {
     mockFS.restore();
-    return expect(result).rejects.toThrowError(/EEXIST,.*'collide.png'/);
+    return expect(result).rejects.toThrowError(/EEXIST,.*collide.png'/);
   });
 
   it('does not overwrite the file on disk', () =>
