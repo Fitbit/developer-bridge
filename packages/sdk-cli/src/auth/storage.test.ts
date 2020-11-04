@@ -32,10 +32,12 @@ beforeEach(() => {
 
 describe('set()', () => {
   it('stores tokens', async () => {
-    await storage.set(new TokenResponse({
-      access_token: 'access',
-      refresh_token: 'refresh',
-    }));
+    await storage.set(
+      new TokenResponse({
+        access_token: 'access',
+        refresh_token: 'refresh',
+      }),
+    );
     expect(setPasswordSpy.mock.calls[0]).toMatchSnapshot();
   });
 });
@@ -57,12 +59,9 @@ describe('get()', () => {
       expect(storage.get()).resolves.toBeInstanceOf(TokenResponse));
   });
 
-  describe.each([
-    null,
-    '{reallynotvalid',
-    JSON.stringify({ foo: null }),
-  ])(
-    'given auth storage content of %s', (storageData) => {
+  describe.each([null, '{reallynotvalid', JSON.stringify({ foo: null })])(
+    'given auth storage content of %s',
+    (storageData) => {
       let getPromise: Promise<TokenResponse | null>;
 
       beforeEach(() => {

@@ -11,9 +11,11 @@ import { RemoteHost } from '@fitbit/fdb-debugger';
 // Jest matchers that use snapshots. You'll know when this has been
 // missed in a test if you see Jest logging that it has written
 // snapshots on every test run.
-beforeEach(() => mockFS({
-  'collide.png': 'Old file contents',
-}));
+beforeEach(() =>
+  mockFS({
+    'collide.png': 'Old file contents',
+  }),
+);
 
 afterEach(() => mockFS.restore());
 
@@ -22,7 +24,9 @@ describe('when everything should work', () => {
   let result: Promise<void>;
 
   beforeEach(() => {
-    takeScreenshot = jest.fn().mockResolvedValue(Buffer.from('P6 1 1 255\n 0 0 0'));
+    takeScreenshot = jest
+      .fn()
+      .mockResolvedValue(Buffer.from('P6 1 1 255\n 0 0 0'));
 
     const host = {
       canTakeScreenshot: () => true,
@@ -31,14 +35,19 @@ describe('when everything should work', () => {
     } as RemoteHost;
 
     result = captureScreenshot(host, 'foo.png');
-    return result.then(() => {}, () => {});
+    return result.then(
+      () => {},
+      () => {},
+    );
   });
 
   it('resolves', () => expect(result).resolves.toBeUndefined());
 
-  it('takes the screenshot', () => expect(takeScreenshot).toBeCalledWith('P6.sRGB', undefined));
+  it('takes the screenshot', () =>
+    expect(takeScreenshot).toBeCalledWith('P6.sRGB', undefined));
 
-  it('writes the file to disk', () => expect(fs.existsSync('foo.png')).toBe(true));
+  it('writes the file to disk', () =>
+    expect(fs.existsSync('foo.png')).toBe(true));
 });
 
 describe.each<[string, string[]]>([
@@ -54,7 +63,10 @@ describe.each<[string, string[]]>([
     } as RemoteHost;
 
     result = captureScreenshot(host, 'foo.png');
-    return result.then(() => {}, () => {});
+    return result.then(
+      () => {},
+      () => {},
+    );
   });
 
   it('rejects', () => {
@@ -62,7 +74,8 @@ describe.each<[string, string[]]>([
     return expect(result).rejects.toThrowErrorMatchingSnapshot();
   });
 
-  it('does not create any files', () => expect(fs.existsSync('foo.png')).toBe(false));
+  it('does not create any files', () =>
+    expect(fs.existsSync('foo.png')).toBe(false));
 });
 
 describe('when destPath is an existing file', () => {
@@ -79,7 +92,10 @@ describe('when destPath is an existing file', () => {
     } as RemoteHost;
 
     result = captureScreenshot(host, 'collide.png');
-    return result.then(() => {}, () => {});
+    return result.then(
+      () => {},
+      () => {},
+    );
   });
 
   it('rejects', () => {
@@ -99,7 +115,9 @@ describe('when the PPM fails to parse', () => {
   let mockTakeScreenshot: jest.Mock;
 
   beforeEach(() => {
-    mockTakeScreenshot = jest.fn().mockResolvedValue(Buffer.from('Not an image'));
+    mockTakeScreenshot = jest
+      .fn()
+      .mockResolvedValue(Buffer.from('Not an image'));
 
     const host = {
       canTakeScreenshot: () => true,
@@ -108,7 +126,10 @@ describe('when the PPM fails to parse', () => {
     } as RemoteHost;
 
     result = captureScreenshot(host, 'foo.png');
-    return result.then(() => {}, () => {});
+    return result.then(
+      () => {},
+      () => {},
+    );
   });
 
   it('rejects', () => {
@@ -116,5 +137,6 @@ describe('when the PPM fails to parse', () => {
     expect(result).rejects.toThrowErrorMatchingSnapshot();
   });
 
-  it('does not leave a file on disk', () => expect(fs.existsSync('foo.png')).toBe(false));
+  it('does not leave a file on disk', () =>
+    expect(fs.existsSync('foo.png')).toBe(false));
 });

@@ -13,10 +13,7 @@ import StreamTap from './StreamTap';
 export type HostType = 'appHost' | 'companionHost';
 
 export class HostConnection {
-  private constructor(
-    public ws: stream.Duplex,
-    public host: RemoteHost,
-  ) {}
+  private constructor(public ws: stream.Duplex, public host: RemoteHost) {}
 
   static getDumpStreamTap() {
     const shouldDumpLogFile = process.env.FITBIT_DEVBRIDGE_DUMP === '1';
@@ -28,10 +25,15 @@ export class HostConnection {
     const epoch = now();
 
     function writeChunk(prefix: string) {
-      return (chunk: any) => fs.writeSync(
-        dumpLogFileHandle,
-        `[${prefix}][${now() - epoch}] ${JSON.stringify(chunk, undefined, 2)}\n`,
-      );
+      return (chunk: any) =>
+        fs.writeSync(
+          dumpLogFileHandle,
+          `[${prefix}][${now() - epoch}] ${JSON.stringify(
+            chunk,
+            undefined,
+            2,
+          )}\n`,
+        );
     }
 
     const transforms = {
@@ -39,9 +41,8 @@ export class HostConnection {
       postDeserializeTransform: new StreamTap(writeChunk('recv')),
     };
 
-    stream.finished(
-      transforms.postDeserializeTransform,
-      () => fs.closeSync(dumpLogFileHandle),
+    stream.finished(transforms.postDeserializeTransform, () =>
+      fs.closeSync(dumpLogFileHandle),
     );
 
     return transforms;
@@ -49,13 +50,7 @@ export class HostConnection {
 
   static async connect(hostID: string) {
     const ws = await developerRelay.connect(hostID);
-    return new this(
-      ws,
-      await RemoteHost.connect(
-        ws,
-        this.getDumpStreamTap(),
-      ),
-    );
+    return new this(ws, await RemoteHost.connect(ws, this.getDumpStreamTap()));
   }
 }
 

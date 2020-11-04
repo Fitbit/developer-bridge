@@ -25,7 +25,10 @@ function set(tokenResponse: TokenResponse) {
 }
 
 async function get(): Promise<TokenResponse | null> {
-  const authDataStr = await keytar.getPassword(keyStoreService, keyStoreAccount);
+  const authDataStr = await keytar.getPassword(
+    keyStoreService,
+    keyStoreAccount,
+  );
   if (authDataStr === null) return null;
   let authData;
   try {

@@ -41,11 +41,7 @@ function mockHostsSuccessResponse(hosts = [mockAppHost, mockCompanionHost]) {
 function mockConnectionURLResponse(hostID: string, response: string) {
   endpointMock
     .post(`/1/user/-/developer-relay/hosts/${hostID}`)
-    .reply(
-      200,
-      response,
-      { 'Content-Type': 'text/uri-list' },
-    );
+    .reply(200, response, { 'Content-Type': 'text/uri-list' });
 }
 
 beforeEach(() => {
@@ -56,16 +52,20 @@ beforeEach(() => {
 describe('hosts()', () => {
   it('returns list of connected app hosts', async () => {
     mockHostsSuccessResponse();
-    return expect(developerRelay.hosts()).resolves.toEqual(expect.objectContaining({
-      appHost: [mockAppHost],
-    }));
+    return expect(developerRelay.hosts()).resolves.toEqual(
+      expect.objectContaining({
+        appHost: [mockAppHost],
+      }),
+    );
   });
 
   it('returns list of connected companion hosts', async () => {
     mockHostsSuccessResponse();
-    return expect(developerRelay.hosts()).resolves.toEqual(expect.objectContaining({
-      companionHost: [mockCompanionHost],
-    }));
+    return expect(developerRelay.hosts()).resolves.toEqual(
+      expect.objectContaining({
+        companionHost: [mockCompanionHost],
+      }),
+    );
   });
 
   it('returns empty lists if no hosts are connected', async () => {
@@ -90,8 +90,12 @@ describe('hosts()', () => {
   });
 
   it('parses a 403 response for error reasons', async () => {
-    mockHostsResponse(403, { errors: [{ message: 'reason 1' }, { message: 'reason 2' }] });
-    return expect(developerRelay.hosts()).rejects.toEqual(new Error('reason 1\nreason 2'));
+    mockHostsResponse(403, {
+      errors: [{ message: 'reason 1' }, { message: 'reason 2' }],
+    });
+    return expect(developerRelay.hosts()).rejects.toEqual(
+      new Error('reason 1\nreason 2'),
+    );
   });
 
   it('handles a 403 response with a malformed payload', async () => {
@@ -118,7 +122,10 @@ describe('connect()', () => {
 
   beforeEach(async () => {
     mockWebSocket = new stream.Duplex();
-    socketPromise = mockWithPromiseWaiter(websocketStream as any, mockWebSocket);
+    socketPromise = mockWithPromiseWaiter(
+      websocketStream as any,
+      mockWebSocket,
+    );
     mockConnectionURLResponse(mockHostID, `${mockConnectionURL}\r\n`);
     connectPromise = developerRelay.connect(mockHostID);
     await socketPromise;
@@ -129,20 +136,21 @@ describe('connect()', () => {
     afterEach(() => connectPromise);
 
     it('opens a websocket connection to the retrieved URL', () => {
-      expect(websocketStream).toBeCalledWith(
-        mockConnectionURL,
-        { objectMode: true },
-      );
+      expect(websocketStream).toBeCalledWith(mockConnectionURL, {
+        objectMode: true,
+      });
     });
 
     it('returns a stream', () =>
       expect(connectPromise).resolves.toBe(mockWebSocket));
-
   });
 
   describe('when the WebSocket connection is unsucessful', () => {
-    beforeEach(() => mockWebSocket.emit('error', new Error('Connection failed!')));
+    beforeEach(() =>
+      mockWebSocket.emit('error', new Error('Connection failed!')),
+    );
 
-    it('throws', () => expect(connectPromise).rejects.toThrowErrorMatchingSnapshot());
+    it('throws', () =>
+      expect(connectPromise).rejects.toThrowErrorMatchingSnapshot());
   });
 });

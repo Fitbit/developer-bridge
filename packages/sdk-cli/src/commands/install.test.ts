@@ -78,7 +78,7 @@ let sideloadCompanionSpy: jest.SpyInstance;
 let appContext: AppContext;
 let hostConnections: HostConnections;
 
-function doInstall({ skipLaunch } : { skipLaunch?: boolean } = {}) {
+function doInstall({ skipLaunch }: { skipLaunch?: boolean } = {}) {
   let cmd = 'install';
   if (skipLaunch) cmd += ' --skipLaunch';
   return cli.exec(cmd);
@@ -94,9 +94,13 @@ function expectConnect(deviceType: string) {
 
 beforeEach(() => {
   appContext = new AppContext();
-  (setAppPackageAction as any).mockImplementation(() => Promise.resolve(appContext.appPackage));
+  (setAppPackageAction as any).mockImplementation(() =>
+    Promise.resolve(appContext.appPackage),
+  );
   hostConnections = new HostConnections();
-  ({ cli, mockLog } = commandTestHarness(install({ appContext, hostConnections })));
+  ({ cli, mockLog } = commandTestHarness(
+    install({ appContext, hostConnections }),
+  ));
   sideloadAppSpy = jest.spyOn(sideload, 'app');
   sideloadCompanionSpy = jest.spyOn(sideload, 'companion');
 
@@ -228,34 +232,40 @@ describe('when an app with a companion is loaded', () => {
       hostConnections.companionHost = mockPhone as any;
     });
 
-    describe.each([
-      'full', 'partial', null,
-    ])('when the app component install is %s', (installType) => {
-      beforeEach(() => {
-        sideloadAppSpy.mockResolvedValueOnce(installType === null ? null : { installType });
-      });
-
-      describe.each([
-        'full', 'partial', null,
-      ])('and the companion component install is %s', (installType) => {
+    describe.each(['full', 'partial', null])(
+      'when the app component install is %s',
+      (installType) => {
         beforeEach(() => {
-          sideloadCompanionSpy.mockResolvedValueOnce(installType === null ? null : { installType });
-          return doInstall();
+          sideloadAppSpy.mockResolvedValueOnce(
+            installType === null ? null : { installType },
+          );
         });
 
-        it('sideloads the app', () => {
-          expect(sideloadAppSpy).toBeCalled();
-        });
+        describe.each(['full', 'partial', null])(
+          'and the companion component install is %s',
+          (installType) => {
+            beforeEach(() => {
+              sideloadCompanionSpy.mockResolvedValueOnce(
+                installType === null ? null : { installType },
+              );
+              return doInstall();
+            });
 
-        it('sideloads the companion', () => {
-          expect(sideloadCompanionSpy).toBeCalled();
-        });
+            it('sideloads the app', () => {
+              expect(sideloadAppSpy).toBeCalled();
+            });
 
-        it('launches the app', () => {
-          expect(mockDevice.host.launchAppComponent).toBeCalled();
-        });
-      });
-    });
+            it('sideloads the companion', () => {
+              expect(sideloadCompanionSpy).toBeCalled();
+            });
+
+            it('launches the app', () => {
+              expect(mockDevice.host.launchAppComponent).toBeCalled();
+            });
+          },
+        );
+      },
+    );
   });
 });
 

@@ -20,8 +20,9 @@ export const ConsoleDebuggerCapabilities = t.partial(
   },
   'ConsoleDebuggerCapabilities',
 );
-export type ConsoleDebuggerCapabilities =
-  t.TypeOf<typeof ConsoleDebuggerCapabilities>;
+export type ConsoleDebuggerCapabilities = t.TypeOf<
+  typeof ConsoleDebuggerCapabilities
+>;
 
 export const ConsoleMessageKind = t.union([
   t.literal('log'),

@@ -19,10 +19,7 @@ interface StreamContext {
 export default class BulkDataReceiver {
   private contexts = new Map<FDBTypes.StreamToken, StreamContext>();
 
-  constructor(
-    public bulkData: BulkData,
-    public name: string,
-  ) {}
+  constructor(public bulkData: BulkData, public name: string) {}
 
   /**
    * Create an incoming bulk data stream wrapped in a Promise.
@@ -43,7 +40,9 @@ export default class BulkDataReceiver {
    *     .then(buffer => useData(buffer))
    *     .catch(err => getDataFailed(err));
    */
-  receiveFromStream(executor: (stream: BulkDataStream) => any): Promise<Buffer> {
+  receiveFromStream(
+    executor: (stream: BulkDataStream) => any,
+  ): Promise<Buffer> {
     // We create the stream and pass it into the executor so that we can
     // clean up the stream if the executor throws or rejects.
     const stream = this.bulkData.createWriteStream();
@@ -77,13 +76,13 @@ export default class BulkDataReceiver {
   finalizeStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
     const context = await this.popStreamContext(stream);
     context.resolve(context.stream.finalize());
-  }
+  };
 
   abortStream = async ({ stream }: FDBTypes.StreamCloseParams) => {
     const context = await this.popStreamContext(stream);
     context.stream.finalize();
     context.reject('Aborted by host');
-  }
+  };
 
   /**
    * Register stream finalize and abort methods on a request dispatcher.
@@ -92,7 +91,10 @@ export default class BulkDataReceiver {
    * case where both the finalize and abort method take
    * `StreamCloseParams` as arguments and return nothing.
    */
-  registerCloserMethods(dispatcher: TypesafeRequestDispatcher, methodPrefix: string): void;
+  registerCloserMethods(
+    dispatcher: TypesafeRequestDispatcher,
+    methodPrefix: string,
+  ): void;
   registerCloserMethods(
     dispatcher: TypesafeRequestDispatcher,
     finalizeMethod: string,
@@ -103,7 +105,9 @@ export default class BulkDataReceiver {
     finalizeMethod: string,
     abortMethod?: string,
   ) {
-    const finalize = abortMethod ? finalizeMethod : `${finalizeMethod}.finalize`;
+    const finalize = abortMethod
+      ? finalizeMethod
+      : `${finalizeMethod}.finalize`;
     const abort = abortMethod || `${finalizeMethod}.abort`;
     dispatcher
       .method(finalize, FDBTypes.StreamCloseParams, this.finalizeStream)

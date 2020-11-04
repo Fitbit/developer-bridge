@@ -10,7 +10,8 @@ export default function repl(stores: { hostConnections: HostConnections }) {
   return (cli: vorpal) => {
     const { hostConnections } = stores;
 
-    const isHostConnected = (host: HostConnection | undefined) => host && !host.host.rpc.ended;
+    const isHostConnected = (host: HostConnection | undefined) =>
+      host && !host.host.rpc.ended;
 
     const exitWithError = (message: string) => {
       cli.activeCommand.log(message);
@@ -26,7 +27,7 @@ export default function repl(stores: { hostConnections: HostConnections }) {
       .types({ string: ['uuid'] })
       .description('Enter into a REPL with the connected device')
       .delimiter('repl$')
-      .init((async (args: REPLArgs) => {
+      .init(((async (args: REPLArgs) => {
         const hostConnection = stores.hostConnections.appHost;
 
         if (!isHostConnected(hostConnection)) {
@@ -42,7 +43,7 @@ export default function repl(stores: { hostConnections: HostConnections }) {
         }
 
         cli.activeCommand.log('Entering REPL mode, type "exit" to quit');
-      }) as any as () => void)
+      }) as any) as () => void)
       .action(async (command: string) => {
         const hostConnection = hostConnections.appHost;
 

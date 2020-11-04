@@ -26,16 +26,25 @@ export enum ErrorCodes {
 }
 
 export const NonNegativeInteger = t.refinement(
-  t.Integer, v => v >= 0, 'NonNegativeInteger');
+  t.Integer,
+  (v) => v >= 0,
+  'NonNegativeInteger',
+);
 
 export const PositiveInteger = t.refinement(
-  t.Integer, v => v > 0, 'PositiveInteger');
+  t.Integer,
+  (v) => v > 0,
+  'PositiveInteger',
+);
 
 export const ObjectURI = t.string;
 export type ObjectURI = t.TypeOf<typeof ObjectURI>;
 
 export const AppFileURI = t.refinement(
-  ObjectURI, s => s.startsWith('app:///'), 'AppFileURI');
+  ObjectURI,
+  (s) => s.startsWith('app:///'),
+  'AppFileURI',
+);
 export type AppFileURI = t.TypeOf<typeof AppFileURI>;
 
 /**
@@ -48,22 +57,23 @@ export type Timestamp = t.TypeOf<typeof Timestamp>;
 /** A Semver 2.0.0 version string. */
 export const Semver = new t.Type<string>(
   'Semver',
-  (value): value is string => t.string.is(value) && semver.valid(value) !== null,
-  (value, context) => either.chain(
-      t.string.validate(value, context),
-      (str) => {
-        // Round-tripping through semver.valid ensures it's canonically formatted.
-        const version = semver.valid(str);
-        return version === null ? t.failure(str, context) : t.success(version);
-      },
-  ),
+  (value): value is string =>
+    t.string.is(value) && semver.valid(value) !== null,
+  (value, context) =>
+    either.chain(t.string.validate(value, context), (str) => {
+      // Round-tripping through semver.valid ensures it's canonically formatted.
+      const version = semver.valid(str);
+      return version === null ? t.failure(str, context) : t.success(version);
+    }),
   t.identity,
 );
 export type Semver = t.TypeOf<typeof Semver>;
 
 /** A Semver 2.0.0 release version string. */
 export const ReleaseSemver = t.refinement(
-  Semver, s => semver.parse(s)!.prerelease.length === 0, 'ReleaseSemver',
+  Semver,
+  (s) => semver.parse(s)!.prerelease.length === 0,
+  'ReleaseSemver',
 );
 export type ReleaseSemver = t.TypeOf<typeof ReleaseSemver>;
 
@@ -111,7 +121,7 @@ export const Position = t.intersection(
 );
 export type Position = t.TypeOf<typeof Position>;
 
-export const UUID = t.refinement(t.string, s => isUUID(s), 'UUID');
+export const UUID = t.refinement(t.string, (s) => isUUID(s), 'UUID');
 export type UUID = t.TypeOf<typeof UUID>;
 
 /**
@@ -121,7 +131,10 @@ export type UUID = t.TypeOf<typeof UUID>;
  * hexadecimal digits.
  */
 export const BuildID = t.refinement(
-  t.string, s => /^[0-9a-fA-F]{16}$/.test(s), 'BuildID');
+  t.string,
+  (s) => /^[0-9a-fA-F]{16}$/.test(s),
+  'BuildID',
+);
 export type BuildID = t.TypeOf<typeof BuildID>;
 
 /** A reference to a Fitbit app. */

@@ -5,7 +5,7 @@ import * as cbor from 'cbor';
 
 export type EncoderCallback = (data: any) => ArrayBufferView | string;
 
-const encoders: {[key in FDBTypes.SerializationType]: EncoderCallback} = {
+const encoders: { [key in FDBTypes.SerializationType]: EncoderCallback } = {
   'cbor-definite': cbor.encode,
   json: JSON.stringify,
 };
@@ -24,7 +24,11 @@ export default class ConfigurableEncode extends Transform {
   }
 
   // tslint:disable-next-line:function-name
-  _transform(chunk: any, encoding: string, callback: (err?: Error, data?: any) => void) {
+  _transform(
+    chunk: any,
+    encoding: string,
+    callback: (err?: Error, data?: any) => void,
+  ) {
     // This looks a bit weird, but if we do the write callback inside the try catch,
     // we end up calling the write callback twice and masking the original error
     // with a "you called write twice" error.

@@ -60,10 +60,7 @@ export const StreamCloseParams = t.interface(
 );
 export type StreamCloseParams = t.TypeOf<typeof StreamCloseParams>;
 
-export const IOEncoding = t.union([
-  t.literal('base64'),
-  t.literal('none'),
-]);
+export const IOEncoding = t.union([t.literal('base64'), t.literal('none')]);
 export type IOEncoding = t.TypeOf<typeof IOEncoding>;
 
 export class NodeBufferType extends t.Type<Buffer> {
@@ -90,10 +87,7 @@ export const IOWriteParams = t.intersection(
       /**
        * Data to write to the stream.
        */
-      data: t.union([
-        t.string,
-        NodeBuffer,
-      ]),
+      data: t.union([t.string, NodeBuffer]),
     }),
     t.partial({
       /**

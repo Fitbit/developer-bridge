@@ -15,7 +15,11 @@ export class BulkDataStream {
   private disposer: () => void;
 
   /** @internal */
-  constructor(token: types.StreamToken, disposer: () => void, onWrite?: WriteCallback) {
+  constructor(
+    token: types.StreamToken,
+    disposer: () => void,
+    onWrite?: WriteCallback,
+  ) {
     this.token = token;
     this.disposer = disposer;
     this.onWrite = onWrite;
@@ -50,7 +54,11 @@ export default class BulkData {
     throw new InvalidParams('Unknown bulk data stream', { stream: token });
   }
 
-  private handleWrite = ({ stream: token, data, encoding = 'base64' }: types.IOWriteParams) => {
+  private handleWrite = ({
+    stream: token,
+    data,
+    encoding = 'base64',
+  }: types.IOWriteParams) => {
     const stream = this.getStream(token);
 
     if (encoding === 'base64') {
@@ -67,14 +75,18 @@ export default class BulkData {
     } else {
       throw new InvalidParams('Invalid encoding', { encoding });
     }
-  }
+  };
 
   createWriteStream(onWrite?: WriteCallback) {
     const token: types.StreamToken = this.nextToken;
     this.nextToken += 1;
 
     invariant(!this.streams.has(token), 'Stream token already exists');
-    const stream = new BulkDataStream(token, () => this.streams.delete(token), onWrite);
+    const stream = new BulkDataStream(
+      token,
+      () => this.streams.delete(token),
+      onWrite,
+    );
     this.streams.set(token, stream);
     return stream;
   }

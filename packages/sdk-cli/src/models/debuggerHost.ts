@@ -14,10 +14,14 @@ export interface HostDescriptor {
 }
 
 function eventPromise<T>(socket: WebSocket, eventName: string) {
-  return new Promise<T>(resolve => socket.once(eventName, resolve));
+  return new Promise<T>((resolve) => socket.once(eventName, resolve));
 }
 
-async function createHostConnection({ id, displayName, capabilities }: HostDescriptor) {
+async function createHostConnection({
+  id,
+  displayName,
+  capabilities,
+}: HostDescriptor) {
   const roles: string[] = [];
   if (capabilities.install) {
     if (capabilities.install.appBundle) roles.push('APP_HOST');
@@ -42,18 +46,18 @@ export async function createDebuggerHost(
   const socket = await createHostConnection(hostDescriptor);
   handleLog('Connected to developer relay, waiting for debugger');
 
-  const initMessageBuffer = await eventPromise<WebSocket.Data>(socket, 'message');
+  const initMessageBuffer = await eventPromise<WebSocket.Data>(
+    socket,
+    'message',
+  );
   const initMessage = JSON.parse(initMessageBuffer.toString());
 
   handleLog('Debugger connected');
   const host = Host.create(
-    websocketStream(
-      socket,
-      {
-        binary: false,
-        objectMode: true,
-      },
-    ),
+    websocketStream(socket, {
+      binary: false,
+      objectMode: true,
+    }),
     {
       maxMessageSize: initMessage.maxMessageSize,
       device: hostDescriptor.displayName,

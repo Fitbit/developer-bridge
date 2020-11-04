@@ -47,7 +47,9 @@ export const APICompatibilityDescriptor = t.intersection(
   ],
   'APICompatibilityDescriptor',
 );
-export type APICompatibilityDescriptor = t.TypeOf<typeof APICompatibilityDescriptor>;
+export type APICompatibilityDescriptor = t.TypeOf<
+  typeof APICompatibilityDescriptor
+>;
 
 export const AppHostDescriptor = t.intersection(
   [
@@ -151,8 +153,9 @@ export const AppInstallStreamBeginParams = t.interface(
   },
   'AppInstallStreamBeginParams',
 );
-export type AppInstallStreamBeginParams =
-  t.TypeOf<typeof AppInstallStreamBeginParams>;
+export type AppInstallStreamBeginParams = t.TypeOf<
+  typeof AppInstallStreamBeginParams
+>;
 
 export const InstallType = t.keyof(
   {

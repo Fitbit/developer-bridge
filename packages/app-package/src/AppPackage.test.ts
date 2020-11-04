@@ -24,21 +24,22 @@ describe('fromJSZip', () => {
   function buildPackage(files: FilesObject = {}) {
     const zip = new jszip();
     for (const [path, content] of Object.entries(files)) {
-      zip.file(path, typeof content === 'object' ? JSON.stringify(content) : content);
+      zip.file(
+        path,
+        typeof content === 'object' ? JSON.stringify(content) : content,
+      );
     }
     return zip;
   }
 
   function itRejects(name: string, files: FilesObject = {}) {
     it(`rejects ${name}`, async () =>
-      expect(fromJSZip(await buildPackage(files)))
-        .rejects.toMatchSnapshot());
+      expect(fromJSZip(await buildPackage(files))).rejects.toMatchSnapshot());
   }
 
   function itAccepts(name: string, files: FilesObject) {
     it(`accepts ${name}`, async () =>
-      expect(fromJSZip(await buildPackage(files)))
-        .resolves.toMatchSnapshot());
+      expect(fromJSZip(await buildPackage(files))).resolves.toMatchSnapshot());
   }
 
   itRejects('a zip file without a manifest');
@@ -68,46 +69,60 @@ describe('fromJSZip', () => {
     'companion.zip': '',
   });
 
-  itRejects('a v5 manifest which references a nonexistent device component file', {
-    'manifest.json': {
-      ...manifestV5,
-      platform: ['HIGGS'],
-      components: { watch: 'doesnotexist.zip' },
-    },
-  });
-
-  itRejects('a v6 manifest which references a nonexistent device component file', {
-    'manifest.json': {
-      ...manifestV6,
-      components: { watch: {
-        higgs: { filename: 'doesnotexist.zip' },
-      } },
-    },
-  });
-
-  itRejects('a v5 manifest which references a nonexistent companion component file', {
-    'manifest.json': {
-      ...manifestV5,
-      components: {
-        watch: 'device.zip',
-        companion: 'companion.zip',
+  itRejects(
+    'a v5 manifest which references a nonexistent device component file',
+    {
+      'manifest.json': {
+        ...manifestV5,
+        platform: ['HIGGS'],
+        components: { watch: 'doesnotexist.zip' },
       },
     },
-    'device.zip': '',
-  });
+  );
 
-  itRejects('a v6 manifest which references a nonexistent companion component file', {
-    'manifest.json': {
-      ...manifestV6,
-      components: {
-        watch: {
-          higgs: { filename: 'higgs.zip' },
+  itRejects(
+    'a v6 manifest which references a nonexistent device component file',
+    {
+      'manifest.json': {
+        ...manifestV6,
+        components: {
+          watch: {
+            higgs: { filename: 'doesnotexist.zip' },
+          },
         },
-        companion: { filename: 'companion.zip' },
       },
     },
-    'higgs.zip': '',
-  });
+  );
+
+  itRejects(
+    'a v5 manifest which references a nonexistent companion component file',
+    {
+      'manifest.json': {
+        ...manifestV5,
+        components: {
+          watch: 'device.zip',
+          companion: 'companion.zip',
+        },
+      },
+      'device.zip': '',
+    },
+  );
+
+  itRejects(
+    'a v6 manifest which references a nonexistent companion component file',
+    {
+      'manifest.json': {
+        ...manifestV6,
+        components: {
+          watch: {
+            higgs: { filename: 'higgs.zip' },
+          },
+          companion: { filename: 'companion.zip' },
+        },
+      },
+      'higgs.zip': '',
+    },
+  );
 
   itRejects('a v5 manifest with no platform descriptor', {
     'manifest.json': {

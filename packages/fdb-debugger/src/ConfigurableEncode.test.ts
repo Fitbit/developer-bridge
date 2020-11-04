@@ -30,19 +30,25 @@ it.each(testCases)('encodes data in %s', async (encoding, encoder) => {
   stream.write(data);
 
   let expectedData: ArrayBufferView | string = encoder(data);
-  if (typeof expectedData === 'string') expectedData = Buffer.from(expectedData);
+  if (typeof expectedData === 'string') {
+    expectedData = Buffer.from(expectedData);
+  }
 
   expect(dataCallback).toBeCalledWith(expectedData);
 });
 
-it.each(testCases)('exposes current encoding via encoder property', (encoding) => {
-  stream.setEncoder(encoding);
-  expect(stream.encoder).toBe(encoding);
-});
+it.each(testCases)(
+  'exposes current encoding via encoder property',
+  (encoding) => {
+    stream.setEncoder(encoding);
+    expect(stream.encoder).toBe(encoding);
+  },
+);
 
 it('emits an error if encoding fails', async () => {
-  jest.spyOn(cbor, 'encode')
-    .mockImplementation(() => { throw new Error('encoding failed :('); });
+  jest.spyOn(cbor, 'encode').mockImplementation(() => {
+    throw new Error('encoding failed :(');
+  });
 
   const errorPromise = new Promise((resolve) => {
     stream.on('error', resolve);

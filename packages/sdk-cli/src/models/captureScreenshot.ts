@@ -10,7 +10,7 @@ export default async function captureScreenshot(
   host: RemoteHost,
   destPath: string,
   options: {
-    onWrite?: (received: number, total?: number) => void,
+    onWrite?: (received: number, total?: number) => void;
   } = {},
 ) {
   if (!host.canTakeScreenshot()) {
@@ -18,7 +18,9 @@ export default async function captureScreenshot(
   }
 
   if (host.screenshotFormats().indexOf(screenshotFormatPPM) < 0) {
-    throw new Error('No image format supported by the device is supported by the debugger');
+    throw new Error(
+      'No image format supported by the device is supported by the debugger',
+    );
   }
 
   // Open the file before starting to take the screenshot so that we
@@ -28,9 +30,7 @@ export default async function captureScreenshot(
     // the file or fails if a file already exists at that path.
     const stream = fs.createWriteStream(destPath, { flags: 'wx' });
 
-    stream
-      .once('open', () => resolve(stream))
-      .once('error', reject);
+    stream.once('open', () => resolve(stream)).once('error', reject);
   });
 
   try {
@@ -41,14 +41,15 @@ export default async function captureScreenshot(
     const png = new PNG({
       width: pixmap.width,
       height: pixmap.height,
-      colorType: 2,  // Color, no alpha
+      colorType: 2, // Color, no alpha
     });
 
     pixmap.toRGBA8888(png.data);
 
     await new Promise((resolve, reject) => {
-      png.pack()
-        .once('error', error => outStream.destroy(error))
+      png
+        .pack()
+        .once('error', (error) => outStream.destroy(error))
         .pipe(outStream)
         .once('error', reject)
         .once('close', resolve);

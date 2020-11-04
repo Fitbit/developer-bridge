@@ -6,6 +6,6 @@
     { "path": "fdb-host" },
     { "path": "fdb-debugger" },
     { "path": "memory-profiler" },
-    { "path": "sdk-cli" },
-  ],
+    { "path": "sdk-cli" }
+  ]
 }

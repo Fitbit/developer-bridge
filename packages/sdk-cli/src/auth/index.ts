@@ -4,11 +4,12 @@ import {
   AuthorizationRequestHandler,
 } from '@openid/appauth/built/authorization_request_handler';
 import { AuthorizationResponse } from '@openid/appauth/built/authorization_response';
-import {
-  AuthorizationServiceConfiguration,
-} from '@openid/appauth/built/authorization_service_configuration';
+import { AuthorizationServiceConfiguration } from '@openid/appauth/built/authorization_service_configuration';
 import * as appAuthFlags from '@openid/appauth/built/flags';
-import { NodeBasedHandler, NodeCrypto } from '@openid/appauth/built/node_support';
+import {
+  NodeBasedHandler,
+  NodeCrypto,
+} from '@openid/appauth/built/node_support';
 import { RevokeTokenRequest } from '@openid/appauth/built/revoke_token_request';
 import {
   GRANT_TYPE_AUTHORIZATION_CODE,
@@ -66,15 +67,13 @@ function authorizationCallbackPromise(handler: AuthorizationRequestHandler) {
   handler.setAuthorizationNotifier(notifier);
 
   return new Promise<{
-    request: AuthorizationRequest,
-    response: AuthorizationResponse,
+    request: AuthorizationRequest;
+    response: AuthorizationResponse;
   }>((resolve, reject) => {
     notifier.setAuthorizationListener((request, response, error) => {
       if (error) {
         if (error.errorDescription) {
-          return reject(
-            authError(`${error.error}: ${error.errorDescription}`),
-          );
+          return reject(authError(`${error.error}: ${error.errorDescription}`));
         }
         return reject(authError(error.error));
       }
@@ -104,7 +103,9 @@ async function authorize() {
     ),
   );
 
-  const { request, response } = await authorizationCallbackPromise(authorizationHandler);
+  const { request, response } = await authorizationCallbackPromise(
+    authorizationHandler,
+  );
   if (request.state !== response.state) throw authError('Mismatched state');
   return {
     redirectUri,
@@ -137,7 +138,10 @@ export async function loginAuthCodeFlow() {
   await storage.set(response);
 }
 
-export async function loginResourceOwnerFlow(username: string, password: string) {
+export async function loginResourceOwnerFlow(
+  username: string,
+  password: string,
+) {
   const { clientId } = environment().config;
 
   const response = await tokenHandler.performTokenRequest(
@@ -158,10 +162,7 @@ export async function loginResourceOwnerFlow(username: string, password: string)
 export async function logout() {
   const authData = await storage.get();
   if (!authData) return;
-  await Promise.all([
-    revoke(authData.accessToken),
-    storage.clear(),
-  ]);
+  await Promise.all([revoke(authData.accessToken), storage.clear()]);
 }
 
 export async function getAccessToken() {

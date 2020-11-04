@@ -10,10 +10,10 @@ let appContext: AppContext;
 let readFileSpy: jest.SpyInstance;
 let appPackageLoadedSpy: jest.Mock;
 
-const mockPreviousApp: AppPackage = {
+const mockPreviousApp: AppPackage = ({
   uuid: 'Old',
   buildId: 'app',
-} as Partial<AppPackage> as AppPackage;
+} as Partial<AppPackage>) as AppPackage;
 
 function loadAppPackage() {
   return appContext.loadAppPackage('app.fba');
@@ -42,10 +42,11 @@ describe.each<[string, AppPackage | undefined, string | undefined]>([
 
     it('rejects', () => expect(loadAppPackage()).rejects.toBe(error));
 
-    it('keeps the old application state', () => expect(appContext).toMatchObject({
-      appPackage: previousAppPackage,
-      appPackagePath: previousAppPath,
-    }));
+    it('keeps the old application state', () =>
+      expect(appContext).toMatchObject({
+        appPackage: previousAppPackage,
+        appPackagePath: previousAppPath,
+      }));
   });
 
   describe('if the app package cannot be parsed', () => {
@@ -58,10 +59,11 @@ describe.each<[string, AppPackage | undefined, string | undefined]>([
 
     it('rejects', () => expect(loadAppPackage()).rejects.toBe(error));
 
-    it('keeps the old application state', () => expect(appContext).toMatchObject({
-      appPackage: previousAppPackage,
-      appPackagePath: previousAppPath,
-    }));
+    it('keeps the old application state', () =>
+      expect(appContext).toMatchObject({
+        appPackage: previousAppPackage,
+        appPackagePath: previousAppPath,
+      }));
   });
 
   describe('when the app package path is valid', () => {

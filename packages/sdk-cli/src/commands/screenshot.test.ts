@@ -25,9 +25,13 @@ beforeEach(() => {
   // screenshot file name is constructed from the current time in the
   // user's local time zone, not UTC.
   mockdate.set(new Date(2018, 2, 4, 15, 6, 7, 8));
-  screenshotMock.mockImplementation(() => fail('captureScreenshot unexpectedly called'));
+  screenshotMock.mockImplementation(() =>
+    fail('captureScreenshot unexpectedly called'),
+  );
   hostConnections = {} as HostConnections;
-  ({ cli, mockLog, mockUIRedraw } = commandTestHarness(screenshot({ hostConnections })));
+  ({ cli, mockLog, mockUIRedraw } = commandTestHarness(
+    screenshot({ hostConnections }),
+  ));
 });
 
 afterEach(() => mockdate.reset());
@@ -49,7 +53,11 @@ it('prints screenshot capture errors to the console', async () => {
 // code as os.homedir(), path.cwd() and the like cannot be mocked.
 // https://github.com/facebook/jest/issues/2549
 
-async function expectCaptureScreenshotCall(expected: string, path?: string, open?: boolean) {
+async function expectCaptureScreenshotCall(
+  expected: string,
+  path?: string,
+  open?: boolean,
+) {
   hostConnections.appHost = { host: jest.fn() } as any;
   screenshotMock.mockResolvedValue(undefined);
   await cli.exec('screenshot', { path, options: { open } });
@@ -58,10 +66,15 @@ async function expectCaptureScreenshotCall(expected: string, path?: string, open
 }
 
 it('defaults to saving the screenshot to a date-derived filename', () =>
-  expectCaptureScreenshotCall(path.resolve('Screenshot 2018-03-04 at 15.06.07.png')));
+  expectCaptureScreenshotCall(
+    path.resolve('Screenshot 2018-03-04 at 15.06.07.png'),
+  ));
 
 it('writes to a path relative to the cwd', () =>
-  expectCaptureScreenshotCall(path.join(process.cwd(), 'asdf', 'foo.png'), 'asdf/foo.png'));
+  expectCaptureScreenshotCall(
+    path.join(process.cwd(), 'asdf', 'foo.png'),
+    'asdf/foo.png',
+  ));
 
 it('untildifies the given path', () =>
   expectCaptureScreenshotCall(path.join(homedir(), 'foo.png'), '~/foo.png'));

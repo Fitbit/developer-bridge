@@ -19,34 +19,44 @@ type InstallArgs = vorpal.Args & {
 
 export const installAction = async (
   cli: vorpal,
-  stores: { hostConnections: HostConnections, appContext: AppContext },
+  stores: { hostConnections: HostConnections; appContext: AppContext },
   args: InstallArgs,
 ) => {
   const makeProgressCallback = (componentType: string) => {
     cli.ui.redraw(`Sideloading ${componentType}: starting...`);
     return (sent: number, total: number) => {
       const percentComplete = Math.round((sent / total) * 100);
-      cli.ui.redraw(`Sideloading ${componentType}: ${percentComplete}% completed`);
+      cli.ui.redraw(
+        `Sideloading ${componentType}: ${percentComplete}% completed`,
+      );
     };
   };
 
-  const printCompletionStatus =
-    (componentType: string) => (result: { installType: string } | null) => {
-      if (result) {
-        cli.ui.redraw(`${componentType} install complete (${result.installType})`);
-      } else {
-        cli.ui.redraw(`${componentType} is already installed`);
-      }
+  const printCompletionStatus = (componentType: string) => (
+    result: { installType: string } | null,
+  ) => {
+    if (result) {
+      cli.ui.redraw(
+        `${componentType} install complete (${result.installType})`,
+      );
+    } else {
+      cli.ui.redraw(`${componentType} is already installed`);
+    }
 
-      cli.ui.redraw.done();
-    };
+    cli.ui.redraw.done();
+  };
 
   const { appContext, hostConnections } = stores;
 
-  const appPackage = await setAppPackageAction(cli, appContext, args.packagePath);
+  const appPackage = await setAppPackageAction(
+    cli,
+    appContext,
+    args.packagePath,
+  );
   if (!appPackage) return false;
 
-  const hasApp = Object.keys(lodash.get(appPackage, 'components.device') || {}).length > 0;
+  const hasApp =
+    Object.keys(lodash.get(appPackage, 'components.device') || {}).length > 0;
   const hasCompanion = !!lodash.get(appPackage, 'components.companion');
   if (!hasApp) {
     if (!hasCompanion) {
@@ -61,15 +71,19 @@ export const installAction = async (
     );
   }
 
-  if (hasApp && (!hostConnections.appHost || hostConnections.appHost.host.rpc.ended)) {
+  if (
+    hasApp &&
+    (!hostConnections.appHost || hostConnections.appHost.host.rpc.ended)
+  ) {
     cli.activeCommand.log('App requires a device, connecting...');
     const result = await connectAction(cli, 'device', hostConnections);
     if (!result) return false;
   }
 
   if (
-    hasCompanion
-    && (!hostConnections.companionHost || hostConnections.companionHost.host.rpc.ended)
+    hasCompanion &&
+    (!hostConnections.companionHost ||
+      hostConnections.companionHost.host.rpc.ended)
   ) {
     cli.activeCommand.log('App requires a phone, connecting...');
     const result = await connectAction(cli, 'phone', hostConnections);
@@ -88,20 +102,19 @@ export const installAction = async (
         return false;
       }
 
-      await sideload.app(
-        appHost.host,
-        appPackage,
-        makeProgressCallback('app'),
-        useDevice,
-      ).then(printCompletionStatus('App'));
+      await sideload
+        .app(appHost.host, appPackage, makeProgressCallback('app'), useDevice)
+        .then(printCompletionStatus('App'));
     }
 
     if (hasCompanion && companionHost) {
-      await sideload.companion(
-        companionHost.host,
-        appPackage,
-        makeProgressCallback('companion'),
-      ).then(printCompletionStatus('Companion'));
+      await sideload
+        .companion(
+          companionHost.host,
+          appPackage,
+          makeProgressCallback('companion'),
+        )
+        .then(printCompletionStatus('Companion'));
     }
   } catch (ex) {
     cli.activeCommand.log(`Install failed: ${ex.message}`);
@@ -110,8 +123,9 @@ export const installAction = async (
 
   if (hasApp && appHost) {
     if (
-      appHost.host.hasCapability('appHost.launch.appComponent')
-      && appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch) {
+      appHost.host.hasCapability('appHost.launch.appComponent') &&
+      appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch
+    ) {
       if (args.options.skipLaunch !== true) {
         cli.activeCommand.log('Launching app');
         await appHost.host.launchAppComponent({
@@ -127,19 +141,19 @@ export const installAction = async (
   return true;
 };
 
-export default function install(
-  stores: {
-    hostConnections: HostConnections,
-    appContext: AppContext,
-  },
-) {
+export default function install(stores: {
+  hostConnections: HostConnections;
+  appContext: AppContext;
+}) {
   return (cli: vorpal) => {
     cli
       .command('install [packagePath]', 'Install an app package')
       .types({ string: ['packagePath', 'useDevice'] })
       .option('--skipLaunch', "Don't launch the app after installing")
-      .option('--useDevice <device>', 'Install a device bundle for a specific device (eg higgs, mira)')
-      .action(async (args: InstallArgs) =>
-        installAction(cli, stores, args));
+      .option(
+        '--useDevice <device>',
+        'Install a device bundle for a specific device (eg higgs, mira)',
+      )
+      .action(async (args: InstallArgs) => installAction(cli, stores, args));
   };
 }

@@ -39,7 +39,9 @@ export type ProtocolCapabilities = t.TypeOf<typeof ProtocolCapabilities>;
 // Defined as a literal rather than an enum because of io-ts bug:
 // https://github.com/gcanti/io-ts/issues/299
 export const AdditionalSerializationCodec = t.literal('cbor-definite');
-export type AdditionalSerializationType = t.TypeOf<typeof AdditionalSerializationCodec>;
+export type AdditionalSerializationType = t.TypeOf<
+  typeof AdditionalSerializationCodec
+>;
 
 export const SerializationType = t.union([
   AdditionalSerializationCodec,
@@ -56,5 +58,6 @@ export const ProtocolSerializationChangeNotification = t.interface(
   },
   'ProtocolSerializationChangeNotification',
 );
-export type ProtocolSerializationChangeNotification =
-    t.TypeOf<typeof ProtocolSerializationChangeNotification>;
+export type ProtocolSerializationChangeNotification = t.TypeOf<
+  typeof ProtocolSerializationChangeNotification
+>;

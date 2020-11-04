@@ -7,10 +7,13 @@ import { AppPackageStore } from './AppContext';
 import * as compatibility from '../models/compatibility';
 import HostConnections, { HostAddedEvent } from './HostConnections';
 import mapValues from '../util/mapValues';
-import { sourceMapMessage, ComponentSourceMapConsumers } from '../util/sourceMapUtil';
+import {
+  sourceMapMessage,
+  ComponentSourceMapConsumers,
+} from '../util/sourceMapUtil';
 
 interface SourceMappedComponents {
-  app?:  ComponentSourceMaps;
+  app?: ComponentSourceMaps;
   companion?: ComponentSourceMaps;
   settings?: ComponentSourceMaps;
 }
@@ -30,9 +33,9 @@ export default class LogConsumer {
     hostConnections,
     messageFormatter,
   }: {
-    appContext: AppPackageStore,
-    hostConnections: HostConnections,
-    messageFormatter: MessageFormatterFunc,
+    appContext: AppPackageStore;
+    hostConnections: HostConnections;
+    messageFormatter: MessageFormatterFunc;
   }) {
     this.appContext = appContext;
     this.appContext.onAppPackageLoad.attach(this.registerSourceMaps);
@@ -55,10 +58,12 @@ export default class LogConsumer {
     host.on('consoleTrace', this.handleTrace);
 
     return this.registerSourceMaps();
-  }
+  };
 
   public registerSourceMaps = async () => {
-    if (!this.appContext.appPackage || !this.appContext.appPackage.sourceMaps) return;
+    if (!this.appContext.appPackage || !this.appContext.appPackage.sourceMaps) {
+      return;
+    }
 
     const sourceMaps: SourceMappedComponents = {
       companion: this.appContext.appPackage.sourceMaps.companion,
@@ -76,20 +81,27 @@ export default class LogConsumer {
       } catch {}
     }
 
-    const sourceMapConsumers = await mapValues(lodash(sourceMaps).pickBy().value(), async maps =>
-      mapValues(maps!, async map => new SourceMapConsumer(map as any)));
+    const sourceMapConsumers = await mapValues(
+      lodash(sourceMaps).pickBy().value(),
+      async (maps) =>
+        mapValues(maps!, async (map) => new SourceMapConsumer(map as any)),
+    );
 
     this.componentSourceMapConsumers = {
       ...this.componentSourceMapConsumers,
       ...sourceMapConsumers,
     };
-  }
+  };
 
   private handleLog = (message: ConsoleMessage) => {
-    this.messageFormatter(sourceMapMessage(message, this.componentSourceMapConsumers));
-  }
+    this.messageFormatter(
+      sourceMapMessage(message, this.componentSourceMapConsumers),
+    );
+  };
 
   private handleTrace = (message: ConsoleTrace) => {
-    this.messageFormatter(sourceMapMessage(message, this.componentSourceMapConsumers));
-  }
+    this.messageFormatter(
+      sourceMapMessage(message, this.componentSourceMapConsumers),
+    );
+  };
 }

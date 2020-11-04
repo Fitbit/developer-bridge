@@ -14,17 +14,17 @@ import HostConnections from './models/HostConnections';
 import LogConsumer from './models/LogConsumer';
 import { formatMessage } from './models/formatMessage';
 
-import build from  './commands/build';
+import build from './commands/build';
 import buildAndInstall from './commands/buildAndInstall';
-import connect from  './commands/connect';
+import connect from './commands/connect';
 import heapSnapshot from './commands/heapSnapshot';
 import hosts from './commands/hosts';
 import install from './commands/install';
-import logout from  './commands/logout';
+import logout from './commands/logout';
 import mockHost from './commands/mockHost';
 import repl from './commands/repl';
 import screenshot from './commands/screenshot';
-import setAppPackage from  './commands/setAppPackage';
+import setAppPackage from './commands/setAppPackage';
 
 const enableQACommands = process.env.FITBIT_QA_COMMANDS === '1';
 
@@ -51,7 +51,7 @@ if (enableQACommands) {
 new LogConsumer({
   appContext,
   hostConnections,
-  messageFormatter: message => formatMessage(cli, message),
+  messageFormatter: (message) => formatMessage(cli, message),
 });
 
 async function main() {
@@ -67,9 +67,7 @@ async function main() {
     console.log(`Logged in as ${user.email}`);
   }
 
-  cli
-    .delimiter('fitbit$')
-    .show();
+  cli.delimiter('fitbit$').show();
 }
 
 main();

@@ -15,10 +15,14 @@ const consoleColors: { [kind: string]: Chalk } = {
 };
 
 const maxComponentNameLength = Math.max(
-  ...Object.values(FDBTypes.Component).map((componentType: string) => componentType.length),
+  ...Object.values(FDBTypes.Component).map(
+    (componentType: string) => componentType.length,
+  ),
 );
 
-function isConsoleTrace(message: ConsoleMessage | ConsoleTrace): message is ConsoleTrace {
+function isConsoleTrace(
+  message: ConsoleMessage | ConsoleTrace,
+): message is ConsoleTrace {
   return (<ConsoleTrace>message).stack !== undefined;
 }
 
@@ -27,7 +31,9 @@ export function createPrefixedLog(message: ConsoleMessage | ConsoleTrace) {
     lodash.upperFirst(message.emittedBy.component),
     maxComponentNameLength,
   );
-  const timestamp = message.timestamp ? `[${message.timestamp.toLocaleTimeString()}] ` : '';
+  const timestamp = message.timestamp
+    ? `[${message.timestamp.toLocaleTimeString()}] `
+    : '';
 
   // Type for util.format expects at least 1 argument and complains when message is spread
   // When called with no args returns an empty string so opt out of util.formats type
@@ -43,7 +49,7 @@ export function addSourcePadding(log: string, sourcePosition: string) {
 
   let padding: number;
   if (messageLength > terminalWidth) {
-    padding = terminalWidth - ((messageLength % terminalWidth) || 0);
+    padding = terminalWidth - (messageLength % terminalWidth || 0);
   } else {
     padding = terminalWidth - messageLength;
   }
@@ -59,7 +65,9 @@ function formatConsoleMessage(cli: vorpal, message: ConsoleMessage) {
 
   if (message.position) {
     const position = message.position;
-    sourcePosition = `(${position.source}:${position.line + 1},${position.column + 1})`;
+    sourcePosition = `(${position.source}:${position.line + 1},${
+      position.column + 1
+    })`;
     log = addSourcePadding(log, sourcePosition);
   }
 
@@ -74,13 +82,19 @@ function formatConsoleTrace(cli: vorpal, message: ConsoleTrace) {
 
   const stackMessage = message.stack
     .map((frame) => {
-      return `${frame.name || '?'} at ${frame.source}:${frame.line + 1},${frame.column + 1}`;
-    }).join(frameIndent);
+      return `${frame.name || '?'} at ${frame.source}:${frame.line + 1},${
+        frame.column + 1
+      }`;
+    })
+    .join(frameIndent);
 
   cli.log(colorizer(`${log}${frameIndent}${stackMessage}`));
 }
 
-export function formatMessage(cli: vorpal, message: ConsoleMessage | ConsoleTrace) {
+export function formatMessage(
+  cli: vorpal,
+  message: ConsoleMessage | ConsoleTrace,
+) {
   if (isConsoleTrace(message)) return formatConsoleTrace(cli, message);
   formatConsoleMessage(cli, message);
 }

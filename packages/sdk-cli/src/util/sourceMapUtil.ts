@@ -23,7 +23,10 @@ export function appURItoPOSIXPath(uri: string) {
   return normalized[0] === '/' ? normalized.substring(1) : normalized;
 }
 
-export function transformPosition(position: FDBTypes.Position, sourceMaps?: SourceMapConsumers) {
+export function transformPosition(
+  position: FDBTypes.Position,
+  sourceMaps?: SourceMapConsumers,
+) {
   position.source = appURItoPOSIXPath(position.source);
 
   if (position.generated || !sourceMaps) return position;
@@ -37,7 +40,9 @@ export function transformPosition(position: FDBTypes.Position, sourceMaps?: Sour
     column: position.column,
   });
 
-  if (mappedPosition.line === null || mappedPosition.column === null) return position;
+  if (mappedPosition.line === null || mappedPosition.column === null) {
+    return position;
+  }
 
   // SourceMapConsumer line numbers are one based, we expect zero based internally.
   mappedPosition.line -= 1;
@@ -73,7 +78,10 @@ export function sourceMapMessage(
 
   if ('stack' in message) {
     message.stack = message.stack.map((position) => {
-      return transformPosition(position, sourceMaps[message.emittedBy.component]);
+      return transformPosition(
+        position,
+        sourceMaps[message.emittedBy.component],
+      );
     });
   }
 

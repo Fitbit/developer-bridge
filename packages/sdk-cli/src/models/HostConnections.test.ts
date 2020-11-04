@@ -31,11 +31,9 @@ function doConnect(type: HostType) {
   return hostConnections.connect(type, mockHostID);
 }
 
-describe.each<HostType>([
-  'appHost',
-  'companionHost',
-])(
-  'when the host type argument is %s', (hostType) => {
+describe.each<HostType>(['appHost', 'companionHost'])(
+  'when the host type argument is %s',
+  (hostType) => {
     let mockWS: jest.Mocked<stream.Duplex>;
     let mockRemoteHost: {};
 
@@ -61,7 +59,10 @@ describe.each<HostType>([
     });
 
     it('emits a host-connected event with the HostType and HostConnection', () => {
-      expect(hostConnectedSpy).toBeCalledWith({ hostType, host: mockRemoteHost });
+      expect(hostConnectedSpy).toBeCalledWith({
+        hostType,
+        host: mockRemoteHost,
+      });
     });
 
     it('closes any existing connection', async () => {

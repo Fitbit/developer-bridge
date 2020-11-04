@@ -47,8 +47,9 @@ export const AppScreenshotStreamCaptureParams = t.interface(
   },
   'AppScreenshotStreamCaptureParams',
 );
-export type AppScreenshotStreamCaptureParams =
-   t.TypeOf<typeof AppScreenshotStreamCaptureParams>;
+export type AppScreenshotStreamCaptureParams = t.TypeOf<
+  typeof AppScreenshotStreamCaptureParams
+>;
 
 export const AppScreenshotStreamCaptureResult = t.partial(
   {
@@ -59,5 +60,6 @@ export const AppScreenshotStreamCaptureResult = t.partial(
   },
   'AppScreenshotStreamCaptureResult',
 );
-export type AppScreenshotStreamCaptureResult =
-  t.TypeOf<typeof AppScreenshotStreamCaptureResult>;
+export type AppScreenshotStreamCaptureResult = t.TypeOf<
+  typeof AppScreenshotStreamCaptureResult
+>;

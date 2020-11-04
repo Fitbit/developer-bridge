@@ -54,10 +54,7 @@ export type InitializeParams = t.TypeOf<typeof InitializeParams>;
 /**
  * What kind of device the Host is.
  */
-export const HostKind = t.union([
-  t.literal('device'),
-  t.literal('companion'),
-]);
+export const HostKind = t.union([t.literal('device'), t.literal('companion')]);
 export type HostKind = t.TypeOf<typeof HostKind>;
 
 export const AppDebugCapabilities = t.partial(
@@ -87,8 +84,9 @@ export const ApplicationHostCapabilities = t.partial(
   },
   'ApplicationHostCapabilities',
 );
-export type ApplicationHostCapabilities =
-  t.TypeOf<typeof ApplicationHostCapabilities>;
+export type ApplicationHostCapabilities = t.TypeOf<
+  typeof ApplicationHostCapabilities
+>;
 
 export const HostCapabilities = t.partial(
   {
