@@ -24,14 +24,14 @@ const mockMessage = {
   emittedBy: {
     uuid: 'fakeUUID',
     buildID: 'fakeBuildID',
-    component: ('app' as ComponentType),
+    component: 'app' as ComponentType,
   },
   position: {
     source: 'app:///./app/index.js',
     line: 10,
     column: 5,
   },
-  kind: ('log' as MessageKind),
+  kind: 'log' as MessageKind,
   message: ['Test Message'],
 };
 
@@ -41,7 +41,7 @@ describe('LogConsumer', () => {
   let appHost: EventEmitter;
   let companionHost: EventEmitter;
   let logConsumer: LogConsumer;
-  let registerAppHostObject: { hostType: HostType, host: RemoteHost };
+  let registerAppHostObject: { hostType: HostType; host: RemoteHost };
   const messageFormatter = jest.fn();
 
   beforeEach(() => {
@@ -59,15 +59,22 @@ describe('LogConsumer', () => {
 
     appHost = new EventEmitter();
     companionHost = new EventEmitter();
-    registerAppHostObject = { hostType: HostType.app, host: (appHost as RemoteHost) };
+    registerAppHostObject = {
+      hostType: HostType.app,
+      host: appHost as RemoteHost,
+    };
   });
 
   it('attaches registerHost to a host added event', () => {
-    expect(hostConnections.onHostAdded.attach).toBeCalledWith(logConsumer.registerHost);
+    expect(hostConnections.onHostAdded.attach).toBeCalledWith(
+      logConsumer.registerHost,
+    );
   });
 
   it('attaches registerSourceMaps to an app package loaded event', () => {
-    expect(appContext.onAppPackageLoad.attach).toBeCalledWith(logConsumer.registerSourceMaps);
+    expect(appContext.onAppPackageLoad.attach).toBeCalledWith(
+      logConsumer.registerSourceMaps,
+    );
   });
 
   describe('registerHost()', () => {
@@ -75,7 +82,7 @@ describe('LogConsumer', () => {
       await logConsumer.registerHost(registerAppHostObject);
       await logConsumer.registerHost({
         hostType: HostType.companion,
-        host: (companionHost as RemoteHost),
+        host: companionHost as RemoteHost,
       });
     });
 
@@ -101,7 +108,7 @@ describe('LogConsumer', () => {
         emittedBy: {
           uuid: 'fakeUUID',
           buildID: 'fakeBuildID',
-          component: ('companion' as ComponentType),
+          component: 'companion' as ComponentType,
         },
       };
 
@@ -116,10 +123,13 @@ describe('LogConsumer', () => {
       const newHost = new EventEmitter();
       const newCompanionHost = new EventEmitter();
 
-      await logConsumer.registerHost({ hostType: HostType.app, host: (newHost as RemoteHost) });
+      await logConsumer.registerHost({
+        hostType: HostType.app,
+        host: newHost as RemoteHost,
+      });
       await logConsumer.registerHost({
         hostType: HostType.companion,
-        host: (newCompanionHost as RemoteHost),
+        host: newCompanionHost as RemoteHost,
       });
 
       appHost.emit('consoleMessage', mockMessage);
@@ -128,7 +138,10 @@ describe('LogConsumer', () => {
     });
 
     it('calls registersSourceMaps', async () => {
-      const registerSourceMapsSpy = jest.spyOn(logConsumer, 'registerSourceMaps');
+      const registerSourceMapsSpy = jest.spyOn(
+        logConsumer,
+        'registerSourceMaps',
+      );
       await logConsumer.registerHost(registerAppHostObject);
       expect(registerSourceMapsSpy).toBeCalled();
     });
@@ -144,7 +157,9 @@ describe('LogConsumer', () => {
       file: 'index.js',
     };
 
-    (compatibility.findCompatibleAppComponent as jest.Mock).mockReturnValue('higgs');
+    (compatibility.findCompatibleAppComponent as jest.Mock).mockReturnValue(
+      'higgs',
+    );
 
     beforeEach(async () => {
       const componentSourceMaps = {
@@ -179,7 +194,7 @@ describe('LogConsumer', () => {
     it('does not register app source maps when no appHost is connected', async () => {
       await logConsumer.registerHost({
         hostType: HostType.companion,
-        host: (companionHost as RemoteHost),
+        host: companionHost as RemoteHost,
       });
 
       expect(logConsumer.componentSourceMapConsumers).toEqual({
@@ -235,7 +250,9 @@ describe('LogConsumer', () => {
     it('does not register app source maps if there is no compatible family', async () => {
       // Return value is mocked in the beforeEach reset it so we can return meson instead
       (compatibility.findCompatibleAppComponent as jest.Mock).mockReset();
-      (compatibility.findCompatibleAppComponent as jest.Mock).mockReturnValueOnce('meson');
+      (compatibility.findCompatibleAppComponent as jest.Mock).mockReturnValueOnce(
+        'meson',
+      );
       await logConsumer.registerHost(registerAppHostObject);
 
       expect(logConsumer.componentSourceMapConsumers).toEqual({

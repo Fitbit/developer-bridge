@@ -8,11 +8,7 @@ import {
   Peer,
   TypesafeRequestDispatcher,
 } from '@fitbit/jsonrpc-ts';
-import {
-  BulkData,
-  FDBTypes,
-  maxBase64DecodedSize,
-} from '@fitbit/fdb-protocol';
+import { BulkData, FDBTypes, maxBase64DecodedSize } from '@fitbit/fdb-protocol';
 import * as lodash from 'lodash';
 import JSZip = require('jszip');
 
@@ -74,12 +70,18 @@ export class RemoteHost extends EventEmitter {
 
   /** Open bulk data transfer streams. */
   protected bulkDataStreams = new BulkData();
-  private screenshotReceiver = new BulkDataReceiver(this.bulkDataStreams, 'screenshot');
+  private screenshotReceiver = new BulkDataReceiver(
+    this.bulkDataStreams,
+    'screenshot',
+  );
   private appContentsListReceiver = new BulkDataReceiver(
     this.bulkDataStreams,
     'app component contents list',
   );
-  private heapSnapshotReceiver = new BulkDataReceiver(this.bulkDataStreams, 'heap snapshot');
+  private heapSnapshotReceiver = new BulkDataReceiver(
+    this.bulkDataStreams,
+    'heap snapshot',
+  );
   private serializerTransform = new ConfigurableEncode();
 
   protected constructor(timeout: number) {
@@ -87,10 +89,26 @@ export class RemoteHost extends EventEmitter {
     this.timeout = timeout;
     this.dispatcher
       .method('ping', t.undefined, () => {})
-      .notification('console.message', FDBTypes.ConsoleMessage, this.handleMessage)
-      .notification('console.traceMessage', FDBTypes.TraceMessage, this.handleTrace)
-      .notification('experimental.lifecycle.appRunning', FDBTypes.App, this.handleAppRunning)
-      .notification('experimental.lifecycle.appClosed', FDBTypes.App, this.handleAppClosed);
+      .notification(
+        'console.message',
+        FDBTypes.ConsoleMessage,
+        this.handleMessage,
+      )
+      .notification(
+        'console.traceMessage',
+        FDBTypes.TraceMessage,
+        this.handleTrace,
+      )
+      .notification(
+        'experimental.lifecycle.appRunning',
+        FDBTypes.App,
+        this.handleAppRunning,
+      )
+      .notification(
+        'experimental.lifecycle.appClosed',
+        FDBTypes.App,
+        this.handleAppClosed,
+      );
     this.bulkDataStreams.register(this.dispatcher);
     this.screenshotReceiver.registerCloserMethods(
       this.dispatcher,
@@ -128,7 +146,7 @@ export class RemoteHost extends EventEmitter {
 
     const host = new this(timeout);
     hostStream
-      .pipe(new ParseJSON)
+      .pipe(new ParseJSON())
       .pipe(postDeserializeTransform)
       .pipe(host.rpc)
       .pipe(preSerializeTransform)
@@ -142,7 +160,9 @@ export class RemoteHost extends EventEmitter {
 
     if (
       host.hasCapability('protocol.additionalSerializations') &&
-      host.info.capabilities.protocol!.additionalSerializations!.includes('cbor-definite')
+      host.info.capabilities.protocol!.additionalSerializations!.includes(
+        'cbor-definite',
+      )
     ) {
       host.changeSerialization('cbor-definite');
     }
@@ -172,7 +192,7 @@ export class RemoteHost extends EventEmitter {
     } else {
       this.emit('consoleMessage', params);
     }
-  }
+  };
 
   handleTrace = (params: FDBTypes.TraceMessage) => {
     if (params.timestamp) {
@@ -183,15 +203,15 @@ export class RemoteHost extends EventEmitter {
     } else {
       this.emit('consoleTrace', params);
     }
-  }
+  };
 
   handleAppRunning = (params: FDBTypes.App) => {
     this.emit('appRunning', params);
-  }
+  };
 
   handleAppClosed = (params: FDBTypes.App) => {
     this.emit('appClosed', params);
-  }
+  };
 
   /**
    * Query whether the Host advertises a capability.
@@ -206,7 +226,7 @@ export class RemoteHost extends EventEmitter {
    * The max message size that the remote host will accept, in bytes.
    */
   get maxMessageSize() {
-    const protocolDefaultSize = 8192;  // Assuming WebSocket
+    const protocolDefaultSize = 8192; // Assuming WebSocket
     const capabilitySize: number = lodash.get(
       this.info.capabilities,
       'protocol.maxMessageSize',
@@ -228,24 +248,29 @@ export class RemoteHost extends EventEmitter {
     method: string,
     paramsType: P,
     resultType: R,
-    {
-      timeoutEnabled = true,
-      minTimeout = 0,
-    } = {},
+    { timeoutEnabled = true, minTimeout = 0 } = {},
   ): (params: t.TypeOf<P>) => Promise<t.TypeOf<R>> {
     return (params: t.TypeOf<P>) =>
-      this.rpc.callMethod(method, params, {
-        timeout: timeoutEnabled ? Math.max(this.timeout, minTimeout) : undefined,
-      }).then(decode(resultType));
+      this.rpc
+        .callMethod(method, params, {
+          timeout: timeoutEnabled
+            ? Math.max(this.timeout, minTimeout)
+            : undefined,
+        })
+        .then(decode(resultType));
   }
 
   private initialize = this.bindMethod(
-    'initialize', FDBTypes.InitializeParams, FDBTypes.InitializeResult);
+    'initialize',
+    FDBTypes.InitializeParams,
+    FDBTypes.InitializeResult,
+  );
 
   /**
    * Ping the remote host.
    */
-  ping = (): Promise<void> => this.rpc.callMethod('ping', undefined, { timeout: this.timeout });
+  ping = (): Promise<void> =>
+    this.rpc.callMethod('ping', undefined, { timeout: this.timeout });
 
   protected ioWrite = this.bindMethod(
     'io.write',
@@ -281,18 +306,20 @@ export class RemoteHost extends EventEmitter {
   );
 
   private changeSerialization = (serialization: FDBTypes.SerializationType) => {
-    this.rpc.sendNotification(
-      'protocol.serialization.change',
-      { serialization },
-    );
+    this.rpc.sendNotification('protocol.serialization.change', {
+      serialization,
+    });
     this.serializerTransform.setEncoder(serialization);
-  }
+  };
 
   protected async writeToStream(
     stream: FDBTypes.StreamToken,
     data: Buffer,
     {
-      onProgress = (() => {}) as (bytesWritten: number, totalBytes: number) => void,
+      onProgress = (() => {}) as (
+        bytesWritten: number,
+        totalBytes: number,
+      ) => void,
     } = {},
   ) {
     /**
@@ -327,7 +354,8 @@ export class RemoteHost extends EventEmitter {
     const overheadChars = 256;
 
     const maxDataBytes = maxBase64DecodedSize(
-      this.maxMessageSize - overheadChars);
+      this.maxMessageSize - overheadChars,
+    );
     if (maxDataBytes < 1) {
       throw new Error('Cannot fit any data into an io.write message');
     }
@@ -354,14 +382,16 @@ export class RemoteHost extends EventEmitter {
      */
     const writes: Promise<any>[] = [];
     for (let cursor = 0; cursor < data.length; cursor += maxDataBytes) {
-      const chunk: FDBTypes.IOWriteParams = this.serializerTransform.canAcceptRawBuffers() ? {
-        stream,
-        data: data.slice(cursor, cursor + maxDataBytes),
-        encoding: 'none',
-      } : {
-        stream,
-        data: data.toString('base64', cursor, cursor + maxDataBytes),
-      };
+      const chunk: FDBTypes.IOWriteParams = this.serializerTransform.canAcceptRawBuffers()
+        ? {
+            stream,
+            data: data.slice(cursor, cursor + maxDataBytes),
+            encoding: 'none',
+          }
+        : {
+            stream,
+            data: data.toString('base64', cursor, cursor + maxDataBytes),
+          };
 
       writes.push(
         this.ioWrite(chunk).then(() => {
@@ -378,7 +408,10 @@ export class RemoteHost extends EventEmitter {
     componentBundle: 'app' | 'companion',
     data: Buffer,
     {
-      onProgress = (() => {}) as (bytesWritten: number, totalBytes: number) => void,
+      onProgress = (() => {}) as (
+        bytesWritten: number,
+        totalBytes: number,
+      ) => void,
     } = {},
   ) {
     let bundleData = data;
@@ -387,8 +420,14 @@ export class RemoteHost extends EventEmitter {
       try {
         const bundleZip = await JSZip.loadAsync(data);
         const uuid = await getAppUUID(bundleZip);
-        const existingContents = await this.getInstalledAppContents(uuid, componentBundle);
-        const partialBundle = await makePartialBundle(bundleZip, existingContents);
+        const existingContents = await this.getInstalledAppContents(
+          uuid,
+          componentBundle,
+        );
+        const partialBundle = await makePartialBundle(
+          bundleZip,
+          existingContents,
+        );
 
         if (partialBundle == null) {
           // Nothing to do! The bundle is already installed.
@@ -408,11 +447,10 @@ export class RemoteHost extends EventEmitter {
       this.abortStreamingInstall({ stream });
       throw e;
     }
-    return this.finalizeStreamingInstall({ stream })
-      .then(result => ({
-        installType: 'full' as FDBTypes.InstallType,
-        ...result,
-      }));
+    return this.finalizeStreamingInstall({ stream }).then((result) => ({
+      installType: 'full' as FDBTypes.InstallType,
+      ...result,
+    }));
   }
 
   protected beginStreamingScreenshotCapture = this.bindMethod(
@@ -433,14 +471,20 @@ export class RemoteHost extends EventEmitter {
     return this.info.capabilities.appHost!.screenshot!.imageFormats;
   }
 
-  takeScreenshot(format: string, onWrite?: (received: number, total?: number) => void) {
-    return this.screenshotReceiver.receiveFromStream(stream =>
-      this.beginStreamingScreenshotCapture({ stream: stream.token, imageFormat: format })
-        .then(({ length }) => {
-          if (onWrite) {
-            stream.onWrite = (_, received) => onWrite(received, length);
-          }
-        }));
+  takeScreenshot(
+    format: string,
+    onWrite?: (received: number, total?: number) => void,
+  ) {
+    return this.screenshotReceiver.receiveFromStream((stream) =>
+      this.beginStreamingScreenshotCapture({
+        stream: stream.token,
+        imageFormat: format,
+      }).then(({ length }) => {
+        if (onWrite) {
+          stream.onWrite = (_, received) => onWrite(received, length);
+        }
+      }),
+    );
   }
 
   private sendEvalCmd = this.bindMethod(
@@ -450,18 +494,22 @@ export class RemoteHost extends EventEmitter {
   );
 
   hasEvalSupport() {
-    return this.hasCapability('appHost.debug.app.evalToString.supported') &&
+    return (
+      this.hasCapability('appHost.debug.app.evalToString.supported') &&
       this.info.capabilities.appHost!.debug!.app!.evalToString!.supported &&
-      !FBOS3_EVAL_QUIRK.test(this.info.device);
+      !FBOS3_EVAL_QUIRK.test(this.info.device)
+    );
   }
 
-  eval(cmd: string) {
-    return this.sendEvalCmd({ cmd });
+  eval(cmd: string, uuid?: FDBTypes.UUID) {
+    return this.sendEvalCmd(uuid ? { cmd, uuid } : { cmd });
   }
 
   supportsPartialAppInstall() {
-    return this.hasCapability('appHost.install.partialBundle') &&
-      this.info.capabilities.appHost!.install!.partialBundle!;
+    return (
+      this.hasCapability('appHost.install.partialBundle') &&
+      this.info.capabilities.appHost!.install!.partialBundle!
+    );
   }
 
   protected beginStreamingAppComponentContents = this.bindMethod(
@@ -470,31 +518,33 @@ export class RemoteHost extends EventEmitter {
     t.any,
   );
 
-  getInstalledAppContents(uuid: string, componentBundle: FDBTypes.ComponentBundleKind) {
-    return this.appContentsListReceiver.receiveFromStream(
-      stream => this.beginStreamingAppComponentContents({
-        componentBundle,
-        uuid,
-        stream: stream.token,
-      }),
-    )
-      .then(buffer => JSON.parse(buffer.toString()))
+  getInstalledAppContents(
+    uuid: string,
+    componentBundle: FDBTypes.ComponentBundleKind,
+  ) {
+    return this.appContentsListReceiver
+      .receiveFromStream((stream) =>
+        this.beginStreamingAppComponentContents({
+          componentBundle,
+          uuid,
+          stream: stream.token,
+        }),
+      )
+      .then((buffer) => JSON.parse(buffer.toString()))
       .then(decode(FDBTypes.AppComponentContentsList));
   }
 
   getHeapSnapshotSupport(): {
-    supported: boolean,
-    requiresInstrumentedLaunch: boolean,
-    formats: string[],
+    supported: boolean;
+    requiresInstrumentedLaunch: boolean;
+    formats: string[];
   } {
     return {
       supported: false,
       requiresInstrumentedLaunch: false,
       formats: [],
-      ...(
-        this.hasCapability('appHost.debug.app.heapSnapshot') &&
-        this.info.capabilities.appHost!.debug!.app!.heapSnapshot!
-      ),
+      ...(this.hasCapability('appHost.debug.app.heapSnapshot') &&
+        this.info.capabilities.appHost!.debug!.app!.heapSnapshot!),
     };
   }
 
@@ -504,9 +554,13 @@ export class RemoteHost extends EventEmitter {
     t.any,
   );
 
-  captureHeapSnapshot(format: string) {
-    return this.heapSnapshotReceiver.receiveFromStream(
-      stream => this.beginHeapSnapshotCapture({ format, stream: stream.token }),
+  captureHeapSnapshot(format: string, uuid?: FDBTypes.UUID) {
+    return this.heapSnapshotReceiver.receiveFromStream((stream) =>
+      this.beginHeapSnapshotCapture(
+        uuid
+          ? { format, uuid, stream: stream.token }
+          : { format, stream: stream.token },
+      ),
     );
   }
 }

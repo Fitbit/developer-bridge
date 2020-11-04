@@ -8,16 +8,21 @@ import open from 'open';
 import HostConnections from '../models/HostConnections';
 import captureScreenshot from '../models/captureScreenshot';
 
-export default function screenshot(
-  stores: {
-    hostConnections: HostConnections,
-  },
-) {
+export default function screenshot(stores: {
+  hostConnections: HostConnections;
+}) {
   return (cli: vorpal) => {
-    cli.command('screenshot [path] [--open]', 'Capture a screenshot from the connected device')
+    cli
+      .command(
+        'screenshot [path] [--open]',
+        'Capture a screenshot from the connected device',
+      )
       .types({ string: ['path'] })
-      .option('-o, --open', 'Opens the screenshot using the native picture viewer')
-      .action(async (args: vorpal.Args & { path?: string, open?: boolean }) => {
+      .option(
+        '-o, --open',
+        'Opens the screenshot using the native picture viewer',
+      )
+      .action(async (args: vorpal.Args & { path?: string; open?: boolean }) => {
         const { appHost } = stores.hostConnections;
         if (!appHost) {
           cli.activeCommand.log('Not connected to a device');
@@ -36,7 +41,9 @@ export default function screenshot(
               cli.ui.redraw(
                 total == null
                   ? 'Downloading...'
-                  : `Downloading: ${Math.round(received / total * 100)}% completed`,
+                  : `Downloading: ${Math.round(
+                      (received / total) * 100,
+                    )}% completed`,
               );
             },
           });

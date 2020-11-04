@@ -5,10 +5,7 @@
  */
 
 const baseConfig = {
-  moduleFileExtensions: [
-    'ts',
-    'js',
-  ],
+  moduleFileExtensions: ['ts', 'js'],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
@@ -23,4 +20,4 @@ const baseConfig = {
 };
 
 // Gotta be compatible with Node 8.0, which does not support object spread.
-module.exports = overrides => Object.assign({}, baseConfig, overrides);
+module.exports = (overrides) => Object.assign({}, baseConfig, overrides);

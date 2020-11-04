@@ -55,9 +55,7 @@ function mockTokenResponseError(status = 500, errorType = 'internal_error') {
 }
 
 function mockRevokeResponse(code = 200) {
-  return nock(environment().config.apiUrl)
-    .post('/oauth2/revoke')
-    .reply(code);
+  return nock(environment().config.apiUrl).post('/oauth2/revoke').reply(code);
 }
 
 function mockFitbitTokenResponse(data: FitbitTokenResponse) {
@@ -69,9 +67,7 @@ function mockFitbitTokenResponse(data: FitbitTokenResponse) {
 
 function mockStoredAuthData(data = mockTokenStorageData) {
   getAuthStorageSpy.mockReset();
-  getAuthStorageSpy.mockResolvedValueOnce(
-    mockFitbitTokenResponse(data),
-  );
+  getAuthStorageSpy.mockResolvedValueOnce(mockFitbitTokenResponse(data));
 }
 
 function mockEmptyAuthData() {
@@ -127,13 +123,17 @@ describe('getAccessToken()', () => {
 
     it('refreshes token and returns if required', () => {
       mockTokenResponse();
-      return expect(auth.getAccessToken()).resolves.toBe(mockTokenResponseData.access_token);
+      return expect(auth.getAccessToken()).resolves.toBe(
+        mockTokenResponseData.access_token,
+      );
     });
 
     it('stores newly refreshed tokens', async () => {
       mockTokenResponse();
       await auth.getAccessToken();
-      expect(setAuthStorageSpy).toBeCalledWith(mockFitbitTokenResponse(mockTokenResponseData));
+      expect(setAuthStorageSpy).toBeCalledWith(
+        mockFitbitTokenResponse(mockTokenResponseData),
+      );
     });
 
     it('clears auth storage if refresh fails', async () => {
@@ -146,7 +146,8 @@ describe('getAccessToken()', () => {
 
 describe('loginAuthCodeFlow()', () => {
   beforeEach(() => {
-    jest.spyOn(NodeCrypto.prototype, 'generateRandom')
+    jest
+      .spyOn(NodeCrypto.prototype, 'generateRandom')
       .mockReturnValue('fixedstate');
     callbackURLPromise = getCallbackURLPromise();
   });
@@ -162,11 +163,15 @@ describe('loginAuthCodeFlow()', () => {
   it('retrieves and stores an auth token', async () => {
     const mockTokenEndpoint = mockTokenResponse();
     const loginPromise = auth.loginAuthCodeFlow();
-    await fetch(`${await callbackURLPromise}?state=fixedstate&code=__valid_code__`);
+    await fetch(
+      `${await callbackURLPromise}?state=fixedstate&code=__valid_code__`,
+    );
     await loginPromise;
 
     expect(mockTokenEndpoint.isDone()).toBe(true);
-    expect(setAuthStorageSpy).toBeCalledWith(mockFitbitTokenResponse(mockTokenResponseData));
+    expect(setAuthStorageSpy).toBeCalledWith(
+      mockFitbitTokenResponse(mockTokenResponseData),
+    );
   });
 
   describe.each([
@@ -175,8 +180,9 @@ describe('loginAuthCodeFlow()', () => {
     'state=fixedstate&error=internal_error&error_description=Something+went+very_wrong',
   ])('given authorization callback parameters %s', (queryParams) => {
     it('rejects', async () => {
-      const loginExpectPromise = expect(auth.loginAuthCodeFlow()).rejects
-        .toThrowErrorMatchingSnapshot();
+      const loginExpectPromise = expect(
+        auth.loginAuthCodeFlow(),
+      ).rejects.toThrowErrorMatchingSnapshot();
       await fetch(`${await callbackURLPromise}?${queryParams}`);
       return loginExpectPromise;
     });
@@ -185,14 +191,18 @@ describe('loginAuthCodeFlow()', () => {
   it('rejects if token response returns a 500 status code', async () => {
     mockTokenResponseError();
     const loginPromise = auth.loginAuthCodeFlow();
-    await fetch(`${await callbackURLPromise}?state=fixedstate&code=__valid_code__`);
+    await fetch(
+      `${await callbackURLPromise}?state=fixedstate&code=__valid_code__`,
+    );
     return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('rejects if token response is empty', async () => {
     mockTokenResponse(200, {});
     const loginPromise = auth.loginAuthCodeFlow();
-    await fetch(`${await callbackURLPromise}?state=fixedstate&code=__valid_code__`);
+    await fetch(
+      `${await callbackURLPromise}?state=fixedstate&code=__valid_code__`,
+    );
     return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
   });
 });
@@ -200,22 +210,33 @@ describe('loginAuthCodeFlow()', () => {
 describe('loginResourceOwnerFlow()', () => {
   it('retrieves and stores an auth token', async () => {
     const mockTokenEndpoint = mockTokenResponse();
-    const loginPromise = auth.loginResourceOwnerFlow(mockUsername, mockPassword);
+    const loginPromise = auth.loginResourceOwnerFlow(
+      mockUsername,
+      mockPassword,
+    );
     await expect(loginPromise).resolves.toBeUndefined();
 
     expect(mockTokenEndpoint.isDone()).toBe(true);
-    expect(setAuthStorageSpy).toBeCalledWith(mockFitbitTokenResponse(mockTokenResponseData));
+    expect(setAuthStorageSpy).toBeCalledWith(
+      mockFitbitTokenResponse(mockTokenResponseData),
+    );
   });
 
   it('rejects if token response returns a 500 status code', async () => {
     mockTokenResponseError();
-    const loginPromise = auth.loginResourceOwnerFlow(mockUsername, mockPassword);
+    const loginPromise = auth.loginResourceOwnerFlow(
+      mockUsername,
+      mockPassword,
+    );
     return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('rejects if token response is empty', async () => {
     mockTokenResponse(200, {});
-    const loginPromise = auth.loginResourceOwnerFlow(mockUsername, mockPassword);
+    const loginPromise = auth.loginResourceOwnerFlow(
+      mockUsername,
+      mockPassword,
+    );
     return expect(loginPromise).rejects.toThrowErrorMatchingSnapshot();
   });
 });

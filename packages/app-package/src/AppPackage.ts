@@ -11,9 +11,9 @@ type RawSourceMap = unknown;
 interface PackageComponents {
   device: {
     [family: string]: {
-      artifact: Buffer,
-      platform?: string[],
-    },
+      artifact: Buffer;
+      platform?: string[];
+    };
   };
   companion?: Buffer;
 }
@@ -99,21 +99,27 @@ async function getTextFromZip(zip: jszip, path: string) {
   return getFile(zip, path).async('text');
 }
 
-const extractComponentSourceMaps =
-  (sourceMapPaths: BundledComponentSourceMaps, zip: jszip): Promise<ComponentSourceMaps> =>
-    aprMap(sourceMapPaths, path => getTextFromZip(zip, path).then(JSON.parse));
+const extractComponentSourceMaps = (
+  sourceMapPaths: BundledComponentSourceMaps,
+  zip: jszip,
+): Promise<ComponentSourceMaps> =>
+  aprMap(sourceMapPaths, (path) => getTextFromZip(zip, path).then(JSON.parse));
 
-async function extractSourceMaps(zip: jszip, sourceMapManifest?: ManifestSourceMaps) {
+async function extractSourceMaps(
+  zip: jszip,
+  sourceMapManifest?: ManifestSourceMaps,
+) {
   if (!sourceMapManifest) return undefined;
 
   const extractComponent = (component?: BundledComponentSourceMaps) =>
     component ? extractComponentSourceMaps(component, zip) : undefined;
 
   return {
-    device: sourceMapManifest.device ? await aprMap(
-      sourceMapManifest.device,
-      component => extractComponentSourceMaps(component, zip),
-    ) as DeviceSourceMaps : undefined,
+    device: sourceMapManifest.device
+      ? ((await aprMap(sourceMapManifest.device, (component) =>
+          extractComponentSourceMaps(component, zip),
+        )) as DeviceSourceMaps)
+      : undefined,
     companion: await extractComponent(sourceMapManifest.companion),
     settings: await extractComponent(sourceMapManifest.settings),
   };
@@ -122,7 +128,9 @@ async function extractSourceMaps(zip: jszip, sourceMapManifest?: ManifestSourceM
 abstract class ManifestParserBase {
   protected manifest!: ManifestCommon;
 
-  abstract getSourceMapExtractor(): (zip: jszip) => Promise<SourceMaps | undefined>;
+  abstract getSourceMapExtractor(): (
+    zip: jszip,
+  ) => Promise<SourceMaps | undefined>;
 
   pullMetadata() {
     return {
@@ -147,7 +155,10 @@ class ManifestParserV5 extends ManifestParserBase {
   }
 
   getDeviceComponents() {
-    if (typeof this.manifest.components !== 'object' || !this.manifest.components.watch) {
+    if (
+      typeof this.manifest.components !== 'object' ||
+      !this.manifest.components.watch
+    ) {
       throw new Error('No components listed in manifest.json');
     }
 
@@ -155,19 +166,19 @@ class ManifestParserV5 extends ManifestParserBase {
       throw new Error('Missing platform descriptors');
     }
 
-    return this.manifest.platform.map<[string, { filename: string, platform?: string[] }]>(
-      (platformDescriptor) => {
-        const [, family, platform] = /^([^:]+):?(.+)?$/.exec(platformDescriptor)!;
+    return this.manifest.platform.map<
+      [string, { filename: string; platform?: string[] }]
+    >((platformDescriptor) => {
+      const [, family, platform] = /^([^:]+):?(.+)?$/.exec(platformDescriptor)!;
 
-        return [
-          family.toLowerCase(),
-          {
-            platform: platform ? [platform] : undefined,
-            filename: this.manifest.components.watch,
-          },
-        ];
-      },
-    );
+      return [
+        family.toLowerCase(),
+        {
+          platform: platform ? [platform] : undefined,
+          filename: this.manifest.components.watch,
+        },
+      ];
+    });
   }
 
   getCompanionFilename() {
@@ -217,7 +228,9 @@ function getManifestParser(manifest: ManifestCommon) {
     case 6:
       return new ManifestParserV6(manifest as ManifestV6);
     default:
-      throw new Error(`Unsupported manifest version ${manifest.manifestVersion}`);
+      throw new Error(
+        `Unsupported manifest version ${manifest.manifestVersion}`,
+      );
   }
 }
 
@@ -238,14 +251,20 @@ export async function fromJSZip(fbaZip: jszip): Promise<AppPackage> {
   const parser = getManifestParser(manifestJSON);
 
   const device = await Promise.all(
-    parser.getDeviceComponents().map(
-      ([family, { platform, filename }]) => bufferFile(filename)
-        .then(artifact => [family, { platform, artifact }]),
-    ),
+    parser
+      .getDeviceComponents()
+      .map(([family, { platform, filename }]) =>
+        bufferFile(filename).then((artifact) => [
+          family,
+          { platform, artifact },
+        ]),
+      ),
   ).then(lodash.fromPairs);
 
   const companionFilename = parser.getCompanionFilename();
-  const companion = companionFilename ? await bufferFile(companionFilename) : undefined;
+  const companion = companionFilename
+    ? await bufferFile(companionFilename)
+    : undefined;
 
   const sourceMaps = await parser.getSourceMapExtractor()(fbaZip);
 

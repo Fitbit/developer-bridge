@@ -1,7 +1,10 @@
 import { AppPackage } from '@fitbit/app-package';
 import { FDBTypes } from '@fitbit/fdb-protocol';
 
-import { findCompatibleAppComponent, assertCompanionComponentIsCompatible } from './compatibility';
+import {
+  findCompatibleAppComponent,
+  assertCompanionComponentIsCompatible,
+} from './compatibility';
 
 function makeAppPackage(...families: string[]) {
   const appPackage: AppPackage = {
@@ -27,9 +30,16 @@ function makeHost(...families: string[]): FDBTypes.InitializeResult {
   return {
     device: '',
     hostKind: 'device',
-    capabilities: { appHost: { install: {
-      appCompatibility: families.map(family => ({ family, version: '32.10.10' })),
-    } } },
+    capabilities: {
+      appHost: {
+        install: {
+          appCompatibility: families.map((family) => ({
+            family,
+            version: '32.10.10',
+          })),
+        },
+      },
+    },
   };
 }
 
@@ -37,11 +47,15 @@ function makeCompanionHost(maxAPIVersion = '1.0.0'): FDBTypes.InitializeResult {
   return {
     device: '',
     hostKind: 'companion',
-    capabilities: { appHost: { install: {
-      companionCompatibility: {
-        maxAPIVersion,
+    capabilities: {
+      appHost: {
+        install: {
+          companionCompatibility: {
+            maxAPIVersion,
+          },
+        },
       },
-    } } },
+    },
   };
 }
 
@@ -53,8 +67,9 @@ describe('given an app which is only compatible with one family', () => {
   });
 
   it('is compatible with a host which is back-compatible to that family', () => {
-    expect(findCompatibleAppComponent(app, makeHost('Alpha', 'Higgs')))
-      .toBe('higgs');
+    expect(findCompatibleAppComponent(app, makeHost('Alpha', 'Higgs'))).toBe(
+      'higgs',
+    );
   });
 
   it('is compatible with a host that reports a lowercased family name', () => {
@@ -62,12 +77,16 @@ describe('given an app which is only compatible with one family', () => {
   });
 
   it('is incompatible with an incompatible host', () => {
-    expect(() => findCompatibleAppComponent(app, makeHost('Beta'))).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      findCompatibleAppComponent(app, makeHost('Beta')),
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('is incompatible if the device reported API version too low', () => {
     app.sdkVersion.deviceApi = '2.0.0';
-    expect(() => findCompatibleAppComponent(app, makeHost('Higgs'))).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      findCompatibleAppComponent(app, makeHost('Higgs')),
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('is compatible when a wildcard version is requested', () => {
@@ -80,21 +99,27 @@ describe('given an app which is compatible with multiple families', () => {
   const app = makeAppPackage('higgs', 'alpha');
 
   it('picks the most-preferred component for the host', () => {
-    expect(findCompatibleAppComponent(app, makeHost('Beta', 'Alpha', 'Higgs')))
-      .toBe('alpha');
+    expect(
+      findCompatibleAppComponent(app, makeHost('Beta', 'Alpha', 'Higgs')),
+    ).toBe('alpha');
   });
 
   it('is incompatible with an incompatible host', () => {
-    expect(() => findCompatibleAppComponent(app, makeHost('Beta', 'Delta')))
-      .toThrowErrorMatchingSnapshot();
+    expect(() =>
+      findCompatibleAppComponent(app, makeHost('Beta', 'Delta')),
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('is incompatible with a host with an empty compatibility list', () => {
-    expect(() => findCompatibleAppComponent(app, makeHost())).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      findCompatibleAppComponent(app, makeHost()),
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('is incompatible with a host which is missing the capability entirely', () => {
-    expect(() => findCompatibleAppComponent(app, {} as any)).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      findCompatibleAppComponent(app, {} as any),
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -131,8 +156,8 @@ describe('given an app with a companion', () => {
 
   it('is incompatible if the phone reported API version too low', () => {
     app.sdkVersion.companionApi = '2.0.0';
-    expect(
-      () => assertCompanionComponentIsCompatible(app, makeCompanionHost()),
+    expect(() =>
+      assertCompanionComponentIsCompatible(app, makeCompanionHost()),
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -142,43 +167,54 @@ describe('given an app with a companion', () => {
       ...makeCompanionHost(),
       capabilities: { appHost: { install: {} } },
     };
-    expect(
-      () => assertCompanionComponentIsCompatible(app, host),
-    ).not.toThrow();
+    expect(() => assertCompanionComponentIsCompatible(app, host)).not.toThrow();
   });
 });
 
 describe('given a Higgs CU2 device', () => {
-  const hostInfo = { ...makeHost('higgs'), device: 'Higgs 27.31.1.29', capabilities: {} };
+  const hostInfo = {
+    ...makeHost('higgs'),
+    device: 'Higgs 27.31.1.29',
+    capabilities: {},
+  };
 
   it('is compatible with Higgs apps', () => {
-    expect(findCompatibleAppComponent(makeAppPackage('alpha', 'higgs'), hostInfo))
-      .toBe('higgs');
+    expect(
+      findCompatibleAppComponent(makeAppPackage('alpha', 'higgs'), hostInfo),
+    ).toBe('higgs');
   });
 
   it('is incompatible with non-Higgs apps', () => {
-    expect(() => findCompatibleAppComponent(makeAppPackage('Alpha', 'Beta'), hostInfo))
-      .toThrowErrorMatchingSnapshot();
+    expect(() =>
+      findCompatibleAppComponent(makeAppPackage('Alpha', 'Beta'), hostInfo),
+    ).toThrowErrorMatchingSnapshot();
   });
 
   describe('with a compatibility matrix', () => {
-    const compatibleHiggs = { ...makeHost('alpha'), device: 'Higgs 27.31.1.29' };
+    const compatibleHiggs = {
+      ...makeHost('alpha'),
+      device: 'Higgs 27.31.1.29',
+    };
 
     it('respects the compatibility matrix', () => {
-      expect(findCompatibleAppComponent(makeAppPackage('alpha'), compatibleHiggs))
-        .toBe('alpha');
+      expect(
+        findCompatibleAppComponent(makeAppPackage('alpha'), compatibleHiggs),
+      ).toBe('alpha');
     });
 
     it('ignores the "device" string', () => {
-      expect(() => findCompatibleAppComponent(makeAppPackage('Higgs'), compatibleHiggs))
-        .toThrowErrorMatchingSnapshot();
+      expect(() =>
+        findCompatibleAppComponent(makeAppPackage('Higgs'), compatibleHiggs),
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 });
 
 it('ignores the "device" string for Higgs CU3', () => {
-  expect(() => findCompatibleAppComponent(
-    makeAppPackage('Higgs'),
-    { ...makeHost(), device: 'Higgs 27.32.1.2' },
-  )).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    findCompatibleAppComponent(makeAppPackage('Higgs'), {
+      ...makeHost(),
+      device: 'Higgs 27.32.1.2',
+    }),
+  ).toThrowErrorMatchingSnapshot();
 });

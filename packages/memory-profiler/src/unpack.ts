@@ -20,9 +20,10 @@ const mapValues = <T, U>(
   mapper: (value: T, key: string, index: number) => Promise<U> | U,
 ) =>
   Promise.all(
-    Object.entries(obj).map(
-      async ([key, value], index) => ({ [key]: await mapper(value, key, index) })),
-  ).then(entries => entries.reduce((a, b) => ({ ...a, ...b }), {}));
+    Object.entries(obj).map(async ([key, value], index) => ({
+      [key]: await mapper(value, key, index),
+    })),
+  ).then((entries) => entries.reduce((a, b) => ({ ...a, ...b }), {}));
 
 function validateOrThrow<A, O, I>(type: t.Type<A, O, I>, data: I): A {
   return pipe(
@@ -31,12 +32,15 @@ function validateOrThrow<A, O, I>(type: t.Type<A, O, I>, data: I): A {
       (errors) => {
         throw new Error(failure(errors).join('\n'));
       },
-      validatedData => validatedData,
+      (validatedData) => validatedData,
     ),
   );
 }
 
-function normalizeRawNode({ id, type, size, repr }: RawNode, rawNodes: RawNodeMap): Node {
+function normalizeRawNode(
+  { id, type, size, repr }: RawNode,
+  rawNodes: RawNodeMap,
+): Node {
   if (Array.isArray(repr)) {
     const [source, line, column, name] = repr;
     return {
@@ -48,7 +52,10 @@ function normalizeRawNode({ id, type, size, repr }: RawNode, rawNodes: RawNodeMa
         column,
         name: name || undefined,
         // TODO: this isn't right, but it was how it behaved before the TS update
-        source: typeof source === 'string' ? source : rawNodes[source].repr as string,
+        source:
+          typeof source === 'string'
+            ? source
+            : (rawNodes[source].repr as string),
       },
     };
   }
@@ -60,7 +67,10 @@ function normalizeRawNode({ id, type, size, repr }: RawNode, rawNodes: RawNodeMa
   return { id, type, size };
 }
 
-function normalizeRawEdge({ type, to, from, name }: RawEdge, nodes: NodeMap): Edge {
+function normalizeRawEdge(
+  { type, to, from, name }: RawEdge,
+  nodes: NodeMap,
+): Edge {
   if (typeof name === 'string') {
     return { type, to, from, name };
   }
@@ -91,7 +101,7 @@ async function applySourceMap(
 ) {
   const sourceMapConsumers = await mapValues(
     lodash(rawSourceMaps).pickBy().value() as lodash.Dictionary<RawSourceMap>,
-    async map => new SourceMapConsumer(map),
+    async (map) => new SourceMapConsumer(map),
   );
 
   for (const node of Object.values(nodes)) {
@@ -122,9 +132,9 @@ export default async function unpack(
   version: string,
   rawSourceMaps: ComponentSourceMaps,
 ): Promise<{
-  version: 'jerryscript-1',
-  nodes: NodeMap,
-  edges: Edge[],
+  version: 'jerryscript-1';
+  nodes: NodeMap;
+  edges: Edge[];
 }> {
   if (version !== 'jerryscript-1') {
     throw new Error(`Unknown heap snapshot format "${version}"`);
@@ -132,7 +142,10 @@ export default async function unpack(
 
   const snapshotCBOR = cbor.decodeFirstSync(snapshotBuffer);
 
-  const { meta, items: packedItems } = validateOrThrow(HeapSnapshot, snapshotCBOR);
+  const { meta, items: packedItems } = validateOrThrow(
+    HeapSnapshot,
+    snapshotCBOR,
+  );
 
   const rawNodes: RawNodeMap = {};
   const rawEdges: RawEdge[] = [];
@@ -162,10 +175,12 @@ export default async function unpack(
       });
       rawNodes[rawNode.id] = rawNode;
     } else {
-      rawEdges.push(validateOrThrow(RawEdge, {
-        type: itemType,
-        ...unpackFields(meta.edgeFields),
-      }));
+      rawEdges.push(
+        validateOrThrow(RawEdge, {
+          type: itemType,
+          ...unpackFields(meta.edgeFields),
+        }),
+      );
     }
   }
 
@@ -174,7 +189,7 @@ export default async function unpack(
     nodes[rawNode.id] = normalizeRawNode(rawNode, rawNodes);
   }
 
-  const edges = rawEdges.map(rawEdge => normalizeRawEdge(rawEdge, nodes));
+  const edges = rawEdges.map((rawEdge) => normalizeRawEdge(rawEdge, nodes));
 
   await applySourceMap(nodes, rawSourceMaps);
 

@@ -10,7 +10,11 @@ declare function map<T, TResult, Input extends Iterable<T>>(
 
 declare function map<T extends object, TResult>(
   input: T,
-  iteratee: (value: T[keyof T], index: string, collection: T) => Promise<TResult>,
+  iteratee: (
+    value: T[keyof T],
+    index: string,
+    collection: T,
+  ) => Promise<TResult>,
 ): Promise<{ [K in keyof T]: TResult }>;
 
 export default map;

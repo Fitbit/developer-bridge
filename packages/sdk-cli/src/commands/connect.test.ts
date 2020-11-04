@@ -62,12 +62,14 @@ const mockRelayHostsResponse = {
   device: (hosts: developerRelay.Host[]) =>
     relayHostsSpy.mockResolvedValueOnce({ appHost: hosts, companionHost: [] }),
   phone: (hosts: developerRelay.Host[]) =>
-  relayHostsSpy.mockResolvedValueOnce({ appHost: [], companionHost: hosts }),
+    relayHostsSpy.mockResolvedValueOnce({ appHost: [], companionHost: hosts }),
 };
 
 beforeEach(() => {
   hostConnections = new HostConnections();
-  ({ cli, mockLog, mockPrompt } = commandTestHarness(connect({ hostConnections })));
+  ({ cli, mockLog, mockPrompt } = commandTestHarness(
+    connect({ hostConnections }),
+  ));
   relayHostsSpy = jest.spyOn(developerRelay, 'hosts');
   hostConnectSpy = jest.spyOn(hostConnections, 'connect');
   mockWS = new events.EventEmitter();
@@ -81,81 +83,74 @@ function doConnect(type: DeviceType) {
 describe.each<[DeviceType, HostType]>([
   ['device', 'appHost'],
   ['phone', 'companionHost'],
-])(
-  'when the device type argument is %s',
-  (deviceType, hostType) => {
-    it(`logs an error if no ${deviceType}s are connected`, async () => {
-      mockRelayHostsResponse[deviceType]([]);
-      await doConnect(deviceType);
+])('when the device type argument is %s', (deviceType, hostType) => {
+  it(`logs an error if no ${deviceType}s are connected`, async () => {
+    mockRelayHostsResponse[deviceType]([]);
+    await doConnect(deviceType);
+    expect(mockLog.mock.calls[0]).toMatchSnapshot();
+  });
+
+  describe(`when a single ${deviceType} is connected`, () => {
+    let mockHost: developerRelay.Host;
+
+    beforeEach(() => {
+      mockHost = mockRelayHosts[deviceType][0];
+      mockRelayHostsResponse[deviceType]([mockHost]);
+      return doConnect(deviceType);
+    });
+
+    it('does not prompt the user to select a host', () => {
+      expect(mockPrompt).not.toBeCalled();
+    });
+
+    it('logs a message explaining the auto-connection', () => {
       expect(mockLog.mock.calls[0]).toMatchSnapshot();
     });
 
-    describe(`when a single ${deviceType} is connected`, () => {
-      let mockHost: developerRelay.Host;
-
-      beforeEach(() => {
-        mockHost = mockRelayHosts[deviceType][0];
-        mockRelayHostsResponse[deviceType]([mockHost]);
-        return doConnect(deviceType);
-      });
-
-      it('does not prompt the user to select a host', () => {
-        expect(mockPrompt).not.toBeCalled();
-      });
-
-      it('logs a message explaining the auto-connection', () => {
-        expect(mockLog.mock.calls[0]).toMatchSnapshot();
-      });
-
-      it('acquires a developer relay connection for the given host type and ID', () => {
-        expect(hostConnectSpy).toBeCalledWith(hostType, mockHost.id);
-      });
-
-      it('logs a message when the host disconnects', () => {
-        mockWS.emit('finish');
-        expect(mockLog.mock.calls[1]).toMatchSnapshot();
-      });
+    it('acquires a developer relay connection for the given host type and ID', () => {
+      expect(hostConnectSpy).toBeCalledWith(hostType, mockHost.id);
     });
 
-    describe(`when multiple ${deviceType}s are connected`, () => {
-      let mockSelectedHost: developerRelay.Host;
+    it('logs a message when the host disconnects', () => {
+      mockWS.emit('finish');
+      expect(mockLog.mock.calls[1]).toMatchSnapshot();
+    });
+  });
 
-      beforeEach(() => {
-        const mockHosts = mockRelayHosts[deviceType];
-        mockSelectedHost = mockHosts[1];
-        mockRelayHostsResponse[deviceType](mockHosts);
-        mockPrompt.mockResolvedValueOnce({
-          hostID: {
-            id: mockSelectedHost.id,
-            displayName: mockSelectedHost.displayName,
-          },
-        });
-        return doConnect(deviceType);
-      });
+  describe(`when multiple ${deviceType}s are connected`, () => {
+    let mockSelectedHost: developerRelay.Host;
 
-      it('prompts the user to select a host', () => {
-        expect(mockPrompt).toBeCalled();
+    beforeEach(() => {
+      const mockHosts = mockRelayHosts[deviceType];
+      mockSelectedHost = mockHosts[1];
+      mockRelayHostsResponse[deviceType](mockHosts);
+      mockPrompt.mockResolvedValueOnce({
+        hostID: {
+          id: mockSelectedHost.id,
+          displayName: mockSelectedHost.displayName,
+        },
       });
-
-      it('acquires a developer relay connection for the given host type and ID', () => {
-        expect(hostConnectSpy).toBeCalledWith(hostType, mockSelectedHost.id);
-      });
+      return doConnect(deviceType);
     });
 
-    it('logs an error if the hosts call throws', async () => {
-      relayHostsSpy.mockRejectedValueOnce(new Error('some error'));
-      await doConnect(deviceType);
-      expect(mockLog.mock.calls[0]).toMatchSnapshot();
+    it('prompts the user to select a host', () => {
+      expect(mockPrompt).toBeCalled();
     });
-  },
-);
+
+    it('acquires a developer relay connection for the given host type and ID', () => {
+      expect(hostConnectSpy).toBeCalledWith(hostType, mockSelectedHost.id);
+    });
+  });
+
+  it('logs an error if the hosts call throws', async () => {
+    relayHostsSpy.mockRejectedValueOnce(new Error('some error'));
+    await doConnect(deviceType);
+    expect(mockLog.mock.calls[0]).toMatchSnapshot();
+  });
+});
 
 it('does not show busy hosts', async () => {
-  mockRelayHostsResponse.device([
-    mockAppHost,
-    mockAppHost2,
-    mockBusyAppHost,
-  ]);
+  mockRelayHostsResponse.device([mockAppHost, mockAppHost2, mockBusyAppHost]);
 
   mockPrompt.mockResolvedValueOnce({
     hostID: {
@@ -165,12 +160,14 @@ it('does not show busy hosts', async () => {
   });
 
   await doConnect('device');
-  expect(mockPrompt).toBeCalledWith(expect.objectContaining({
-    choices: [mockAppHost, mockAppHost2].map(host => ({
-      value: { id: host.id, displayName: host.displayName },
-      name: host.displayName,
-    })),
-  }));
+  expect(mockPrompt).toBeCalledWith(
+    expect.objectContaining({
+      choices: [mockAppHost, mockAppHost2].map((host) => ({
+        value: { id: host.id, displayName: host.displayName },
+        name: host.displayName,
+      })),
+    }),
+  );
 });
 
 it('does not auto-connect a busy host', async () => {

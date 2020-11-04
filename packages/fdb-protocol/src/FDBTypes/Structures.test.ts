@@ -8,8 +8,8 @@ function testAType<S, A>(
   description: string,
   type: Type<S, A>,
   vectors: {
-    accepts: { [key: string]: any },
-    rejects: { [key: string]: any },
+    accepts: { [key: string]: any };
+    rejects: { [key: string]: any };
   },
 ) {
   describe(description, () => {
@@ -95,8 +95,10 @@ describe('Semver', () => {
         pipe(
           types.Semver.decode(version),
           fold(
-            () => { throw new Error('decode error'); },
-            version => version,
+            () => {
+              throw new Error('decode error');
+            },
+            (version) => version,
           ),
         ),
       ).toBe(expected));
@@ -104,7 +106,8 @@ describe('Semver', () => {
 
   describe.each(['01.2.3', '', '1.2', 'asdf', 3])('rejects %j', (value) => {
     test('in .is()', () => expect(types.Semver.is(value)).toBe(false));
-    test('in .decode()', () => expect(isLeft(types.Semver.decode(value))).toBeTruthy());
+    test('in .decode()', () =>
+      expect(isLeft(types.Semver.decode(value))).toBeTruthy());
   });
 });
 

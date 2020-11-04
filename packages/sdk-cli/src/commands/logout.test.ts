@@ -19,6 +19,8 @@ beforeEach(() => {
   return cli.exec('logout');
 });
 
-it('logs the user out',  () => expect(auth.logout as jest.Mock).toBeCalled());
-it('exits the shell with code 0', () => expect(processExitSpy).toBeCalledWith(0));
-it('logs a message to the user', () => expect(mockLog).toBeCalledWith('Logged out'));
+it('logs the user out', () => expect(auth.logout as jest.Mock).toBeCalled());
+it('exits the shell with code 0', () =>
+  expect(processExitSpy).toBeCalledWith(0));
+it('logs a message to the user', () =>
+  expect(mockLog).toBeCalledWith('Logged out'));

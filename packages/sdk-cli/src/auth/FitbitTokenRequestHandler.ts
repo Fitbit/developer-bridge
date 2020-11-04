@@ -1,6 +1,4 @@
-import {
-  AuthorizationServiceConfiguration,
-} from '@openid/appauth/built/authorization_service_configuration';
+import { AuthorizationServiceConfiguration } from '@openid/appauth/built/authorization_service_configuration';
 import { AppAuthError } from '@openid/appauth/built/errors';
 import { RevokeTokenRequest } from '@openid/appauth/built/revoke_token_request';
 import {
@@ -8,9 +6,7 @@ import {
   TokenError,
   TokenResponse,
 } from '@openid/appauth/built/token_response';
-import {
-  TokenRequestHandler,
-} from '@openid/appauth/built/token_request_handler';
+import { TokenRequestHandler } from '@openid/appauth/built/token_request_handler';
 import { BasicQueryStringUtils } from '@openid/appauth/built/query_string_utils';
 import * as t from 'io-ts';
 
@@ -35,11 +31,7 @@ const FitbitTokenResponse = t.interface({
   access_token: t.string,
   refresh_token: t.string,
   expires_in: t.number,
-  token_type: t.union([
-    t.literal('bearer'),
-    t.literal('mac'),
-    t.undefined,
-  ]),
+  token_type: t.union([t.literal('bearer'), t.literal('mac'), t.undefined]),
 });
 export type FitbitTokenResponse = t.TypeOf<typeof FitbitTokenResponse>;
 
@@ -57,34 +49,30 @@ export default class FitbitTokenRequestHandler implements TokenRequestHandler {
     configuration: AuthorizationServiceConfiguration,
     request: RevokeTokenRequest,
   ): Promise<boolean> {
-    return fetch(
-      configuration.revocationEndpoint,
-      {
-        ...commonParams,
-        body: this.utils.stringify({
-          token: request.token,
-        }),
-      },
-    ).then(response => response.ok);
+    return fetch(configuration.revocationEndpoint, {
+      ...commonParams,
+      body: this.utils.stringify({
+        token: request.token,
+      }),
+    }).then((response) => response.ok);
   }
 
   async performTokenRequest(
     configuration: AuthorizationServiceConfiguration,
     request: {
-      toStringMap: () => Record<string, string>,
+      toStringMap: () => Record<string, string>;
     },
   ): Promise<TokenResponse> {
-    const response = await fetch(
-      configuration.tokenEndpoint,
-      {
-        ...commonParams,
-        body: this.utils.stringify(request.toStringMap()),
-      },
-    );
+    const response = await fetch(configuration.tokenEndpoint, {
+      ...commonParams,
+      body: this.utils.stringify(request.toStringMap()),
+    });
     const responseJson = await response.json();
 
     // AppAuth types insist this is lower case, but it's title-cased by Fitbit
-    if (responseJson.token_type) responseJson.token_type = responseJson.token_type.toLowerCase();
+    if (responseJson.token_type) {
+      responseJson.token_type = responseJson.token_type.toLowerCase();
+    }
 
     if (response.status === 200 && FitbitTokenResponse.is(responseJson)) {
       return new TokenResponse({
@@ -105,7 +93,9 @@ export default class FitbitTokenRequestHandler implements TokenRequestHandler {
     }
 
     throw new AppAuthError(
-      `Unexpected response format for status ${response.status}: ${JSON.stringify(responseJson)}`,
+      `Unexpected response format for status ${
+        response.status
+      }: ${JSON.stringify(responseJson)}`,
     );
   }
 }

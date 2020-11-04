@@ -20,7 +20,9 @@ let installActionSpy: jest.SpyInstance;
 beforeEach(() => {
   appContext = new AppContext();
   hostConnections = new HostConnections();
-  ({ cli } = commandTestHarness(buildAndInstall({ appContext, hostConnections })));
+  ({ cli } = commandTestHarness(
+    buildAndInstall({ appContext, hostConnections }),
+  ));
   buildActionSpy = jest.spyOn(build, 'buildAction');
   installActionSpy = jest.spyOn(install, 'installAction');
 

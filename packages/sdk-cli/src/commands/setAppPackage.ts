@@ -18,10 +18,14 @@ export const setAppPackageAction = async (
         // If we're using the same package, reload it incase it changed
         // on disk since we last installed.
         loadPath = appContext.appPackagePath;
-        cli.activeCommand.log(`No app package specified. Reloading ${loadPath}.`);
+        cli.activeCommand.log(
+          `No app package specified. Reloading ${loadPath}.`,
+        );
       } else {
         loadPath = defaultAppPath;
-        cli.activeCommand.log(`No app package specified. Using default ${loadPath}.`);
+        cli.activeCommand.log(
+          `No app package specified. Using default ${loadPath}.`,
+        );
       }
     }
 
@@ -41,6 +45,7 @@ export default function setAppPackage(stores: { appContext: AppContext }) {
       .types({ string: ['packagePath'] })
       .hidden()
       .action(async (args: vorpal.Args & { packagePath?: string }) =>
-        setAppPackageAction(cli, stores.appContext, args.packagePath));
+        setAppPackageAction(cli, stores.appContext, args.packagePath),
+      );
   };
 }

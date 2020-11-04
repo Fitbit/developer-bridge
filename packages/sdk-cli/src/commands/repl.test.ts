@@ -13,7 +13,8 @@ beforeEach(() => {
   ({ cli, mockLog } = commandTestHarness(repl({ hostConnections })));
 });
 
-const run = () => cli.exec('repl device');
+const run = (uuid?: string) =>
+  uuid ? cli.exec(`repl device ${uuid}`) : cli.exec('repl device');
 const cliMode = () => (cli.session as any)._mode;
 
 const mockHost = ({ hasEvalSupport }: { hasEvalSupport: boolean }) => {
@@ -30,7 +31,7 @@ const mockHost = ({ hasEvalSupport }: { hasEvalSupport: boolean }) => {
 const mockEval = () => hostConnections.appHost!.host.eval as jest.Mock;
 
 describe('no device is connected', () => {
-  beforeEach(run);
+  beforeEach(() => run());
 
   it('logs an error', () => {
     expect(mockLog.mock.calls[0][0]).toMatchSnapshot();
@@ -57,61 +58,78 @@ describe('connected device not support REPL', () => {
 });
 
 describe('connected device supports REPL', () => {
-  beforeEach(() => {
-    mockHost({ hasEvalSupport: true });
-    return run();
-  });
+  const uuid = 'af93f4e1-de78-4a32-8f39-4b34ee9425df';
 
-  it('logs an informational message explaining how to exit', () => {
-    expect(mockLog.mock.calls[0][0]).toMatchSnapshot();
-  });
+  beforeEach(() => mockHost({ hasEvalSupport: true }));
 
-  it('enters REPL mode', () => {
-    expect(cliMode()).not.toEqual(false);
-  });
+  describe('a UUID is specified', () => {
+    beforeEach(() => run(uuid));
 
-  describe('executing a statement', () => {
-    beforeEach(() => mockLog.mockClear());
-
-    it('sends the statement to the device', async () => {
+    it('sends the statement to the device with UUID', async () => {
       await cli.exec('console');
-      expect(hostConnections.appHost!.host.eval).toBeCalledWith('console');
-    });
-
-    it('logs the result on success', async () => {
-      const expectedResult = 'is a function';
-      mockEval().mockResolvedValueOnce({
-        success: true,
-        value: expectedResult,
-      });
-      await cli.exec('console');
-      expect(mockLog).toBeCalledWith(expectedResult);
-    });
-
-    it('does not log any result on failure', async () => {
-      mockEval().mockResolvedValueOnce({
-        success: false,
-      });
-      await cli.exec('console');
-      expect(mockLog).not.toBeCalled();
-    });
-
-    it('logs if an error occurs during eval', async () => {
-      mockEval().mockRejectedValueOnce(
-        new Error('something went wrong :('),
+      expect(hostConnections.appHost!.host.eval).toBeCalledWith(
+        'console',
+        uuid,
       );
-      await cli.exec('console');
+    });
+  });
+
+  describe('no UUID is specified', () => {
+    beforeEach(() => run());
+
+    it('logs an informational message explaining how to exit', () => {
       expect(mockLog.mock.calls[0][0]).toMatchSnapshot();
     });
 
-    describe('host disconnected since entering REPL', () => {
-      beforeEach(() => {
-        hostConnections.appHost!.host.rpc.ended = true;
-        return cli.exec('console');
+    it('enters REPL mode', () => {
+      expect(cliMode()).not.toEqual(false);
+    });
+
+    describe('executing a statement', () => {
+      beforeEach(() => mockLog.mockClear());
+
+      it('sends the statement to the device', async () => {
+        await cli.exec('console');
+        expect(hostConnections.appHost!.host.eval).toBeCalledWith(
+          'console',
+          undefined,
+        );
       });
 
-      it('logs an error', () => expect(mockLog.mock.calls[0][0]).toMatchSnapshot());
-      it('exits the REPL', () => expect(cliMode()).toEqual(false));
+      it('logs the result on success', async () => {
+        const expectedResult = 'is a function';
+        mockEval().mockResolvedValueOnce({
+          success: true,
+          value: expectedResult,
+        });
+        await cli.exec('console');
+        expect(mockLog).toBeCalledWith(expectedResult);
+      });
+
+      it('does not log any result on failure', async () => {
+        mockEval().mockResolvedValueOnce({
+          success: false,
+        });
+        await cli.exec('console');
+        expect(mockLog).not.toBeCalled();
+      });
+
+      it('logs if an error occurs during eval', async () => {
+        mockEval().mockRejectedValueOnce(new Error('something went wrong :('));
+        await cli.exec('console');
+        expect(mockLog.mock.calls[0][0]).toMatchSnapshot();
+      });
+
+      describe('host disconnected since entering REPL', () => {
+        beforeEach(() => {
+          hostConnections.appHost!.host.rpc.ended = true;
+          return cli.exec('console');
+        });
+
+        it('logs an error', () =>
+          expect(mockLog.mock.calls[0][0]).toMatchSnapshot());
+        it('exits the REPL', () => expect(cliMode()).toEqual(false));
+      });
     });
   });
 });

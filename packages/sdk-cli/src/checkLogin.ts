@@ -1,4 +1,3 @@
-
 import os from 'os';
 
 import * as auth from './auth';
@@ -11,7 +10,9 @@ async function checkEnvVarLogin() {
   if (!username && !password) return false;
 
   if (!username || !password) {
-    console.error('Both FITBIT_SDK_USERNAME and FITBIT_SDK_PASSWORD must be set');
+    console.error(
+      'Both FITBIT_SDK_USERNAME and FITBIT_SDK_PASSWORD must be set',
+    );
     process.exit(1);
   }
 
@@ -32,10 +33,10 @@ async function checkStoredLogin() {
     // thrown is a fatal error.
     accessToken = await auth.getAccessToken();
   } catch (ex) {
-    console.error(`Failed to read auth token from keychain: ${ex}`);
+    console.error(`Failed to read auth token from keychain: ${ex.message}`);
     if (os.platform() === 'darwin') {
       console.error(
-        'Try locking and then unlocking your \'login\' keychain using the Keychain Access app.',
+        "Try locking and then unlocking your 'login' keychain using the Keychain Access app.",
       );
     }
     process.exit(1);
@@ -55,7 +56,7 @@ async function checkStoredLogin() {
 export default async function checkLogin() {
   // Try to login using username/password from environment variables first if present, if not
   // use stored login and start browser login flow
-  if (!await checkEnvVarLogin()) {
+  if (!(await checkEnvVarLogin())) {
     await checkStoredLogin();
   }
 }

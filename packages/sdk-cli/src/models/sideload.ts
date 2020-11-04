@@ -11,11 +11,9 @@ export function app(
   onProgress: ProgressCallback,
   family = compatibility.findCompatibleAppComponent(appPackage, host.info),
 ) {
-  return host.installApp(
-    'app',
-    appPackage.components.device[family].artifact,
-    { onProgress },
-  );
+  return host.installApp('app', appPackage.components.device[family].artifact, {
+    onProgress,
+  });
 }
 
 export function companion(
@@ -24,9 +22,7 @@ export function companion(
   onProgress: ProgressCallback,
 ) {
   compatibility.assertCompanionComponentIsCompatible(appPackage, host.info);
-  return host.installApp(
-    'companion',
-    appPackage.components.companion!,
-    { onProgress },
-  );
+  return host.installApp('companion', appPackage.components.companion!, {
+    onProgress,
+  });
 }

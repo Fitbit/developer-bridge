@@ -74,7 +74,8 @@ export async function makePartialBundle(
   if (
     manifestIsIdentical &&
     deleteList.length === 0 &&
-    zipFile.filter((path, file) => path !== 'manifest.json' && !file.dir).length === 0
+    zipFile.filter((path, file) => path !== 'manifest.json' && !file.dir)
+      .length === 0
   ) {
     // There is nothing to install. There are no files to add or remove.
     return null;

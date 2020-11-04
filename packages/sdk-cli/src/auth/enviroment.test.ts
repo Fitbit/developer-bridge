@@ -19,19 +19,19 @@ beforeEach(() => {
   delete process.env.FITBIT_SDK_CLIENT_ID;
 });
 
-describe.each([
-  'int',
-  'stage',
-  'production',
-])('given an FITBIT_SDK_ENVIRONMENT value of "%s"', (env) => {
-  test('returns environment data', () => isValidEnv(env));
-});
+describe.each(['int', 'stage', 'production'])(
+  'given an FITBIT_SDK_ENVIRONMENT value of "%s"',
+  (env) => {
+    test('returns environment data', () => isValidEnv(env));
+  },
+);
 
-describe.each([
-  '__bad_env__',
-])('given an FITBIT_SDK_ENVIRONMENT value of "%s"', (env) => {
-  test('throws', () => isInvalidEnv(env));
-});
+describe.each(['__bad_env__'])(
+  'given an FITBIT_SDK_ENVIRONMENT value of "%s"',
+  (env) => {
+    test('throws', () => isInvalidEnv(env));
+  },
+);
 
 it('defaults to the production environment', () => {
   expect(environment()).toEqual(
@@ -46,12 +46,10 @@ it('uses FITBIT_SDK_CLIENT_ID if provided', () => {
 
   process.env.FITBIT_SDK_CLIENT_ID = clientId;
 
-  expect(environment()).toEqual(
-    {
-      config: expect.objectContaining({
-        clientId,
-      }),
-      environment: 'production',
-    },
-  );
+  expect(environment()).toEqual({
+    config: expect.objectContaining({
+      clientId,
+    }),
+    environment: 'production',
+  });
 });

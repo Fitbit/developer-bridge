@@ -44,10 +44,22 @@ beforeEach(async () => {
 describe('appURItoPOSIXPath()', () => {
   it.each([
     ['resolves a relative path', 'app://foo.js', 'foo.js'],
-    ['resolves a relative path containing a period', 'app://./foo.js', 'foo.js'],
-    ['resolves a relative path that traverses upwards', 'app://bar/../foo.js', 'foo.js'],
+    [
+      'resolves a relative path containing a period',
+      'app://./foo.js',
+      'foo.js',
+    ],
+    [
+      'resolves a relative path that traverses upwards',
+      'app://bar/../foo.js',
+      'foo.js',
+    ],
     ['resolves an absolute path', 'app:///foo.js', 'foo.js'],
-    ['resolves an absolute path with more than one level', 'app:///bar/foo.js', 'bar/foo.js'],
+    [
+      'resolves an absolute path with more than one level',
+      'app:///bar/foo.js',
+      'bar/foo.js',
+    ],
   ])('%s', (testName, appUri, expectedPath) => {
     expect(appURItoPOSIXPath(appUri)).toEqual(expectedPath);
   });
@@ -55,17 +67,22 @@ describe('appURItoPOSIXPath()', () => {
 
 describe('transformPosition()', () => {
   it('normalizes the source field', () => {
-    expect(transformPosition(
-      { source: 'app://foo.js', line: 10, column: 5 },
-      sourceMapConsumers,
-    )).toEqual(expect.objectContaining({
-      source: 'foo.js',
-    }));
+    expect(
+      transformPosition(
+        { source: 'app://foo.js', line: 10, column: 5 },
+        sourceMapConsumers,
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        source: 'foo.js',
+      }),
+    );
   });
 
   it('transforms source position using a sourcemap', () => {
-    expect(transformPosition(generated, sourceMapConsumers))
-      .toEqual(expect.objectContaining(original));
+    expect(transformPosition(generated, sourceMapConsumers)).toEqual(
+      expect.objectContaining(original),
+    );
   });
 
   it('does not transform positions with no matching sourcemap entry', () => {
@@ -91,7 +108,10 @@ describe('transformPosition()', () => {
   });
 
   it('does not transform position if the line on the mapped position does not exists', () => {
-    const positionSpy = jest.spyOn(sourceMapConsumers[generated.source], 'originalPositionFor');
+    const positionSpy = jest.spyOn(
+      sourceMapConsumers[generated.source],
+      'originalPositionFor',
+    );
     positionSpy.mockReturnValueOnce({
       source: 'input.js',
       line: null,
@@ -103,7 +123,10 @@ describe('transformPosition()', () => {
   });
 
   it('does not transform position if the column on the mapped position does not exists', () => {
-    const positionSpy = jest.spyOn(sourceMapConsumers[generated.source], 'originalPositionFor');
+    const positionSpy = jest.spyOn(
+      sourceMapConsumers[generated.source],
+      'originalPositionFor',
+    );
     positionSpy.mockReturnValueOnce({
       source: 'input.js',
       line: 10,
@@ -115,7 +138,10 @@ describe('transformPosition()', () => {
   });
 
   it('uses the generated position name if mapped position name does not exist', () => {
-    const positionSpy = jest.spyOn(sourceMapConsumers[generated.source], 'originalPositionFor');
+    const positionSpy = jest.spyOn(
+      sourceMapConsumers[generated.source],
+      'originalPositionFor',
+    );
     positionSpy.mockReturnValueOnce({
       source: original.source,
       line: original.line + 1,
@@ -147,14 +173,25 @@ describe('sourceMapMessage()', () => {
       app: sourceMapConsumers,
     };
 
-    expect(sourceMapMessage(mockMessage, componentSourceMapConsumers).position)
-      .toEqual(expect.objectContaining(original));
+    expect(
+      sourceMapMessage(mockMessage, componentSourceMapConsumers).position,
+    ).toEqual(expect.objectContaining(original));
   });
 
   it('transforms the stack positions of a trace message', async () => {
-    const original = { source: 'input.js', line: 100, column: 50, name: 'logFunc' };
+    const original = {
+      source: 'input.js',
+      line: 100,
+      column: 50,
+      name: 'logFunc',
+    };
     const original2 = { source: 'input.js', line: 200, column: 20 };
-    const generated = { source: 'output.js', line: 10, column: 5, name: 'outputFunc' };
+    const generated = {
+      source: 'output.js',
+      line: 10,
+      column: 5,
+      name: 'outputFunc',
+    };
     const generated2 = { source: 'output.js', line: 20, column: 2 };
 
     const sourceMap = new SourceMapGenerator({
@@ -177,7 +214,9 @@ describe('sourceMapMessage()', () => {
     });
 
     const traceSourceMapConsumers = {
-      app: { [generated.source]: await new SourceMapConsumer(sourceMap.toString()) },
+      app: {
+        [generated.source]: await new SourceMapConsumer(sourceMap.toString()),
+      },
     };
 
     const mockTrace = {
@@ -187,7 +226,9 @@ describe('sourceMapMessage()', () => {
       stack: [generated, generated2],
     };
 
-    expect(sourceMapMessage(mockTrace as ConsoleTrace, traceSourceMapConsumers).stack)
-      .toEqual([original, original2]);
+    expect(
+      sourceMapMessage(mockTrace as ConsoleTrace, traceSourceMapConsumers)
+        .stack,
+    ).toEqual([original, original2]);
   });
 });

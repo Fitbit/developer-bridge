@@ -1,25 +1,22 @@
 {
-    "compilerOptions": {
-        "composite": true,
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
 
-        "module": "commonjs",
-        "target": "es6",
-        "lib": ["es2017", "dom"],
-        "importHelpers": true,
-        "strict": true,
-        "noUnusedLocals": true,
-        "noEmitOnError": true,
-        "moduleResolution": "node",
-        "removeComments": true,
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "*",
-                "../types/*"
-            ]
-        }
+    "module": "commonjs",
+    "target": "es6",
+    "lib": ["es2017", "dom"],
+    "importHelpers": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noEmitOnError": true,
+    "moduleResolution": "node",
+    "removeComments": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*", "../types/*"]
     }
+  }
 }

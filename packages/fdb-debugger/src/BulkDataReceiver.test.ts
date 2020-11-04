@@ -13,10 +13,14 @@ it('registers closer methods with a common prefix', () => {
 
   expect(dispatcher.method).toHaveBeenCalledTimes(2);
   expect(dispatcher.method).toHaveBeenCalledWith(
-    'foo.bar.finalize', FDBTypes.StreamCloseParams, receiver.finalizeStream,
+    'foo.bar.finalize',
+    FDBTypes.StreamCloseParams,
+    receiver.finalizeStream,
   );
   expect(dispatcher.method).toHaveBeenCalledWith(
-    'foo.bar.abort', FDBTypes.StreamCloseParams, receiver.abortStream,
+    'foo.bar.abort',
+    FDBTypes.StreamCloseParams,
+    receiver.abortStream,
   );
 });
 
@@ -29,10 +33,14 @@ it('registers closer methods with arbitrary names', () => {
 
   expect(dispatcher.method).toHaveBeenCalledTimes(2);
   expect(dispatcher.method).toHaveBeenCalledWith(
-    'foo.bar.done', FDBTypes.StreamCloseParams, receiver.finalizeStream,
+    'foo.bar.done',
+    FDBTypes.StreamCloseParams,
+    receiver.finalizeStream,
   );
   expect(dispatcher.method).toHaveBeenCalledWith(
-    'bar.baz.undo', FDBTypes.StreamCloseParams, receiver.abortStream,
+    'bar.baz.undo',
+    FDBTypes.StreamCloseParams,
+    receiver.abortStream,
   );
 });
 
@@ -58,12 +66,18 @@ describe('when the stream open promise resolution is delayed', () => {
       createWriteStream: () => mockBulkDataStream as BulkDataStream,
     };
 
-    receiver = new BulkDataReceiver(mockBulkData as Partial<BulkData> as BulkData, 'test');
+    receiver = new BulkDataReceiver(
+      (mockBulkData as Partial<BulkData>) as BulkData,
+      'test',
+    );
 
-    openPromise = receiver.receiveFromStream(() => new Promise((resolve, reject) => {
-      openResolve = resolve;
-      openReject = reject;
-    }));
+    openPromise = receiver.receiveFromStream(
+      () =>
+        new Promise((resolve, reject) => {
+          openResolve = resolve;
+          openReject = reject;
+        }),
+    );
 
     openResolvedMockFn = jest.fn();
     openRejectedMockFn = jest.fn();
