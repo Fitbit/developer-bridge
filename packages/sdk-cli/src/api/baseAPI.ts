@@ -56,18 +56,28 @@ export const decodeJSON = <A, O, I>(endpointType: t.Type<A, O, I>) => (
 ): Promise<A> =>
   assertAPIResponseOK(response).then(assertJSON()).then(decode(endpointType));
 
-export async function apiFetch(path: string, init: RequestInit = {}) {
-  const authToken = await auth.getAccessToken();
-  if (!authToken) {
-    throw new Error(`Fetch of ${path} failed: no stored auth token`);
+export async function apiFetch(
+  path: string,
+  init: RequestInit = {},
+  apiUrl: string = environment().config.apiUrl,
+  shouldAuth = true,
+) {
+  const headers = new Headers(init.headers || {});
+
+  if (shouldAuth) {
+    const authToken = await auth.getAccessToken();
+    if (!authToken) {
+      throw new Error(`Fetch of ${path} failed: no stored auth token`);
+    }
+
+    headers.set('authorization', `Bearer ${authToken}`);
   }
 
-  const headers = new Headers(init.headers || {});
-  headers.set('authorization', `Bearer ${authToken}`);
   const mergedInit: RequestInit = {
     cache: 'no-store',
     ...init,
     headers,
   };
-  return fetch(`${environment().config.apiUrl}/${path}`, mergedInit);
+
+  return fetch(`${apiUrl}/${path}`, mergedInit);
 }

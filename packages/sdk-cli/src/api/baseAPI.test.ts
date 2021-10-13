@@ -1,12 +1,13 @@
 import nock from 'nock';
 
+jest.mock('../auth');
 import * as auth from '../auth';
+// Wrap export to an object to be able to mock the default export using spyOn(fetchModule, 'default')
+import * as fetchModule from '../fetch';
+
 import environment from '../auth/environment';
 import * as baseAPI from './baseAPI';
-import { Response } from '../fetch';
 import makeResponse from '../testUtils/makeResponse';
-
-jest.mock('../auth');
 
 const mockAccessTokenContent = 'mockAccess';
 const fakeAPIPath = 'fakeAPI';
@@ -21,6 +22,40 @@ describe('apiFetch()', () => {
     return expect(
       baseAPI.apiFetch(fakeAPIPath),
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it("doesn't authenticate if shouldAuth = false", async () => {
+    const response = await baseAPI.apiFetch(
+      fakeAPIPath,
+      undefined,
+      undefined,
+      false,
+    );
+    expect(response).toBeDefined();
+
+    // ASK: Is it lower- or upper-case? Case-insensitive?
+    expect(response.headers.has('authorization')).toBe(false);
+    expect(response.headers.has('Authorization')).toBe(false);
+  });
+
+  it('uses a custom API URL when specified', async () => {
+    jest
+      // ASK: is there a way to jest.mock('../fetch'), but RETAIN the original fetch() implementation,
+      // EXCEPT only if I explicitly do mockImpl/Return/etc?
+      .spyOn(fetchModule, 'default')
+      // ASK: mock implementation without type errors? E.g. just "(url: string) => url"
+      .mockImplementationOnce(async (url: string | RequestInfo) => url as any);
+
+    const fakeApiUrl = 'https://fakeurl.com';
+    // ASK Style conflict: fakeAPIPath vs fakeApiUrl
+    const response = await baseAPI.apiFetch(
+      fakeAPIPath,
+      undefined,
+      fakeApiUrl,
+      false,
+    );
+
+    return expect(response).toBe(`${fakeApiUrl}/${fakeAPIPath}`);
   });
 
   describe('when an auth token is available', () => {
@@ -61,7 +96,7 @@ describe('assertAPIResponseOK()', () => {
   it('resolves to a response object on status code 200', () => {
     return expect(
       baseAPI.assertAPIResponseOK(makeResponse()),
-    ).resolves.toBeInstanceOf(Response);
+    ).resolves.toBeInstanceOf(fetchModule.Response);
   });
 
   it('parses an error response with a valid JSON body', () => {
