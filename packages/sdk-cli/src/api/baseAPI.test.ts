@@ -1,6 +1,5 @@
 import nock from 'nock';
 
-jest.mock('../auth');
 import * as auth from '../auth';
 // Wrap export to an object to be able to mock the default export using spyOn(fetchModule, 'default')
 import * as fetchModule from '../fetch';
@@ -8,6 +7,8 @@ import * as fetchModule from '../fetch';
 import environment from '../auth/environment';
 import * as baseAPI from './baseAPI';
 import makeResponse from '../testUtils/makeResponse';
+
+jest.mock('../auth');
 
 const mockAccessTokenContent = 'mockAccess';
 const fakeAPIPath = 'fakeAPI';
@@ -32,30 +33,25 @@ describe('apiFetch()', () => {
       false,
     );
     expect(response).toBeDefined();
-
-    // ASK: Is it lower- or upper-case? Case-insensitive?
     expect(response.headers.has('authorization')).toBe(false);
-    expect(response.headers.has('Authorization')).toBe(false);
   });
 
   it('uses a custom API URL when specified', async () => {
     jest
-      // ASK: is there a way to jest.mock('../fetch'), but RETAIN the original fetch() implementation,
-      // EXCEPT only if I explicitly do mockImpl/Return/etc?
       .spyOn(fetchModule, 'default')
-      // ASK: mock implementation without type errors? E.g. just "(url: string) => url"
-      .mockImplementationOnce(async (url: string | RequestInfo) => url as any);
+      .mockImplementationOnce(
+        async (url: RequestInfo) => ({ url } as Response),
+      );
 
-    const fakeApiUrl = 'https://fakeurl.com';
-    // ASK Style conflict: fakeAPIPath vs fakeApiUrl
+    const fakeAPIDomain = 'ttps://fake-dev-relay-test-endpoint.fitbit.com';
     const response = await baseAPI.apiFetch(
       fakeAPIPath,
       undefined,
-      fakeApiUrl,
+      fakeAPIDomain,
       false,
     );
 
-    return expect(response).toBe(`${fakeApiUrl}/${fakeAPIPath}`);
+    return expect(response.url).toBe(`${fakeAPIDomain}/${fakeAPIPath}`);
   });
 
   describe('when an auth token is available', () => {
