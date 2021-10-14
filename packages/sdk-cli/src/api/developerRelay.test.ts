@@ -10,12 +10,6 @@ import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
 jest.mock('websocket-stream', () => jest.fn());
 jest.mock('../auth');
 
-jest.mock('./developerRelay', () => ({
-  ...(jest.requireActual('./developerRelay') as DeveloperRelay),
-  hosts: jest.fn(),
-  connect: jest.fn(),
-}));
-
 const mockHostID = 'fakeHost';
 
 const mockAppHost = {
