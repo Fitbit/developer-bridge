@@ -4,6 +4,7 @@ import websocketStream from 'websocket-stream';
 
 import { apiFetch, assertAPIResponseOK, decodeJSON } from './baseAPI';
 import { assertContentType } from '../util/fetchUtil';
+import environment from '../auth/environment';
 
 // tslint:disable-next-line:variable-name
 export const Host = t.type(
@@ -17,6 +18,8 @@ export const Host = t.type(
 );
 export type Host = t.TypeOf<typeof Host>;
 
+export type Hosts = { appHost: Host[]; companionHost: Host[] };
+
 // tslint:disable-next-line:variable-name
 const HostsResponse = t.type(
   {
@@ -25,41 +28,67 @@ const HostsResponse = t.type(
   'HostsResponse',
 );
 
-async function getConnectionURL(hostID: string) {
-  const response = await apiFetch(`1/user/-/developer-relay/hosts/${hostID}`, {
-    method: 'POST',
-  })
-    .then(assertAPIResponseOK)
-    .then(assertContentType('text/uri-list'));
-  const uriList = (await response.text())
-    .split('\r\n')
-    .filter((line) => line[0] !== '#');
-  return uriList[0];
-}
+export class DeveloperRelay {
+  constructor(
+    private apiUrl: string = environment().config.apiUrl,
+    private shouldAuth: boolean = true,
+  ) {}
 
-function createWebSocket(uri: string) {
-  return new Promise<stream.Duplex>((resolve, reject) => {
-    const ws = websocketStream(uri, { objectMode: true });
-    ws.on('connect', () => resolve(ws));
-    ws.on('error', (e) => reject(e));
-  });
-}
+  async connect(hostID: string): Promise<stream.Duplex> {
+    const url = await this.getConnectionURL(
+      hostID,
+      this.apiUrl,
+      this.shouldAuth,
+    );
 
-export async function connect(hostID: string) {
-  const url = await getConnectionURL(hostID);
-  return createWebSocket(url);
-}
+    return this.createWebSocket(url);
+  }
 
-export async function hosts() {
-  const response = await apiFetch('1/user/-/developer-relay/hosts.json').then(
-    decodeJSON(HostsResponse),
-  );
+  async hosts(): Promise<Hosts> {
+    const response = await apiFetch(
+      '1/user/-/developer-relay/hosts.json',
+      undefined,
+      this.apiUrl,
+      this.shouldAuth,
+    ).then(decodeJSON(HostsResponse));
 
-  const hostsWithRole = (role: string) =>
-    response.hosts.filter((host) => host.roles.includes(role));
+    const hostsWithRole = (role: string) =>
+      response.hosts.filter((host) => host.roles.includes(role));
 
-  return {
-    appHost: hostsWithRole('APP_HOST'),
-    companionHost: hostsWithRole('COMPANION_HOST'),
-  };
+    return {
+      appHost: hostsWithRole('APP_HOST'),
+      companionHost: hostsWithRole('COMPANION_HOST'),
+    };
+  }
+
+  private async getConnectionURL(
+    hostID: string,
+    apiUrl?: string,
+    shouldAuth?: boolean,
+  ): Promise<string> {
+    const response = await apiFetch(
+      `1/user/-/developer-relay/hosts/${hostID}`,
+      {
+        method: 'POST',
+      },
+      apiUrl,
+      shouldAuth,
+    )
+      .then(assertAPIResponseOK)
+      .then(assertContentType('text/uri-list'));
+
+    const uriList = (await response.text())
+      .split('\r\n')
+      .filter((line) => line[0] !== '#');
+
+    return uriList[0];
+  }
+
+  private createWebSocket(uri: string): Promise<stream.Duplex> {
+    return new Promise<stream.Duplex>((resolve, reject) => {
+      const ws = websocketStream(uri, { objectMode: true });
+      ws.on('connect', () => resolve(ws));
+      ws.on('error', (e) => reject(e));
+    });
+  }
 }

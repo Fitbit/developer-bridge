@@ -8,6 +8,7 @@ import * as developerRelay from '../api/developerRelay';
 import HostConnections from '../models/HostConnections';
 
 export const RELAY_PKG_NAME = '@fitbit/local-developer-relay';
+import { DeveloperRelay, Host } from '../api/developerRelay';
 
 export type DeviceType = 'device' | 'phone';
 
@@ -15,15 +16,19 @@ export const connectAction = async (
   cli: vorpal,
   deviceType: DeviceType,
   hostConnections: HostConnections,
-  local: boolean = false,
+  relayAddress?: string,
 ) => {
   let hosts: {
-    appHost: developerRelay.Host[];
-    companionHost: developerRelay.Host[];
+    appHost: Host[];
+    companionHost: Host[];
   };
 
+  const relayInstance: DeveloperRelay = relayAddress
+    ? new DeveloperRelay(relayAddress, false)
+    : new DeveloperRelay();
+
   try {
-    hosts = await developerRelay.hosts();
+    hosts = await relayInstance.hosts();
   } catch (error) {
     cli.log(
       // tslint:disable-next-line:max-line-length
@@ -71,7 +76,11 @@ export const connectAction = async (
     ).hostID;
   }
 
-  const connection = await hostConnections.connect(hostType, host.id);
+  const connection = await hostConnections.connect(
+    hostType,
+    host.id,
+    relayInstance,
+  );
   connection.ws.once('finish', () =>
     cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`),
   );

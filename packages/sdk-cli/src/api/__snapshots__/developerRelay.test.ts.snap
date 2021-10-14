@@ -1,13 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`connect() when the WebSocket connection is unsucessful throws 1`] = `"Connection failed!"`;
+exports[`$describeMessage connect() when the WebSocket connection is unsuccessful throws 1`] = `"Connection failed!"`;
 
-exports[`hosts() handles a 403 response with a malformed payload 1`] = `
+exports[`$describeMessage connect() when the WebSocket connection is unsuccessful throws 2`] = `"Connection failed!"`;
+
+exports[`$describeMessage hosts() handles a 403 response with a malformed payload 1`] = `
 [Error: fetch of https://api.fitbit.com:443/1/user/-/developer-relay/hosts.json returned status 403 Forbidden with body: {
   "message": "reason 2"
 }]
 `;
 
-exports[`hosts() handles a 403 response with a non JSON payload 1`] = `[Error: Fetch of https://api.fitbit.com:443/1/user/-/developer-relay/hosts.json returned status 403 Forbidden]`;
+exports[`$describeMessage hosts() handles a 403 response with a malformed payload 2`] = `
+[Error: fetch of https://fake-dev-relay-test-endpoint.fitbit.com/1/user/-/developer-relay/hosts.json returned status 403 Forbidden with body: {
+  "message": "reason 2"
+}]
+`;
 
-exports[`hosts() handles a non 403 error response 1`] = `[Error: Fetch of https://api.fitbit.com:443/1/user/-/developer-relay/hosts.json returned status 500 Internal Server Error]`;
+exports[`$describeMessage hosts() handles a 403 response with a non JSON payload 1`] = `[Error: Fetch of https://api.fitbit.com:443/1/user/-/developer-relay/hosts.json returned status 403 Forbidden]`;
+
+exports[`$describeMessage hosts() handles a 403 response with a non JSON payload 2`] = `[Error: Fetch of https://fake-dev-relay-test-endpoint.fitbit.com/1/user/-/developer-relay/hosts.json returned status 403 Forbidden]`;
+
+exports[`$describeMessage hosts() handles a non 403 error response 1`] = `[Error: Fetch of https://api.fitbit.com:443/1/user/-/developer-relay/hosts.json returned status 500 Internal Server Error]`;
+
+exports[`$describeMessage hosts() handles a non 403 error response 2`] = `[Error: Fetch of https://fake-dev-relay-test-endpoint.fitbit.com/1/user/-/developer-relay/hosts.json returned status 500 Internal Server Error]`;

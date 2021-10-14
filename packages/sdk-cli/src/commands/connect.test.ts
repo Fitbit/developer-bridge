@@ -4,40 +4,40 @@ import vorpal from '@moleculer/vorpal';
 
 import connect, { DeviceType } from './connect';
 import commandTestHarness from '../testUtils/commandTestHarness';
-import * as developerRelay from '../api/developerRelay';
+import { Host, DeveloperRelay } from '../api/developerRelay';
 import HostConnections, { HostType } from '../models/HostConnections';
 
 jest.mock('../models/HostConnections');
 
-const mockAppHost: developerRelay.Host = {
+const mockAppHost: Host = {
   id: 'apphost',
   displayName: 'App Host',
   roles: ['APP_HOST'],
   state: 'available',
 };
 
-const mockAppHost2: developerRelay.Host = {
+const mockAppHost2: Host = {
   id: 'apphost2',
   displayName: 'Another App Host',
   roles: ['APP_HOST'],
   state: 'available',
 };
 
-const mockCompanionHost: developerRelay.Host = {
+const mockCompanionHost: Host = {
   id: 'companionhost',
   displayName: 'Companion Host',
   roles: ['COMPANION_HOST'],
   state: 'available',
 };
 
-const mockCompanionHost2: developerRelay.Host = {
+const mockCompanionHost2: Host = {
   id: 'companionhost2',
   displayName: 'Another Companion Host',
   roles: ['COMPANION_HOST'],
   state: 'available',
 };
 
-const mockBusyAppHost: developerRelay.Host = {
+const mockBusyAppHost: Host = {
   id: 'apphost3',
   displayName: 'Yet Another App Host',
   roles: ['APP_HOST'],
@@ -59,9 +59,9 @@ let relayHostsSpy: jest.SpyInstance;
 let hostConnectSpy: jest.SpyInstance;
 
 const mockRelayHostsResponse = {
-  device: (hosts: developerRelay.Host[]) =>
+  device: (hosts: Host[]) =>
     relayHostsSpy.mockResolvedValueOnce({ appHost: hosts, companionHost: [] }),
-  phone: (hosts: developerRelay.Host[]) =>
+  phone: (hosts: Host[]) =>
     relayHostsSpy.mockResolvedValueOnce({ appHost: [], companionHost: hosts }),
 };
 
@@ -70,7 +70,7 @@ beforeEach(() => {
   ({ cli, mockLog, mockPrompt } = commandTestHarness(
     connect({ hostConnections }),
   ));
-  relayHostsSpy = jest.spyOn(developerRelay, 'hosts');
+  relayHostsSpy = jest.spyOn(DeveloperRelay.prototype, 'hosts');
   hostConnectSpy = jest.spyOn(hostConnections, 'connect');
   mockWS = new events.EventEmitter();
   hostConnectSpy.mockResolvedValueOnce({ ws: mockWS });
@@ -91,7 +91,7 @@ describe.each<[DeviceType, HostType]>([
   });
 
   describe(`when a single ${deviceType} is connected`, () => {
-    let mockHost: developerRelay.Host;
+    let mockHost: Host;
 
     beforeEach(() => {
       mockHost = mockRelayHosts[deviceType][0];
@@ -108,7 +108,11 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(hostType, mockHost.id);
+      expect(hostConnectSpy).toBeCalledWith(
+        hostType,
+        mockHost.id,
+        expect.any(DeveloperRelay),
+      );
     });
 
     it('logs a message when the host disconnects', () => {
@@ -118,7 +122,7 @@ describe.each<[DeviceType, HostType]>([
   });
 
   describe(`when multiple ${deviceType}s are connected`, () => {
-    let mockSelectedHost: developerRelay.Host;
+    let mockSelectedHost: Host;
 
     beforeEach(() => {
       const mockHosts = mockRelayHosts[deviceType];
@@ -138,7 +142,11 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(hostType, mockSelectedHost.id);
+      expect(hostConnectSpy).toBeCalledWith(
+        hostType,
+        mockSelectedHost.id,
+        expect.any(DeveloperRelay),
+      );
     });
   });
 

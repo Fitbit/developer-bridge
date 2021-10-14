@@ -2,13 +2,14 @@ import stream from 'stream';
 
 import { RemoteHost } from '@fitbit/fdb-debugger';
 
-import * as developerRelay from '../api/developerRelay';
+import { DeveloperRelay } from '../api/developerRelay';
 import HostConnections, { HostType } from '../models/HostConnections';
 
 jest.mock('@fitbit/fdb-debugger');
 
 const mockHostID = 'mockHostID';
 const hostConnectedSpy = jest.fn();
+const relayInstance = new DeveloperRelay();
 
 let hostConnections: HostConnections;
 let relayConnectSpy: jest.SpyInstance;
@@ -23,12 +24,12 @@ function mockSentinel(spy: jest.SpyInstance) {
 beforeEach(() => {
   hostConnections = new HostConnections();
   hostConnections.onHostAdded.attach(hostConnectedSpy);
-  relayConnectSpy = jest.spyOn(developerRelay, 'connect');
+  relayConnectSpy = jest.spyOn(DeveloperRelay.prototype, 'connect');
   remoteHostSpy = jest.spyOn(RemoteHost, 'connect');
 });
 
 function doConnect(type: HostType) {
-  return hostConnections.connect(type, mockHostID);
+  return hostConnections.connect(type, mockHostID, relayInstance);
 }
 
 describe.each<HostType>(['appHost', 'companionHost'])(

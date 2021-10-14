@@ -4,11 +4,17 @@ import websocketStream from 'websocket-stream';
 
 import * as auth from '../auth';
 import environment from '../auth/environment';
-import * as developerRelay from './developerRelay';
+import { DeveloperRelay } from './developerRelay';
 import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
 
 jest.mock('websocket-stream', () => jest.fn());
 jest.mock('../auth');
+
+jest.mock('./developerRelay', () => ({
+  ...(jest.requireActual('./developerRelay') as DeveloperRelay),
+  hosts: jest.fn(),
+  connect: jest.fn(),
+}));
 
 const mockHostID = 'fakeHost';
 
@@ -44,113 +50,143 @@ function mockConnectionURLResponse(hostID: string, response: string) {
     .reply(200, response, { 'Content-Type': 'text/uri-list' });
 }
 
-beforeEach(() => {
-  (auth.getAccessToken as jest.Mock).mockResolvedValueOnce('mockToken');
-  endpointMock = nock(environment().config.apiUrl);
-});
+describe.each([
+  {
+    shouldAuth: true,
+    authToken: 'mockToken',
+    apiUrl: environment().config.apiUrl,
+    describeMessage: 'default: require auth, valid auth token',
+  },
+  {
+    // If auth was to run, it would fail (because authToken = null).
+    // This is used to test that auth configuration is properly passed to apiFetch and auth DOESN'T run.
+    shouldAuth: false,
+    authToken: null,
+    apiUrl: 'https://fake-dev-relay-test-endpoint.fitbit.com',
+    describeMessage:
+      "configurable: don't require auth, invalid auth token, dummy API URL",
+  },
+])('$describeMessage', ({ shouldAuth, authToken, apiUrl, describeMessage }) => {
+  let developerRelay: DeveloperRelay;
 
-describe('hosts()', () => {
-  it('returns list of connected app hosts', async () => {
-    mockHostsSuccessResponse();
-    return expect(developerRelay.hosts()).resolves.toEqual(
-      expect.objectContaining({
-        appHost: [mockAppHost],
-      }),
-    );
+  // Custom API endpoint
+  beforeAll(() => {
+    developerRelay = new DeveloperRelay(apiUrl, shouldAuth);
   });
 
-  it('returns list of connected companion hosts', async () => {
-    mockHostsSuccessResponse();
-    return expect(developerRelay.hosts()).resolves.toEqual(
-      expect.objectContaining({
-        companionHost: [mockCompanionHost],
-      }),
-    );
+  beforeEach(() => {
+    (auth.getAccessToken as jest.Mock).mockResolvedValueOnce(authToken);
+    endpointMock = nock(apiUrl);
   });
 
-  it('returns empty lists if no hosts are connected', async () => {
-    mockHostsSuccessResponse([]);
-    return expect(developerRelay.hosts()).resolves.toEqual({
-      appHost: [],
-      companionHost: [],
+  afterAll(() => {
+    (developerRelay.hosts as jest.Mock).mockRestore();
+    (developerRelay.connect as jest.Mock).mockRestore();
+  });
+
+  describe('hosts()', () => {
+    it('returns list of connected app hosts', async () => {
+      mockHostsSuccessResponse();
+      return expect(developerRelay.hosts()).resolves.toEqual(
+        expect.objectContaining({
+          appHost: [mockAppHost],
+        }),
+      );
     });
-  });
 
-  it('ignores hosts with unknown roles', async () => {
-    mockHostsSuccessResponse([
-      {
-        ...mockAppHost,
-        roles: ['__bad_role__'],
-      },
-    ]);
-    return expect(developerRelay.hosts()).resolves.toEqual({
-      appHost: [],
-      companionHost: [],
+    it('returns list of connected companion hosts', async () => {
+      mockHostsSuccessResponse();
+      return expect(developerRelay.hosts()).resolves.toEqual(
+        expect.objectContaining({
+          companionHost: [mockCompanionHost],
+        }),
+      );
     });
-  });
 
-  it('parses a 403 response for error reasons', async () => {
-    mockHostsResponse(403, {
-      errors: [{ message: 'reason 1' }, { message: 'reason 2' }],
-    });
-    return expect(developerRelay.hosts()).rejects.toEqual(
-      new Error('reason 1\nreason 2'),
-    );
-  });
-
-  it('handles a 403 response with a malformed payload', async () => {
-    mockHostsResponse(403, { message: 'reason 2' });
-    return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
-  });
-
-  it('handles a 403 response with a non JSON payload', async () => {
-    mockHostsResponse(403);
-    return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
-  });
-
-  it('handles a non 403 error response', async () => {
-    mockHostsResponse(500);
-    return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
-  });
-});
-
-describe('connect()', () => {
-  const mockConnectionURL = 'ws://device_url';
-  let mockWebSocket: stream.Duplex;
-  let socketPromise: Promise<void>;
-  let connectPromise: Promise<stream.Duplex>;
-
-  beforeEach(async () => {
-    mockWebSocket = new stream.Duplex();
-    socketPromise = mockWithPromiseWaiter(
-      websocketStream as any,
-      mockWebSocket,
-    );
-    mockConnectionURLResponse(mockHostID, `${mockConnectionURL}\r\n`);
-    connectPromise = developerRelay.connect(mockHostID);
-    await socketPromise;
-  });
-
-  describe('when the WebSocket connection is successful', () => {
-    beforeEach(() => mockWebSocket.emit('connect'));
-    afterEach(() => connectPromise);
-
-    it('opens a websocket connection to the retrieved URL', () => {
-      expect(websocketStream).toBeCalledWith(mockConnectionURL, {
-        objectMode: true,
+    it('returns empty lists if no hosts are connected', async () => {
+      mockHostsSuccessResponse([]);
+      return expect(developerRelay.hosts()).resolves.toEqual({
+        appHost: [],
+        companionHost: [],
       });
     });
 
-    it('returns a stream', () =>
-      expect(connectPromise).resolves.toBe(mockWebSocket));
+    it('ignores hosts with unknown roles', async () => {
+      mockHostsSuccessResponse([
+        {
+          ...mockAppHost,
+          roles: ['__bad_role__'],
+        },
+      ]);
+      return expect(developerRelay.hosts()).resolves.toEqual({
+        appHost: [],
+        companionHost: [],
+      });
+    });
+
+    it('parses a 403 response for error reasons', async () => {
+      mockHostsResponse(403, {
+        errors: [{ message: 'reason 1' }, { message: 'reason 2' }],
+      });
+      return expect(developerRelay.hosts()).rejects.toEqual(
+        new Error('reason 1\nreason 2'),
+      );
+    });
+
+    it('handles a 403 response with a malformed payload', async () => {
+      mockHostsResponse(403, { message: 'reason 2' });
+      return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
+    });
+
+    it('handles a 403 response with a non JSON payload', async () => {
+      mockHostsResponse(403);
+      return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
+    });
+
+    it('handles a non 403 error response', async () => {
+      mockHostsResponse(500);
+      return expect(developerRelay.hosts()).rejects.toMatchSnapshot();
+    });
   });
 
-  describe('when the WebSocket connection is unsucessful', () => {
-    beforeEach(() =>
-      mockWebSocket.emit('error', new Error('Connection failed!')),
-    );
+  describe('connect()', () => {
+    const mockConnectionURL = 'ws://device_url';
+    let mockWebSocket: stream.Duplex;
+    let socketPromise: Promise<void>;
+    let connectPromise: Promise<stream.Duplex>;
 
-    it('throws', () =>
-      expect(connectPromise).rejects.toThrowErrorMatchingSnapshot());
+    beforeEach(async () => {
+      mockWebSocket = new stream.Duplex();
+      socketPromise = mockWithPromiseWaiter(
+        websocketStream as any,
+        mockWebSocket,
+      );
+      mockConnectionURLResponse(mockHostID, `${mockConnectionURL}\r\n`);
+      connectPromise = developerRelay.connect(mockHostID);
+      await socketPromise;
+    });
+
+    describe('when the WebSocket connection is successful', () => {
+      beforeEach(() => mockWebSocket.emit('connect'));
+      afterEach(() => connectPromise);
+
+      it('opens a websocket connection to the retrieved URL', () => {
+        expect(websocketStream).toBeCalledWith(mockConnectionURL, {
+          objectMode: true,
+        });
+      });
+
+      it('returns a stream', () =>
+        expect(connectPromise).resolves.toBe(mockWebSocket));
+    });
+
+    describe('when the WebSocket connection is unsuccessful', () => {
+      beforeEach(() =>
+        mockWebSocket.emit('error', new Error('Connection failed!')),
+      );
+
+      it('throws', () =>
+        expect(connectPromise).rejects.toThrowErrorMatchingSnapshot());
+    });
   });
 });
