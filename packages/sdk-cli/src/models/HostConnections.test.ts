@@ -2,7 +2,7 @@ import stream from 'stream';
 
 import { RemoteHost } from '@fitbit/fdb-debugger';
 
-import { DeveloperRelay } from '../api/developerRelay';
+import DeveloperRelay from '../models/DeveloperRelay';
 import HostConnections, { HostType } from '../models/HostConnections';
 
 jest.mock('@fitbit/fdb-debugger');

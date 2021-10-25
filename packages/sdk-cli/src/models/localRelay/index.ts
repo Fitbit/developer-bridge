@@ -1,7 +1,18 @@
 import * as child_process from 'child_process';
-import { relayEntryPointPath, pollRelayInfo } from './relayInfo';
+import {
+  relayEntryPointPath,
+  pollRelayInfo,
+  RelayInfo,
+  readRelayInfo,
+} from './relayInfo';
 
-export default async function launch() {
+export { RelayInfo } from './relayInfo';
+
+export async function instance(): Promise<RelayInfo> {
+  return (await readRelayInfo()) || launch();
+}
+
+async function launch(): Promise<RelayInfo> {
   const relayJsPath = await relayEntryPointPath();
   // FORK:
   // https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options

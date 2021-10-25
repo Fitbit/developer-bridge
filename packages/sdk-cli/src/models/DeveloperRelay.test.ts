@@ -4,7 +4,7 @@ import websocketStream from 'websocket-stream';
 
 import * as auth from '../auth';
 import environment from '../auth/environment';
-import { DeveloperRelay } from './developerRelay';
+import DeveloperRelay from './DeveloperRelay';
 import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
 
 jest.mock('websocket-stream', () => jest.fn());
@@ -60,7 +60,7 @@ describe.each([
     describeMessage:
       "configurable: don't require auth, invalid auth token, dummy API URL",
   },
-])('$describeMessage', ({ shouldAuth, authToken, apiUrl, describeMessage }) => {
+])('$describeMessage', ({ shouldAuth, authToken, apiUrl }) => {
   let developerRelay: DeveloperRelay;
 
   // Custom API endpoint

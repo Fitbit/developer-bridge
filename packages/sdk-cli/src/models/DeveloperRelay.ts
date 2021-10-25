@@ -2,7 +2,8 @@ import * as t from 'io-ts';
 import stream from 'stream';
 import websocketStream from 'websocket-stream';
 
-import { apiFetch, assertAPIResponseOK, decodeJSON } from './baseAPI';
+import * as localRelay from '../models/localRelay';
+import { apiFetch, assertAPIResponseOK, decodeJSON } from '../api/baseAPI';
 import { assertContentType } from '../util/fetchUtil';
 import environment from '../auth/environment';
 
@@ -28,20 +29,25 @@ const HostsResponse = t.type(
   'HostsResponse',
 );
 
-export class DeveloperRelay {
+export default class DeveloperRelay {
   constructor(
-    private apiUrl: string = environment().config.apiUrl,
-    private shouldAuth: boolean = true,
+    public readonly apiUrl: string = environment().config.apiUrl,
+    public readonly shouldAuth: boolean = true,
   ) {}
 
-  async connect(hostID: string): Promise<stream.Duplex> {
-    const url = await this.getConnectionURL(
-      hostID,
-      this.apiUrl,
-      this.shouldAuth,
-    );
+  static async create(local = false) {
+    if (local) {
+      const { port } = await localRelay.instance();
+      return new DeveloperRelay(`http://localhost:${port}`, false);
+    } 
+      return new DeveloperRelay();
+    
+  }
 
-    return this.createWebSocket(url);
+  async connect(hostID: string): Promise<stream.Duplex> {
+    const url = await this.getConnectionURL(hostID);
+
+    return createWebSocket(url);
   }
 
   async hosts(): Promise<Hosts> {
@@ -61,18 +67,14 @@ export class DeveloperRelay {
     };
   }
 
-  private async getConnectionURL(
-    hostID: string,
-    apiUrl?: string,
-    shouldAuth?: boolean,
-  ): Promise<string> {
+  private async getConnectionURL(hostID: string): Promise<string> {
     const response = await apiFetch(
       `1/user/-/developer-relay/hosts/${hostID}`,
       {
         method: 'POST',
       },
-      apiUrl,
-      shouldAuth,
+      this.apiUrl,
+      this.shouldAuth,
     )
       .then(assertAPIResponseOK)
       .then(assertContentType('text/uri-list'));
@@ -83,12 +85,12 @@ export class DeveloperRelay {
 
     return uriList[0];
   }
+}
 
-  private createWebSocket(uri: string): Promise<stream.Duplex> {
-    return new Promise<stream.Duplex>((resolve, reject) => {
-      const ws = websocketStream(uri, { objectMode: true });
-      ws.on('connect', () => resolve(ws));
-      ws.on('error', (e) => reject(e));
-    });
-  }
+function createWebSocket(uri: string): Promise<stream.Duplex> {
+  return new Promise<stream.Duplex>((resolve, reject) => {
+    const ws = websocketStream(uri, { objectMode: true });
+    ws.on('connect', () => resolve(ws));
+    ws.on('error', (e) => reject(e));
+  });
 }

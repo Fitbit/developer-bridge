@@ -3,8 +3,9 @@ import events from 'events';
 import vorpal from '@moleculer/vorpal';
 
 import connect, { DeviceType } from './connect';
+import * as localRelay from '../models/localRelay';
+import DeveloperRelay, { Host } from '../models/DeveloperRelay';
 import commandTestHarness from '../testUtils/commandTestHarness';
-import { Host, DeveloperRelay } from '../api/developerRelay';
 import HostConnections, { HostType } from '../models/HostConnections';
 
 jest.mock('../models/HostConnections');
@@ -67,6 +68,7 @@ const mockRelayHostsResponse = {
 
 beforeEach(() => {
   hostConnections = new HostConnections();
+
   ({ cli, mockLog, mockPrompt } = commandTestHarness(
     connect({ hostConnections }),
   ));
@@ -78,6 +80,10 @@ beforeEach(() => {
 
 function doConnect(type: DeviceType) {
   return cli.exec(`connect ${type}`);
+}
+
+function doConnectLocal(type: DeviceType) {
+  return cli.exec(`connect ${type} --local`);
 }
 
 describe.each<[DeviceType, HostType]>([
@@ -154,6 +160,27 @@ describe.each<[DeviceType, HostType]>([
     relayHostsSpy.mockRejectedValueOnce(new Error('some error'));
     await doConnect(deviceType);
     expect(mockLog.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('connects using local relay', async () => {
+    const mockHost = mockRelayHosts[deviceType][0];
+    mockRelayHostsResponse[deviceType]([mockHost]);
+
+    const port = 1;
+    jest
+      .spyOn(localRelay, 'instance')
+      .mockImplementationOnce(async () => ({ port, pid: 1 }));
+
+    await doConnectLocal(deviceType);
+
+    expect(hostConnectSpy).toBeCalledWith(
+      hostType,
+      mockHost.id,
+      expect.objectContaining({
+        apiUrl: `http://localhost:${port}`,
+        shouldAuth: false,
+      }),
+    );
   });
 });
 

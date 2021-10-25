@@ -1,14 +1,8 @@
-import * as fs from 'fs/promises';
-import * as child_process from 'child_process';
-import { join } from 'path';
 import { startCase } from 'lodash';
 import vorpal from '@moleculer/vorpal';
 
-import * as developerRelay from '../api/developerRelay';
 import HostConnections from '../models/HostConnections';
-
-export const RELAY_PKG_NAME = '@fitbit/local-developer-relay';
-import { DeveloperRelay, Host } from '../api/developerRelay';
+import DeveloperRelay, { Host } from '../models/DeveloperRelay';
 
 export type DeviceType = 'device' | 'phone';
 
@@ -16,19 +10,17 @@ export const connectAction = async (
   cli: vorpal,
   deviceType: DeviceType,
   hostConnections: HostConnections,
-  relayAddress?: string,
+  local = false,
 ) => {
   let hosts: {
     appHost: Host[];
     companionHost: Host[];
   };
 
-  const relayInstance: DeveloperRelay = relayAddress
-    ? new DeveloperRelay(relayAddress, false)
-    : new DeveloperRelay();
+  const developerRelay = await DeveloperRelay.create(local);
 
   try {
-    hosts = await relayInstance.hosts();
+    hosts = await developerRelay.hosts();
   } catch (error) {
     cli.log(
       // tslint:disable-next-line:max-line-length
@@ -79,7 +71,7 @@ export const connectAction = async (
   const connection = await hostConnections.connect(
     hostType,
     host.id,
-    relayInstance,
+    developerRelay,
   );
   connection.ws.once('finish', () =>
     cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`),
@@ -88,84 +80,11 @@ export const connectAction = async (
   return true;
 };
 
-export async function startLocalRelayAction(cli: vorpal) {
-  if (!(await installRelayPkgPrompt(cli))) {
-    return;
-  }
-
-  const relayJsPath = await relayEntryPointPath();
-  // FORK:
-  // https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
-  // Unlike POSIX fork(), child_process.fork() creates a completely separate V8 process with its own memory.
-  // Dangers of POSIX fork() (https://www.evanjones.ca/fork-is-dangerous.html) don't apply.
-  child_process.fork(relayJsPath, {
-    detached: true,
-    // We don't want to read parent's stdin from child process, but we want to share the same stdout/stderr.
-    // 'ipc' is fork()'s requirement.
-    // https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
-    stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
-  });
-}
-
-async function isRelayPkgInstalled() {
-  // package.json _must_ be at the project root, and all dependencies _must_ be declared in package.json,
-  // so this is standard way to check for installed dependencies.
-  const { dependencies, devDependencies } = await readJsonFile(
-    join(process.cwd(), 'package.json'),
-  );
-
-  return dependencies?.[RELAY_PKG_NAME] || devDependencies?.[RELAY_PKG_NAME];
-}
-
-// Find the path to relay's entry point (executable) file (package.json -> "main" field)
-async function relayEntryPointPath(): Promise<string> {
-  const pkgPath = join('node_modules', RELAY_PKG_NAME);
-  const { main: entryPoint } = await readJsonFile(
-    join(process.cwd(), pkgPath, 'package.json'),
-  );
-
-  return join(process.cwd(), pkgPath, entryPoint);
-}
-
-async function readJsonFile(path: string): Promise<Record<string, any>> {
-  try {
-    return JSON.parse(await fs.readFile(path, { encoding: 'utf-8' }));
-  } catch (error) {
-    return {};
-  }
-}
-
-async function installRelayPkgPrompt(cli: vorpal): Promise<boolean> {
-  if (!(await isRelayPkgInstalled())) {
-    cli.log(
-      "Local Developer Relay isn't installed in the current project. Please install @fitbit/local-developer-relay.",
-    );
-
-    // There is no single way to install dependencies, and the tools used highly vary between projects.
-    // So we offload the responsibility of installing the @fitbit/local-developer-relay dependency to the user,
-    // and simply ask for a user confirmation of whether the package has been installed.
-    const { installed } = await cli.activeCommand.prompt({
-      type: 'confirm',
-      name: 'installed',
-      message: `Please confirm that @fitbit/local-developer-relay is installed:`,
-    });
-
-    // We can't do anything if the user answered "no" to the previous prompt.
-    if (!installed) {
-      cli.log(
-        'Sorry, but local connections (-l, --local flag) are only possible with @fitbit/local-developer-relay installed as a dependency in your project.',
-      );
-      return false;
-    }
-
-    // We can't fully trust the user's verbal installation confirmation, so we check it again.
-    return installRelayPkgPrompt(cli);
-  }
-
-  return true;
-}
-
-export default function (stores: { hostConnections: HostConnections }) {
+export default function ({
+  hostConnections,
+}: {
+  hostConnections: HostConnections;
+}) {
   return (cli: vorpal) => {
     const deviceTypes: DeviceType[] = ['device', 'phone'];
     for (const deviceType of deviceTypes) {
@@ -173,19 +92,12 @@ export default function (stores: { hostConnections: HostConnections }) {
         .command(`connect ${deviceType}`, `Connect a ${deviceType}`)
         .option('-l, --local', 'Connect using Local Relay')
         .action(
-          async (
+          (
             args: vorpal.Args & {
               options: vorpal.Args['options'] & { local?: boolean };
             },
-          ) => {
-            const local = args.options.local;
-
-            if (local) {
-              await startLocalRelayAction(cli);
-            }
-
-            await connectAction(cli, deviceType, stores.hostConnections, local);
-          },
+          ) =>
+            connectAction(cli, deviceType, hostConnections, args.options.local),
         );
     }
   };
