@@ -63,16 +63,11 @@ class HostConnections {
   appHost?: HostConnection;
   companionHost?: HostConnection;
 
-  async connect(
-    hostType: HostType,
-    hostId: string,
-    relayInstance: DeveloperRelay,
-  ) {
+  async connect(hostType: HostType, hostWs: stream.Duplex) {
     const existingHost = this[hostType];
     if (existingHost) existingHost.ws.destroy();
 
-    const ws = await relayInstance.connect(hostId);
-    const hostConnection = await HostConnection.connect(ws);
+    const hostConnection = await HostConnection.connect(hostWs);
     this[hostType] = hostConnection;
     this.onHostAdded.post({ hostType, host: hostConnection.host });
     return hostConnection;

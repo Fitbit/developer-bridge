@@ -68,11 +68,8 @@ export const connectAction = async (
     ).hostID;
   }
 
-  const connection = await hostConnections.connect(
-    hostType,
-    host.id,
-    developerRelay,
-  );
+  const ws = await developerRelay.connect(host.id);
+  const connection = await hostConnections.connect(hostType, ws);
   connection.ws.once('finish', () =>
     cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`),
   );
