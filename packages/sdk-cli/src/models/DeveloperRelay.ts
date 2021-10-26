@@ -39,9 +39,9 @@ export default class DeveloperRelay {
     if (local) {
       const { port } = await localRelay.instance();
       return new DeveloperRelay(`http://localhost:${port}`, false);
-    } 
-      return new DeveloperRelay();
-    
+    }
+
+    return new DeveloperRelay();
   }
 
   async connect(hostID: string): Promise<stream.Duplex> {
