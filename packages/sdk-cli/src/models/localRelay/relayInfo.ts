@@ -7,16 +7,12 @@ export type RelayInfo = { port: number; pid: number };
 
 export type ReadRelayInfoResult = RelayInfo | false;
 
-// Currently the only relay info keys are port and pid,
-// and the only requirement is for them to be integers.
-export const isValidRelayInfoKey = isInt;
-
 export async function readRelayInfo(): Promise<ReadRelayInfoResult> {
   try {
     const { port, pid } = await readJsonFile<RelayInfo>(RELAY_PID_FILE_PATH);
 
     // [port, pid].every(...) doesn't pass Control Flow Analysis. I.e. TS won't know port & pid are numbers.
-    if (isValidRelayInfoKey(port) && isValidRelayInfoKey(pid)) {
+    if (isInt(port) && isInt(pid)) {
       return {
         port: Number((port as unknown) as string),
         pid: Number((pid as unknown) as string),
@@ -67,10 +63,8 @@ export async function pollRelayInfo(
 }
 
 // Find the path to relay's entry point (executable) file (package.json -> "main" field)
-export async function relayEntryPointPath(
-  relayPkgName: string = RELAY_PKG_NAME,
-): Promise<string> {
-  const pkgPath = join('node_modules', relayPkgName);
+export async function relayEntryPointPath(): Promise<string> {
+  const pkgPath = join('node_modules', RELAY_PKG_NAME);
   const fullPath = join(cwd(), pkgPath, 'package.json');
 
   let entryPoint: string;

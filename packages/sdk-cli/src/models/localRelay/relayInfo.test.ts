@@ -2,7 +2,6 @@ import { join } from 'path';
 import { cwd } from 'process';
 import { RELAY_PKG_NAME } from './const';
 import {
-  isValidRelayInfoKey,
   pollRelayInfo,
   readRelayInfo,
   relayEntryPointPath,
@@ -13,20 +12,20 @@ import * as util from './util';
 describe('readRelayInfo', () => {
   describe.each([
     {
-      port: 5,
-      pid: 7,
+      isPortValid: true,
+      isPidValid: true,
       readJsonFileValue: { port: 5, pid: 7 },
       readRelayInfoValue: { port: 5, pid: 7 },
     },
     {
-      port: 5,
-      pid: '7',
+      isPortValid: true,
+      isPidValid: false,
       readJsonFileValue: { port: 5, pid: '7' },
       readRelayInfoValue: false,
     },
     {
-      port: '5',
-      pid: 7,
+      isPortValid: false,
+      isPidValid: true,
       readJsonFileValue: { port: '5', pid: 7 },
       readRelayInfoValue: false,
     },
@@ -38,30 +37,27 @@ describe('readRelayInfo', () => {
       readJsonFileValue: { not: 'keys we expect' },
       readRelayInfoValue: false,
     },
-  ])('reads', ({ port, pid, readJsonFileValue, readRelayInfoValue }) => {
-    const isValidPort = isValidRelayInfoKey(port);
-    const isValidPid = isValidRelayInfoKey(pid);
+  ])(
+    'reads',
+    ({ isPortValid, isPidValid, readJsonFileValue, readRelayInfoValue }) => {
+      const [resultName, conditionName] =
+        isPortValid && isPidValid
+          ? ['relay info (port, pid)', 'both are valid numbers']
+          : isPortValid
+          ? ['false', 'port is not a number']
+          : isPidValid
+          ? ['false', 'pid is not a number']
+          : ['false', 'no relay info has been obtained'];
 
-    const [resultName, conditionName] =
-      isValidPort && isValidPid
-        ? ['relay info (port, pid)', 'both are valid numbers']
-        : isValidPort
-        ? ['false', 'port is not a number']
-        : isValidPid
-        ? ['false', 'pid is not a number']
-        : ['false', 'no relay info has been obtained'];
+      it(`returns ${resultName} if ${conditionName}`, async () => {
+        jest
+          .spyOn(util, 'readJsonFile')
+          .mockResolvedValueOnce(readJsonFileValue as any);
 
-    it(`returns ${resultName} if ${conditionName}`, async () => {
-      expect(util.isInt(port)).toBe(isValidPort);
-      expect(util.isInt(pid)).toBe(isValidPid);
-
-      jest
-        .spyOn(util, 'readJsonFile')
-        .mockResolvedValueOnce(readJsonFileValue as any);
-
-      await expect(readRelayInfo()).resolves.toEqual(readRelayInfoValue);
-    });
-  });
+        await expect(readRelayInfo()).resolves.toEqual(readRelayInfoValue);
+      });
+    },
+  );
 });
 
 describe('pollRelayInfo', () => {
@@ -145,12 +141,11 @@ describe('pollRelayInfo', () => {
 describe('relayEntryPointPath', () => {
   it(`reads package.json of ${RELAY_PKG_NAME} and gets its main file path`, async () => {
     const main = 'index.ts';
-    const relayPkgName = 'package';
 
     jest.spyOn(util, 'readJsonFile').mockResolvedValueOnce({ main });
 
-    await expect(relayEntryPointPath(relayPkgName)).resolves.toMatch(
-      join(cwd(), 'node_modules', relayPkgName, main),
+    await expect(relayEntryPointPath()).resolves.toMatch(
+      join(cwd(), 'node_modules', RELAY_PKG_NAME, main),
     );
   });
 
