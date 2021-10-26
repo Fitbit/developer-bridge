@@ -58,6 +58,30 @@ describe('readRelayInfo', () => {
       });
     },
   );
+
+  describe.only('handles errors', () => {
+    it("doesn't log error if file doesn't exist", async () => {
+      jest
+        .spyOn(util, 'readJsonFile')
+        .mockRejectedValueOnce({ code: 'ENOENT' });
+
+      const consoleErrorSpy = jest.spyOn(console, 'error');
+
+      await expect(readRelayInfo()).resolves.toBe(false);
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
+
+    it("logs error on any error except ENOENT: file doesn't exist ...", async () => {
+      jest
+        .spyOn(util, 'readJsonFile')
+        .mockRejectedValueOnce({ code: 'random' });
+
+      const consoleErrorSpy = jest.spyOn(console, 'error');
+
+      await expect(readRelayInfo()).resolves.toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+  });
 });
 
 describe('pollRelayInfo', () => {
