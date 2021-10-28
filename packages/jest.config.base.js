@@ -4,11 +4,11 @@
  * project's root directory, not the root of the monorepo.
  */
 
+const { jsWithBabel: tsjPreset } = require('ts-jest/presets');
+
 const baseConfig = {
   moduleFileExtensions: ['ts', 'js'],
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-  },
+  transform: tsjPreset.transform,
   testRegex: '(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$',
   roots: ['<rootDir>/src'],
   globals: {
@@ -17,6 +17,7 @@ const baseConfig = {
     },
   },
   testEnvironment: 'node',
+  transformIgnorePatterns: ['node_modules/(?!p-wait-for|p-timeout)'],
 };
 
 // Gotta be compatible with Node 8.0, which does not support object spread.
