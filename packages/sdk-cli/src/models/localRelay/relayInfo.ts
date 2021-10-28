@@ -1,5 +1,7 @@
 import { cwd } from 'process';
 import { join } from 'path';
+import waitFor from 'p-wait-for';
+
 import { isInt, readJsonFile } from './util';
 import { RELAY_PKG_NAME, RELAY_PID_FILE_PATH } from './const';
 
@@ -29,39 +31,18 @@ export async function readRelayInfo(): Promise<ReadRelayInfoResult> {
 
 export async function pollRelayInfo(
   timeout = 15000,
-  interval = 500,
+  interval = 300,
   readRelayInfoFn = readRelayInfo,
-): Promise<RelayInfo> {
-  let requestInProgress = false;
+): Promise<ReadRelayInfoResult> {
+  let relayInfo: ReadRelayInfoResult;
 
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(
-      () =>
-        reject(
-          `Local Relay launch and PID file update exceeded timeout of ${timeout} ms`,
-        ),
-      timeout,
-    );
+  await waitFor(async () => Boolean((relayInfo = await readRelayInfoFn())), {
+    timeout,
+    interval,
+    before: true,
   });
 
-  const poll = new Promise<RelayInfo>((resolve) => {
-    const intervalRef = setInterval(async () => {
-      // Prevent multiple simultaneous requests
-      if (requestInProgress) return;
-
-      requestInProgress = true;
-
-      const relayInfo = await readRelayInfoFn();
-      if (relayInfo) {
-        clearInterval(intervalRef);
-        return resolve(relayInfo);
-      }
-
-      requestInProgress = false;
-    }, interval);
-  });
-
-  return Promise.race([poll, timeoutPromise]);
+  return relayInfo!;
 }
 
 // Find the path to relay's entry point (executable) file (package.json -> "main" field)
