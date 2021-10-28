@@ -28,8 +28,9 @@ beforeEach(() => {
   remoteHostSpy = jest.spyOn(RemoteHost, 'connect');
 });
 
-function doConnect(type: HostType) {
-  return hostConnections.connect(type, mockHostID, relayInstance);
+async function doConnect(type: HostType) {
+  const ws = await relayInstance.connect(mockHostID);
+  return hostConnections.connect(type, ws);
 }
 
 describe.each<HostType>(['appHost', 'companionHost'])(

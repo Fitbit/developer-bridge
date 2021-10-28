@@ -6,8 +6,6 @@ import fs from 'fs';
 import stream from 'stream';
 import { SyncEvent } from 'ts-events';
 
-import DeveloperRelay from '../models/DeveloperRelay';
-
 import StreamTap from './StreamTap';
 
 export type HostType = 'appHost' | 'companionHost';
