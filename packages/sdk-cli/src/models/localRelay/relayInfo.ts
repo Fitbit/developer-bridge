@@ -1,6 +1,6 @@
 import { cwd } from 'process';
 import { join } from 'path';
-import waitFor from 'p-wait-for';
+import pWaitFor from 'p-wait-for';
 
 import { isInt, readJsonFile } from './util';
 import { RELAY_PKG_NAME, RELAY_PID_FILE_PATH } from './const';
@@ -11,13 +11,16 @@ export type ReadRelayInfoResult = RelayInfo | false;
 
 export async function readRelayInfo(): Promise<ReadRelayInfoResult> {
   try {
-    const { port, pid } = await readJsonFile<RelayInfo>(RELAY_PID_FILE_PATH);
+    // Error will be thrown and caught if readJsonFile returns undefined or anything else that can't be destructured
+    const { port, pid } = (await readJsonFile(
+      RELAY_PID_FILE_PATH,
+    )) as RelayInfo;
 
     // [port, pid].every(...) doesn't pass Control Flow Analysis. I.e. TS won't know port & pid are numbers.
     if (isInt(port) && isInt(pid)) {
       return {
-        port: Number((port as unknown) as string),
-        pid: Number((pid as unknown) as string),
+        port: Number(port),
+        pid: Number(pid),
       };
     }
   } catch (error) {
@@ -53,17 +56,11 @@ export async function relayEntryPointPath(): Promise<string> {
   let entryPoint: string;
 
   try {
-    const packageJson = await readJsonFile<{ main: string }>(fullPath);
-    // No "?." — error throw is desired behaviour
-    entryPoint = packageJson.main;
+    ({ main: entryPoint } = (await readJsonFile(fullPath)) as {
+      main: string;
+    });
   } catch (error) {
     throw new Error(`Can't read package.json: ${fullPath}`);
-  }
-
-  if (!entryPoint || entryPoint === '') {
-    throw new Error(
-      `No 'main' path specified in ${RELAY_PKG_NAME}'s package.json (${fullPath})`,
-    );
   }
 
   return join(cwd(), pkgPath, entryPoint);
