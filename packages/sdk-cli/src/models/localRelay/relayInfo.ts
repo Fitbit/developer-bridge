@@ -1,6 +1,6 @@
 import { cwd } from 'process';
 import { join } from 'path';
-import pWaitFor from 'p-wait-for';
+import waitFor from 'p-wait-for';
 
 import { isInt, readJsonFile } from './util';
 import { RELAY_PKG_NAME, RELAY_PID_FILE_PATH } from './const';
