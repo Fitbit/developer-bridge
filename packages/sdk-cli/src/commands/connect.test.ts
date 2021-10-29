@@ -7,6 +7,7 @@ import * as localRelay from '../models/localRelay';
 import DeveloperRelay, { Host } from '../models/DeveloperRelay';
 import commandTestHarness from '../testUtils/commandTestHarness';
 import HostConnections, { HostType } from '../models/HostConnections';
+import { Duplex } from 'stream';
 
 jest.mock('../models/HostConnections');
 
@@ -57,6 +58,7 @@ let mockWS: events.EventEmitter;
 
 let hostConnections: HostConnections;
 let relayHostsSpy: jest.SpyInstance;
+let relayConnectSpy: jest.SpyInstance;
 let hostConnectSpy: jest.SpyInstance;
 
 const mockRelayHostsResponse = {
@@ -74,6 +76,11 @@ beforeEach(() => {
   ));
   relayHostsSpy = jest.spyOn(DeveloperRelay.prototype, 'hosts');
   hostConnectSpy = jest.spyOn(hostConnections, 'connect');
+  relayConnectSpy = jest.spyOn(DeveloperRelay.prototype, 'connect');
+
+  // ASK: Works in beforeEach(), but doesn't in beforeAll()
+  relayConnectSpy.mockResolvedValueOnce(new Duplex());
+
   mockWS = new events.EventEmitter();
   hostConnectSpy.mockResolvedValueOnce({ ws: mockWS });
 });
@@ -114,11 +121,7 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(
-        hostType,
-        mockHost.id,
-        expect.any(DeveloperRelay),
-      );
+      expect(hostConnectSpy).toBeCalledWith(hostType, expect.any(Duplex));
     });
 
     it('logs a message when the host disconnects', () => {
@@ -148,11 +151,7 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(
-        hostType,
-        mockSelectedHost.id,
-        expect.any(DeveloperRelay),
-      );
+      expect(hostConnectSpy).toBeCalledWith(hostType, expect.any(Duplex));
     });
   });
 
@@ -167,20 +166,11 @@ describe.each<[DeviceType, HostType]>([
     mockRelayHostsResponse[deviceType]([mockHost]);
 
     const port = 1;
-    jest
-      .spyOn(localRelay, 'instance')
-      .mockImplementationOnce(async () => ({ port, pid: 1 }));
+    jest.spyOn(localRelay, 'instance').mockResolvedValueOnce({ port, pid: 1 });
 
     await doConnectLocal(deviceType);
 
-    expect(hostConnectSpy).toBeCalledWith(
-      hostType,
-      mockHost.id,
-      expect.objectContaining({
-        apiUrl: `http://localhost:${port}`,
-        shouldAuth: false,
-      }),
-    );
+    expect(hostConnectSpy).toBeCalledWith(hostType, expect.any(Duplex));
   });
 });
 
