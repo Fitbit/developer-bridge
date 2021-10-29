@@ -1,3 +1,4 @@
+import { TimeoutError } from 'p-timeout';
 import { join } from 'path';
 import { cwd } from 'process';
 import { RELAY_PKG_NAME } from './const';
@@ -59,7 +60,7 @@ describe('readRelayInfo', () => {
     },
   );
 
-  describe.only('handles errors', () => {
+  describe('handles errors', () => {
     it("doesn't log error if file doesn't exist", async () => {
       jest
         .spyOn(util, 'readJsonFile')
@@ -109,7 +110,7 @@ describe('pollRelayInfo', () => {
   });
 
   /**
-   * With timeout 3500ms, and interval 1000ms, pollRelayInfo can only make max. 3 poll calls.
+   * With timeout 3500ms, and interval 1000ms, pollRelayInfo can only make max. 3 poll calls + 1 initial, at t = 0.
    * We check whether polls are really called in the specified interval and not slower/faster (so exactly 3 times).
    * setInterval/Timeout/etc. are not guaranteed to call functions at __exactly__ the time specified,
    * so there is a margin of 500ms (3 x 1000ms + 500ms).
@@ -121,7 +122,10 @@ describe('pollRelayInfo', () => {
 
     await pollRelayInfo(timeout, interval, readRelayInfo).catch(() => {});
 
-    expect(readRelayInfo).toHaveBeenCalledTimes(Math.floor(timeout / interval));
+    // Calls: 0, 1000, 2000, 3000
+    expect(readRelayInfo).toHaveBeenCalledTimes(
+      Math.floor(timeout / interval) + 1,
+    );
   });
 
   /**
@@ -156,8 +160,8 @@ describe('pollRelayInfo', () => {
     const readRelayInfo = () =>
       new Promise<false>((resolve) => setTimeout(() => resolve(false), 2000));
 
-    await expect(pollRelayInfo(1000, undefined, readRelayInfo)).rejects.toBe(
-      'Local Relay launch and PID file update exceeded timeout of 1000 ms',
+    await expect(pollRelayInfo(1000, undefined, readRelayInfo)).rejects.toEqual(
+      new TimeoutError('Promise timed out after 1000 milliseconds'),
     );
   });
 });
@@ -182,10 +186,11 @@ describe('relayEntryPointPath', () => {
   });
 
   it(`reads package.json of ${RELAY_PKG_NAME} and gets its main file path`, async () => {
-    jest.spyOn(util, 'readJsonFile').mockResolvedValueOnce({ main: '' });
+    const main = undefined;
+    jest.spyOn(util, 'readJsonFile').mockResolvedValueOnce({ main });
 
     await expect(relayEntryPointPath()).rejects.toThrowError(
-      `No 'main' path specified in ${RELAY_PKG_NAME}'s package.json`,
+      `The "path" argument must be of type string. Received ${typeof main}`,
     );
   });
 });
