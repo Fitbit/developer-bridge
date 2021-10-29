@@ -4,15 +4,22 @@ import {
   pollRelayInfo,
   RelayInfo,
   readRelayInfo,
+  ReadRelayInfoResult,
 } from './relayInfo';
 
 export { RelayInfo } from './relayInfo';
 
 export async function instance(): Promise<RelayInfo> {
-  return (await readRelayInfo()) || launch();
+  const relayInfo = (await readRelayInfo()) || (await launch());
+
+  if (!relayInfo) {
+    throw new Error("Couldn't obtain Local Relay port and pid from PID file");
+  }
+
+  return relayInfo;
 }
 
-async function launch(): Promise<RelayInfo> {
+async function launch(): Promise<ReadRelayInfoResult> {
   const relayJsPath = await relayEntryPointPath();
   // FORK:
   // https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
