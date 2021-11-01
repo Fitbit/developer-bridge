@@ -1,4 +1,5 @@
 import events from 'events';
+import { Duplex } from 'stream';
 
 import vorpal from '@moleculer/vorpal';
 
@@ -7,7 +8,6 @@ import * as localRelay from '../models/localRelay';
 import DeveloperRelay, { Host } from '../models/DeveloperRelay';
 import commandTestHarness from '../testUtils/commandTestHarness';
 import HostConnections, { HostType } from '../models/HostConnections';
-import { Duplex } from 'stream';
 
 jest.mock('../models/HostConnections');
 
@@ -166,7 +166,9 @@ describe.each<[DeviceType, HostType]>([
     mockRelayHostsResponse[deviceType]([mockHost]);
 
     const port = 1;
-    jest.spyOn(localRelay, 'instance').mockResolvedValueOnce({ port, pid: 1 });
+    const pid = 1;
+
+    jest.spyOn(localRelay, 'instance').mockResolvedValueOnce({ port, pid });
 
     await doConnectLocal(deviceType);
 

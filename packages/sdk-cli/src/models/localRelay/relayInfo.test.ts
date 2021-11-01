@@ -1,6 +1,9 @@
-import { TimeoutError } from 'p-timeout';
+import * as util from './util';
 import { join } from 'path';
 import { cwd } from 'process';
+
+import { TimeoutError } from 'p-timeout';
+
 import { RELAY_PKG_NAME } from './const';
 import {
   pollRelayInfo,
@@ -8,57 +11,41 @@ import {
   relayEntryPointPath,
   RelayInfo,
 } from './relayInfo';
-import * as util from './util';
 
 describe('readRelayInfo', () => {
-  describe.each([
+  it.each([
     {
-      isPortValid: true,
-      isPidValid: true,
       readJsonFileValue: { port: 5, pid: 7 },
       readRelayInfoValue: { port: 5, pid: 7 },
+      name: 'returns relay info (port, pid) if both are valid numbers',
     },
     {
-      isPortValid: true,
-      isPidValid: false,
       readJsonFileValue: { port: 5, pid: '7' },
       readRelayInfoValue: false,
+      name: 'returns false if pid is not a number',
     },
     {
-      isPortValid: false,
-      isPidValid: true,
       readJsonFileValue: { port: '5', pid: 7 },
       readRelayInfoValue: false,
+      name: 'returns false if port is not a number',
     },
     {
       readJsonFileValue: 'obviously not JSON containing Relay Info',
       readRelayInfoValue: false,
+      name: 'returns false if no relay info has been obtained',
     },
     {
       readJsonFileValue: { not: 'keys we expect' },
       readRelayInfoValue: false,
+      name: 'returns false if no relay info has been obtained',
     },
-  ])(
-    'reads',
-    ({ isPortValid, isPidValid, readJsonFileValue, readRelayInfoValue }) => {
-      const [resultName, conditionName] =
-        isPortValid && isPidValid
-          ? ['relay info (port, pid)', 'both are valid numbers']
-          : isPortValid
-          ? ['false', 'port is not a number']
-          : isPidValid
-          ? ['false', 'pid is not a number']
-          : ['false', 'no relay info has been obtained'];
+  ])('$name', async ({ readJsonFileValue, readRelayInfoValue }) => {
+    jest
+      .spyOn(util, 'readJsonFile')
+      .mockResolvedValueOnce(readJsonFileValue as any);
 
-      it(`returns ${resultName} if ${conditionName}`, async () => {
-        jest
-          .spyOn(util, 'readJsonFile')
-          .mockResolvedValueOnce(readJsonFileValue as any);
-
-        await expect(readRelayInfo()).resolves.toEqual(readRelayInfoValue);
-      });
-    },
-  );
+    await expect(readRelayInfo()).resolves.toEqual(readRelayInfoValue);
+  });
 
   describe('handles errors', () => {
     it("doesn't log error if file doesn't exist", async () => {

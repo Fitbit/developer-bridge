@@ -43,6 +43,7 @@ describe('apiFetch()', () => {
       false,
     );
 
+    expect(response).toBeDefined();
     expect(auth.getAccessToken).toBeCalledTimes(0);
     expect(response.url).toBe(`${fakeAPIDomain}/${fakeAPIPath}`);
     expect(response.headers.has('authorization')).toBe(false);

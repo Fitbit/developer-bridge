@@ -61,11 +61,11 @@ class HostConnections {
   appHost?: HostConnection;
   companionHost?: HostConnection;
 
-  async connect(hostType: HostType, hostWs: stream.Duplex) {
+  async connect(hostType: HostType, hostStream: stream.Duplex) {
     const existingHost = this[hostType];
     if (existingHost) existingHost.ws.destroy();
 
-    const hostConnection = await HostConnection.connect(hostWs);
+    const hostConnection = await HostConnection.connect(hostStream);
     this[hostType] = hostConnection;
     this.onHostAdded.post({ hostType, host: hostConnection.host });
     return hostConnection;

@@ -31,8 +31,8 @@ const HostsResponse = t.type(
 
 export default class DeveloperRelay {
   constructor(
-    public readonly apiUrl: string = environment().config.apiUrl,
-    public readonly shouldAuth: boolean = true,
+    private readonly apiUrl: string = environment().config.apiUrl,
+    private readonly shouldAuth: boolean = true,
   ) {}
 
   static async create(local = false) {

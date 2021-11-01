@@ -16,10 +16,10 @@ jest.mock('fs/promises', () => {
 
 describe('isInt', () => {
   describe('false', () => {
-    it('undefined', () => expect(isInt(undefined)).toBe(false));
-    it('null', () => expect(isInt(null)).toBe(false));
-    it('Infinity', () => expect(isInt(Infinity)).toBe(false));
-    it('-Infinity', () => expect(isInt(-Infinity)).toBe(false));
+    it.each([undefined, null, Infinity, -Infinity])('%s', (x) =>
+      expect(isInt(x)).toBe(false),
+    );
+
     it('number string', () => expect(isInt('5')).toBe(false));
   });
 
@@ -30,7 +30,7 @@ describe('isInt', () => {
 
 describe('readJsonFile', () => {
   describe('actual file system', () => {
-    it('reads actual file and returns JSON (integration test)', async () => {
+    it('reads file and returns JSON', async () => {
       const json = { data: 'random' };
       const contents = JSON.stringify(json, null, 2);
 
@@ -42,7 +42,7 @@ describe('readJsonFile', () => {
       await fsPromises.unlink(path);
     });
 
-    it("throws on actual file read error (integration test) – file doesn't exist", async () => {
+    it("throws on file read error – file doesn't exist", async () => {
       const path = join(tmpdir(), `readJsonFile-test-${RELAY_PID_FILE_NAME}`);
       await expect(fsPromises.open(path, 'r')).rejects.toMatchObject({
         code: 'ENOENT',
@@ -50,7 +50,7 @@ describe('readJsonFile', () => {
       await expect(readJsonFile(path)).rejects.toThrowError();
     });
 
-    it('throws on actual JSON file parse error', async () => {
+    it('throws on file JSON parse error', async () => {
       const contents = 'not json at all';
       const path = join(tmpdir(), `readJsonFile-test-${RELAY_PID_FILE_NAME}`);
       await fsPromises.writeFile(path, contents);
@@ -71,7 +71,7 @@ describe('readJsonFile', () => {
       await expect(readJsonFile("path doesn't matter")).resolves.toEqual(json);
     });
 
-    it('returns false on file read error – generic error', async () => {
+    it("throws on file read error – file doesn't exist", async () => {
       jest
         .spyOn(fsPromises, 'readFile')
         .mockRejectedValueOnce(new Error('generic read error'));
@@ -79,7 +79,7 @@ describe('readJsonFile', () => {
       await expect(readJsonFile("path doesn't matter")).rejects.toThrowError();
     });
 
-    it('returns empty object on JSON parse error', async () => {
+    it('throws on file JSON parse error', async () => {
       const contents = 'not json at all';
       jest.spyOn(fsPromises, 'readFile').mockResolvedValueOnce(contents);
 

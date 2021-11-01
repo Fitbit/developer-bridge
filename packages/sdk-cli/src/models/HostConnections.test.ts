@@ -1,4 +1,4 @@
-import stream from 'stream';
+import { Duplex } from 'stream';
 
 import { RemoteHost } from '@fitbit/fdb-debugger';
 
@@ -29,6 +29,7 @@ beforeEach(() => {
 });
 
 async function doConnect(type: HostType) {
+  jest.spyOn(relayInstance, 'connect').mockResolvedValueOnce(new Duplex());
   const ws = await relayInstance.connect(mockHostID);
   return hostConnections.connect(type, ws);
 }
@@ -36,11 +37,11 @@ async function doConnect(type: HostType) {
 describe.each<HostType>(['appHost', 'companionHost'])(
   'when the host type argument is %s',
   (hostType) => {
-    let mockWS: jest.Mocked<stream.Duplex>;
+    let mockWS: jest.Mocked<Duplex>;
     let mockRemoteHost: {};
 
     beforeEach(() => {
-      mockWS = mockSentinel(relayConnectSpy) as jest.Mocked<stream.Duplex>;
+      mockWS = mockSentinel(relayConnectSpy) as jest.Mocked<Duplex>;
       mockWS.destroy = jest.fn();
 
       mockRemoteHost = mockSentinel(remoteHostSpy);
