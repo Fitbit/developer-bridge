@@ -28,13 +28,9 @@ async function launch(): Promise<ReadRelayInfoResult> {
   // Official docs use fs.openSync, which returns a file descriptor integer.
   // In our case, using a Writable Stream is more intuitive.
   const out = createWriteStream(RELAY_LOG_FILE_PATH, { flags: 'a' });
-  const err = createWriteStream(RELAY_LOG_FILE_PATH, { flags: 'a' });
 
-  // FORK:
-  // https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
-  // Unlike POSIX fork(), child_process.fork() creates a completely separate V8 process with its own memory.
-  // Dangers of POSIX fork() (https://www.evanjones.ca/fork-is-dangerous.html) don't apply.
-  const relayChildProcess = child_process.fork(relayJsPath, {
+  // Why spawn instead of fork? Fork() doesn't support unref()
+  const relayChildProcess = child_process.spawn('node', [relayJsPath], {
     detached: true,
     /**
      * 0: stdin  – We don't want to read parent's stdin.
@@ -50,7 +46,7 @@ async function launch(): Promise<ReadRelayInfoResult> {
      *             See: https://nodejs.org/api/child_process.html#child_processforkmodulepath-args-options -> options.stdio
      *             [CONFUSING]: conflicts with https://nodejs.org/api/child_process.html#optionsdetached
      */
-    stdio: ['ignore', out, err, 'ipc'],
+    stdio: ['ignore', out, out],
   });
 
   // unref()'ing child process allows the parent process (CLI) to exit without waiting for the child (Local Relay) to exit.
