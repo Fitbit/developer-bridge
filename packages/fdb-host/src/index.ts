@@ -4,13 +4,13 @@ import * as stream from 'stream';
 import * as t from 'io-ts';
 import {
   InvalidParams,
-  ParseJSON,
   Peer,
   StringifyJSON,
   TypesafeRequestDispatcher,
 } from '@fitbit/jsonrpc-ts';
 
 import { BulkData, BulkDataStream, FDBTypes } from '@fitbit/fdb-protocol';
+import ConfigurableDecode from './ConfigurableDecode';
 
 export interface HostInfo {
   device: string;
@@ -58,6 +58,8 @@ export class Host extends EventEmitter {
   protected bulkDataStreams = new BulkData();
   private appInstallStream?: BulkDataStream;
 
+  private deserializerTransform = new ConfigurableDecode();
+
   protected constructor(hostInfo: HostInfo, timeout: number) {
     super();
     this.hostInfo = hostInfo;
@@ -86,6 +88,11 @@ export class Host extends EventEmitter {
         'app.install.stream.abort',
         FDBTypes.StreamCloseParams,
         this.handleAppInstallAbort,
+      )
+      .notification(
+        'protocol.serialization.change',
+        FDBTypes.ProtocolSerializationChangeNotification,
+        this.handleSerializationChange,
       );
 
     this.bulkDataStreams.register(this.dispatcher);
@@ -104,7 +111,7 @@ export class Host extends EventEmitter {
   ) {
     const host = new this(hostInfo, timeout);
     debuggerStream
-      .pipe(new ParseJSON())
+      .pipe(host.deserializerTransform)
       .pipe(host.rpc)
       .pipe(new StringifyJSON())
       .pipe(debuggerStream);
@@ -125,6 +132,9 @@ export class Host extends EventEmitter {
         ...installOptions,
         sideloadStream: true,
       },
+    };
+    this.capabilities.protocol = {
+      additionalSerializations: ['cbor-definite'],
     };
   };
 
@@ -183,6 +193,12 @@ export class Host extends EventEmitter {
     this.validateAppInstallStream(stream);
     this.appInstallStream!.finalize();
     this.appInstallStream = undefined;
+  };
+
+  handleSerializationChange = ({
+    serialization,
+  }: FDBTypes.ProtocolSerializationChangeNotification) => {
+    this.deserializerTransform.setDecoder(serialization);
   };
 
   /**

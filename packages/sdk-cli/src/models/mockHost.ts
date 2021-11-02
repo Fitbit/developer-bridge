@@ -20,8 +20,8 @@ function makeInstallCapabilities(
       appCompatibility: [
         {
           maxAPIVersion,
-          family: 'Higgs',
-          version: '277.255.1.999',
+          family: 'Atlas',
+          version: '277.255.2.999',
         },
       ],
     },

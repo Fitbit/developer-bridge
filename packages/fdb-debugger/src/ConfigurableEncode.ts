@@ -36,7 +36,7 @@ export default class ConfigurableEncode extends Transform {
     try {
       encodedChunk = encoders[this.encoder](chunk);
     } catch (e) {
-      callback(e);
+      callback(e as Error);
       return;
     }
     callback(undefined, encodedChunk);
