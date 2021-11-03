@@ -36,14 +36,15 @@ describe('apiFetch()', () => {
 
     mockAuthToken(null);
     // apiFetch would throw if it didn't skip auth, because authToken is falsy
-    const response = await baseAPI.apiFetch(
+    const responsePromise = baseAPI.apiFetch(
       fakeAPIPath,
       undefined,
       fakeAPIDomain,
       false,
     );
+    await expect(responsePromise).resolves.toBeDefined();
 
-    expect(response).toBeDefined();
+    const response = await responsePromise;
     expect(auth.getAccessToken).toBeCalledTimes(0);
     expect(response.url).toBe(`${fakeAPIDomain}/${fakeAPIPath}`);
     expect(response.headers.has('authorization')).toBe(false);

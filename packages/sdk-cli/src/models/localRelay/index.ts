@@ -24,28 +24,15 @@ export async function instance(): Promise<RelayInfo> {
 
 async function launch(): Promise<ReadRelayInfoResult> {
   const relayJsPath = await relayEntryPointPath();
-
-  // Official docs use fs.openSync, which returns a file descriptor integer.
-  // In our case, using a Writable Stream is more intuitive.
   const out = createWriteStream(RELAY_LOG_FILE_PATH, { flags: 'a' });
 
-  // Why spawn instead of fork? Fork() doesn't support unref()
+  // Fork() doesn't support unref()
   const relayChildProcess = child_process.spawn('node', [relayJsPath], {
     detached: true,
-    /**
-     * 0: stdin  – We don't want to read parent's stdin.
-     * 1: stdout – Log any child process messages to a file. Could also be 'inherit', to let child's messages appear in the
-     *             parent's console, however, it isn't compatible with `detached: true`
-     *             ("...provided with a stdio configuration that is not connected to the parent"):
-     *             https://nodejs.org/api/child_process.html#optionsdetached
-     *             Plus, we want to be able to read child process output even after the parent exits.
-     *             [TODO]: Ask StackOverflow about what exactly is meant by "stdio configuration", because even "inherit"
-     *             seems to work on test tasks. Maybe only "stdin" is meant?
-     * 2: stderr – Log any child process errors to a file. See 1:stdout above.
-     * 3: ipc    – Having an 'ipc' channel is a requirement for using `fork()`.
-     *             See: https://nodejs.org/api/child_process.html#child_processforkmodulepath-args-options -> options.stdio
-     *             [CONFUSING]: conflicts with https://nodejs.org/api/child_process.html#optionsdetached
-     */
+    // Could be ['ignore', 'inherit', 'inherit'], to let child's messages appear in the parent's console.
+    // However, 'inherit' isn't compatible with 'detached: true':
+    // https://nodejs.org/api/child_process.html#optionsdetached
+    // "...provided with a stdio configuration that is not connected to the parent"):
     stdio: ['ignore', out, out],
   });
 
