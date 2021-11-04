@@ -105,9 +105,7 @@ describe('pollRelayInfo', () => {
       .spyOn(util, 'readJsonFile')
       .mockResolvedValue({});
 
-    await expect(pollRelayInfo(timeout, interval)).rejects.toBeInstanceOf(
-      Error,
-    );
+    await expect(pollRelayInfo(timeout, interval)).rejects.toThrow();
 
     // Calls: 0, 1000, 2000, 3000
     expect(readJsonFileSpy).toHaveBeenCalledTimes(
