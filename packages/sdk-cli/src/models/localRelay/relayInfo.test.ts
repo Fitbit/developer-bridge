@@ -1,9 +1,7 @@
-import * as util from './util';
 import { join } from 'path';
 import { cwd } from 'process';
 
-import { TimeoutError } from 'p-timeout';
-
+import * as util from './util';
 import { RELAY_PKG_NAME } from './const';
 import {
   pollRelayInfo,
@@ -83,17 +81,15 @@ describe('pollRelayInfo', () => {
    */
   it('polls until relay info is obtained', async () => {
     const relayInfo: RelayInfo = { port: 1, pid: 1 };
-    const readRelayInfo = jest
-      .fn()
-      .mockReturnValueOnce(undefined)
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(relayInfo);
+    const readJsonFileSpy = jest
+      .spyOn(util, 'readJsonFile')
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce(relayInfo);
 
-    await expect(pollRelayInfo(500, 100, readRelayInfo)).resolves.toEqual(
-      relayInfo,
-    );
+    await expect(pollRelayInfo(500, 100)).resolves.toEqual(relayInfo);
 
-    expect(readRelayInfo).toHaveBeenCalledTimes(3);
+    expect(readJsonFileSpy).toHaveBeenCalledTimes(3);
   });
 
   /**
@@ -105,14 +101,18 @@ describe('pollRelayInfo', () => {
   it('polls in regular intervals', async () => {
     const timeout = 3500;
     const interval = 1000;
-    const readRelayInfo = jest.fn().mockReturnValue(undefined);
+    const readJsonFileSpy = jest
+      .spyOn(util, 'readJsonFile')
+      .mockResolvedValue({});
 
-    await pollRelayInfo(timeout, interval, readRelayInfo).catch(() => {});
+    await pollRelayInfo(timeout, interval).catch(() => {});
 
     // Calls: 0, 1000, 2000, 3000
-    expect(readRelayInfo).toHaveBeenCalledTimes(
+    expect(readJsonFileSpy).toHaveBeenCalledTimes(
       Math.floor(timeout / interval) + 1,
     );
+
+    readJsonFileSpy.mockReset();
   });
 
   /**
@@ -126,30 +126,38 @@ describe('pollRelayInfo', () => {
     const interval = 100;
     const pollExecTime = 800;
 
-    const readRelayInfo = jest.fn().mockImplementation(
+    const readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
       () =>
         new Promise<RelayInfo>((resolve) =>
           setTimeout(() => resolve({ port: 1, pid: 1 }), pollExecTime),
         ),
     );
 
-    await pollRelayInfo(timeout, interval, readRelayInfo).catch(() => {});
+    await pollRelayInfo(timeout, interval).catch(() => {});
 
-    expect(readRelayInfo).toHaveBeenCalledTimes(
+    expect(readJsonFileSpy).toHaveBeenCalledTimes(
       Math.floor(timeout / pollExecTime),
     );
+
+    readJsonFileSpy.mockReset();
   });
 
   /**
    * First poll request's execution time 2000ms exceeds the total specified 1000ms timeout.
    */
   it('rejects on timeout', async () => {
-    const readRelayInfo = () =>
-      new Promise<false>((resolve) => setTimeout(() => resolve(false), 2000));
-
-    await expect(pollRelayInfo(1000, undefined, readRelayInfo)).rejects.toEqual(
-      new TimeoutError('Promise timed out after 1000 milliseconds'),
+    const timeout = 1000;
+    const readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
+      () =>
+        new Promise<false>((resolve) => setTimeout(() => resolve(false), 2000)),
     );
+
+    await expect(pollRelayInfo(timeout, undefined)).rejects.toHaveProperty(
+      'message',
+      `Timed out after waiting for ${timeout} ms`,
+    );
+
+    readJsonFileSpy.mockReset();
   });
 });
 
