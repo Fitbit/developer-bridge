@@ -1,16 +1,20 @@
-import * as fsPromises from 'fs/promises';
+import { promises as fsPromises } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { RELAY_PID_FILE_NAME } from './const';
 import { isInt, readJsonFile } from './util';
 
 // Have to do this, because 'fsPromises' __must__ be mocked (which sets all fs methods to jest.fn())
-jest.mock('fs/promises', () => {
-  const actualFs = jest.requireActual('fs/promises') as typeof fsPromises;
+jest.mock('fs', () => {
+  const actualFs = jest.requireActual('fs');
+  const actualFsPromises = actualFs.promises as typeof fsPromises;
 
   return {
     ...actualFs,
-    readFile: jest.fn().mockImplementation(actualFs.readFile),
+    promises: {
+      ...actualFsPromises,
+      readFile: jest.fn().mockImplementation(actualFsPromises.readFile),
+    },
   };
 });
 
@@ -43,6 +47,13 @@ describe('readJsonFile – actual file system', () => {
 
   it("throws on file read error – file doesn't exist", async () => {
     const path = join(tmpdir(), `readJsonFile-test-${RELAY_PID_FILE_NAME}`);
+    // Delete the file just in case
+    try {
+      await fsPromises.unlink(path);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+
     await expect(fsPromises.open(path, 'r')).rejects.toMatchObject({
       code: 'ENOENT',
     });
