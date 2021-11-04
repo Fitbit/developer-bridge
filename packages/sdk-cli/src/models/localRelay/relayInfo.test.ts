@@ -105,7 +105,9 @@ describe('pollRelayInfo', () => {
       .spyOn(util, 'readJsonFile')
       .mockResolvedValue({});
 
-    await pollRelayInfo(timeout, interval).catch(() => {});
+    await expect(pollRelayInfo(timeout, interval)).rejects.toBeInstanceOf(
+      Error,
+    );
 
     // Calls: 0, 1000, 2000, 3000
     expect(readJsonFileSpy).toHaveBeenCalledTimes(
@@ -126,14 +128,15 @@ describe('pollRelayInfo', () => {
     const interval = 100;
     const pollExecTime = 800;
 
+    const value: RelayInfo = { port: 1, pid: 1 };
     const readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
       () =>
         new Promise<RelayInfo>((resolve) =>
-          setTimeout(() => resolve({ port: 1, pid: 1 }), pollExecTime),
+          setTimeout(() => resolve(value), pollExecTime),
         ),
     );
 
-    await pollRelayInfo(timeout, interval).catch(() => {});
+    await expect(pollRelayInfo(timeout, interval)).resolves.toEqual(value);
 
     expect(readJsonFileSpy).toHaveBeenCalledTimes(
       Math.floor(timeout / pollExecTime),
