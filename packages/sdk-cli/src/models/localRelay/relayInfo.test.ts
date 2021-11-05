@@ -4,6 +4,7 @@ import { cwd } from 'process';
 import * as util from './util';
 import { RELAY_PKG_NAME } from './const';
 import {
+  isRelayPkgInstalled,
   pollRelayInfo,
   readRelayInfo,
   relayEntryPointPath,
@@ -159,6 +160,46 @@ describe('pollRelayInfo', () => {
     );
 
     readJsonFileSpy.mockReset();
+  });
+});
+
+describe.only('isRelayPkgInstalled', () => {
+  describe('true if relay pkg present in', () => {
+    it('dependencies', async () => {
+      jest
+        .spyOn(util, 'readJsonFile')
+        .mockResolvedValueOnce({ dependencies: { [RELAY_PKG_NAME]: '1.0' } });
+
+      await expect(isRelayPkgInstalled()).resolves.toBe(true);
+    });
+
+    it('devDependencies', async () => {
+      jest.spyOn(util, 'readJsonFile').mockResolvedValueOnce({
+        devDependencies: { [RELAY_PKG_NAME]: '1.0' },
+      });
+
+      await expect(isRelayPkgInstalled()).resolves.toBe(true);
+    });
+  });
+
+  describe('false', () => {
+    it('if relay pkg not present in dependencies or devDependencies', async () => {
+      jest
+        .spyOn(util, 'readJsonFile')
+        .mockResolvedValueOnce({ dependencies: {}, devDependencies: {} });
+
+      await expect(isRelayPkgInstalled()).resolves.toBe(false);
+    });
+
+    it('if package.json not found', async () => {
+      jest
+        .spyOn(util, 'readJsonFile')
+        .mockRejectedValueOnce({ code: 'ENOENT' });
+
+      await expect(isRelayPkgInstalled()).rejects.toThrow(
+        'No package.json found for the project at',
+      );
+    });
   });
 });
 

@@ -46,6 +46,34 @@ export async function pollRelayInfo(
   return relayInfo!;
 }
 
+export async function isRelayPkgInstalled(): Promise<boolean> {
+  // package.json _must_ be at the project root, and all dependencies _must_ be declared in package.json,
+  // so this is standard way to check for installed dependencies.
+  try {
+    const { dependencies, devDependencies } = (await readJsonFile(
+      join(process.cwd(), 'package.json'),
+    )) as {
+      dependencies: Record<string, any>;
+      devDependencies: Record<string, any>;
+    };
+
+    return Boolean(
+      dependencies?.[RELAY_PKG_NAME] || devDependencies?.[RELAY_PKG_NAME],
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error(
+        `No package.json found for the project at ${join(
+          process.cwd(),
+          'package.json',
+        )}`,
+      );
+    }
+
+    throw error;
+  }
+}
+
 // Find the path to relay's entry point (executable) file (package.json -> "main" field)
 export async function relayEntryPointPath(): Promise<string> {
   const pkgPath = join('node_modules', RELAY_PKG_NAME);

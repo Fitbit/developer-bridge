@@ -1,6 +1,7 @@
 import { instance } from '.';
 import * as relayInfoUtils from './relayInfo';
 import * as launchUtils from './launch';
+import { RELAY_PKG_NAME } from './const';
 
 jest.mock('fs');
 jest.mock('./relayInfo');
@@ -16,7 +17,23 @@ describe('instance', () => {
     await expect(instance()).resolves.toEqual(relayInfo);
   });
 
+  it('throws if local relay pkg not installed', async () => {
+    jest
+      .spyOn(relayInfoUtils, 'isRelayPkgInstalled')
+      .mockResolvedValueOnce(false);
+
+    await expect(instance()).rejects.toThrow(
+      `To use local relay (-l, --local flag), you should have ${RELAY_PKG_NAME} installed. No ${RELAY_PKG_NAME} dependency found in package.json`,
+    );
+  });
+
   describe('launches relay instance if no existing relay instance', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(relayInfoUtils, 'isRelayPkgInstalled')
+        .mockResolvedValueOnce(true);
+    });
+
     it('polls and returns launched relay instance info', async () => {
       const relayInfo = { port: 1, pid: 1 };
       (relayInfoUtils.readRelayInfo as jest.Mock).mockResolvedValueOnce(false);
