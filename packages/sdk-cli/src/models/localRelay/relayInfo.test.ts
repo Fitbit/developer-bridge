@@ -163,7 +163,7 @@ describe('pollRelayInfo', () => {
   });
 });
 
-describe.only('isRelayPkgInstalled', () => {
+describe('isRelayPkgInstalled', () => {
   describe('true if relay pkg present in', () => {
     it('dependencies', async () => {
       jest

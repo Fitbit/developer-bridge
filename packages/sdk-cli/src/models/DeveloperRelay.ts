@@ -2,7 +2,7 @@ import * as t from 'io-ts';
 import stream from 'stream';
 import websocketStream from 'websocket-stream';
 
-import * as localRelay from '../models/localRelay';
+import * as localRelay from './localRelay';
 import { apiFetch, assertAPIResponseOK, decodeJSON } from '../api/baseAPI';
 import { assertContentType } from '../util/fetchUtil';
 import environment from '../auth/environment';
