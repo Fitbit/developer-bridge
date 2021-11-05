@@ -90,22 +90,22 @@ export const installAction = async (
     if (!result) return false;
   }
 
-  const { appHost, companionHost } = hostConnections;
+  const { companionHost } = hostConnections;
 
   try {
-    if (hasApp && appHost) {
-      const { useDevice } = args.options;
-      if (useDevice && appPackage.components.device[useDevice] === undefined) {
-        cli.activeCommand.log(
-          `Requested '${useDevice}' bundle to be used, but it isn't present within the app package`,
-        );
-        return false;
-      }
+    // if (hasApp && appHost) {
+    //   const { useDevice } = args.options;
+    //   if (useDevice && appPackage.components.device[useDevice] === undefined) {
+    //     cli.activeCommand.log(
+    //       `Requested '${useDevice}' bundle to be used, but it isn't present within the app package`,
+    //     );
+    //     return false;
+    //   }
 
-      await sideload
-        .app(appHost.host, appPackage, makeProgressCallback('app'), useDevice)
-        .then(printCompletionStatus('App'));
-    }
+    //   await sideload
+    //     .app(appHost.host, appPackage, makeProgressCallback('app'), useDevice)
+    //     .then(printCompletionStatus('App'));
+    // }
 
     if (hasCompanion && companionHost) {
       await sideload
@@ -121,22 +121,22 @@ export const installAction = async (
     return false;
   }
 
-  if (hasApp && appHost) {
-    if (
-      appHost.host.hasCapability('appHost.launch.appComponent') &&
-      appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch
-    ) {
-      if (args.options.skipLaunch !== true) {
-        cli.activeCommand.log('Launching app');
-        await appHost.host.launchAppComponent({
-          uuid: appPackage.uuid,
-          component: 'app',
-        });
-      }
-    } else {
-      cli.activeCommand.log('Device does not support launching app remotely');
-    }
-  }
+  // if (hasApp && appHost) {
+  //   if (
+  //     appHost.host.hasCapability('appHost.launch.appComponent') &&
+  //     appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch
+  //   ) {
+  //     if (args.options.skipLaunch !== true) {
+  //       cli.activeCommand.log('Launching app');
+  //       await appHost.host.launchAppComponent({
+  //         uuid: appPackage.uuid,
+  //         component: 'app',
+  //       });
+  //     }
+  //   } else {
+  //     cli.activeCommand.log('Device does not support launching app remotely');
+  //   }
+  // }
 
   return true;
 };
