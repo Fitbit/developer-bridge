@@ -13,11 +13,18 @@ import {
 export async function instance(): Promise<RelayInfo> {
   // Connect to any existing Relay instance; if doesn't exist, launch a new one.
   const existingRelayInfo = await readRelayInfo();
-  if (existingRelayInfo) return existingRelayInfo;
 
+  if (existingRelayInfo) {
+    console.log(
+      `Connecting to existing Local Relay instance (port: ${existingRelayInfo.port}, pid: ${existingRelayInfo.pid})`,
+    );
+    return existingRelayInfo;
+  }
+
+  console.log('No existing Local Relay instance. Launching a new one...');
   if (!(await isRelayPkgInstalled())) {
     throw new Error(
-      `To use local relay (-l, --local flag), you should have ${RELAY_PKG_NAME} installed. No ${RELAY_PKG_NAME} dependency found in package.json`,
+      `To launch local relay (-l, --local flag), you should have ${RELAY_PKG_NAME} installed. No ${RELAY_PKG_NAME} dependency found in package.json`,
     );
   }
 
