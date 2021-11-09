@@ -73,11 +73,6 @@ describe.each([
     endpointMock = nock(apiUrl);
   });
 
-  afterAll(() => {
-    (developerRelay.hosts as jest.Mock).mockRestore();
-    (developerRelay.connect as jest.Mock).mockRestore();
-  });
-
   describe('hosts()', () => {
     it('returns list of connected app hosts', async () => {
       mockHostsSuccessResponse();

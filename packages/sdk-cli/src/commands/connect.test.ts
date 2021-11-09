@@ -78,7 +78,6 @@ beforeEach(() => {
   hostConnectSpy = jest.spyOn(hostConnections, 'connect');
   relayConnectSpy = jest.spyOn(DeveloperRelay.prototype, 'connect');
 
-  // ASK: Works in beforeEach(), but doesn't in beforeAll()
   relayConnectSpy.mockResolvedValueOnce(new Duplex());
 
   mockWS = new events.EventEmitter();
@@ -165,10 +164,9 @@ describe.each<[DeviceType, HostType]>([
     const mockHost = mockRelayHosts[deviceType][0];
     mockRelayHostsResponse[deviceType]([mockHost]);
 
-    const port = 1;
-    const pid = 1;
-
-    jest.spyOn(localRelay, 'instance').mockResolvedValueOnce({ port, pid });
+    jest
+      .spyOn(localRelay, 'instance')
+      .mockResolvedValueOnce({ port: 1, pid: 1 });
 
     await doConnectLocal(deviceType);
 

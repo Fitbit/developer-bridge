@@ -48,10 +48,6 @@ describe.each<HostType>(['appHost', 'companionHost'])(
       return doConnect(hostType);
     });
 
-    it('acquires a developer relay connection for the given host ID', () => {
-      expect(relayConnectSpy).toBeCalledWith(mockHostID);
-    });
-
     it('creates a debugger client from the developer relay connection', () => {
       expect(remoteHostSpy).toBeCalledWith(mockWS, undefined);
     });

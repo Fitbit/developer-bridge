@@ -4,20 +4,6 @@ import { join } from 'path';
 import { RELAY_PID_FILE_NAME } from './const';
 import { isInt, readJsonFile } from './util';
 
-// Have to do this, because 'fsPromises' __must__ be mocked (which sets all fs methods to jest.fn())
-jest.mock('fs', () => {
-  const actualFs = jest.requireActual('fs');
-  const actualFsPromises = actualFs.promises as typeof fsPromises;
-
-  return {
-    ...actualFs,
-    promises: {
-      ...actualFsPromises,
-      readFile: jest.fn().mockImplementation(actualFsPromises.readFile),
-    },
-  };
-});
-
 describe('isInt', () => {
   describe('false', () => {
     it.each([undefined, null, Infinity, -Infinity])('%s', (x) =>
