@@ -33,8 +33,11 @@ export async function instance(): Promise<RelayInfo> {
 
   await launch([relayJsPath], logStream);
   const relayInfo = await pollRelayInfo();
-  if (!relayInfo)
+
+  if (!relayInfo) {
     throw new Error("Couldn't obtain Local Relay port and pid from PID file");
+  }
+
   return relayInfo;
 }
 
