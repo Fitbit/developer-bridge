@@ -19,27 +19,29 @@ describe('isInt', () => {
 });
 
 describe('readJsonFile – actual file system', () => {
-  it('reads file and returns JSON', async () => {
-    const json = { data: 'random' };
-    const contents = JSON.stringify(json, null, 2);
+  const path: string = join(
+    tmpdir(),
+    `readJsonFile-test-${RELAY_PID_FILE_NAME}`,
+  );
 
-    const path = join(tmpdir(), `readJsonFile-test-${RELAY_PID_FILE_NAME}`);
-    await fsPromises.writeFile(path, contents);
-
-    await expect(readJsonFile(path)).resolves.toEqual(json);
-
-    await fsPromises.unlink(path);
-  });
-
-  it("throws on file read error – file doesn't exist", async () => {
-    const path = join(tmpdir(), `readJsonFile-test-${RELAY_PID_FILE_NAME}`);
-    // Delete the file just in case
+  afterEach(async () => {
     try {
       await fsPromises.unlink(path);
     } catch (error) {
+      // It is expected that, in some cases, no file will exist at path
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
+  });
 
+  it('reads file and returns JSON', async () => {
+    const json = { data: 'random' };
+    const contents = JSON.stringify(json, null, 2);
+    await fsPromises.writeFile(path, contents);
+
+    await expect(readJsonFile(path)).resolves.toEqual(json);
+  });
+
+  it("throws on file read error – file doesn't exist", async () => {
     await expect(fsPromises.open(path, 'r')).rejects.toMatchObject({
       code: 'ENOENT',
     });
@@ -48,11 +50,8 @@ describe('readJsonFile – actual file system', () => {
 
   it('throws on file JSON parse error', async () => {
     const contents = 'not json at all';
-    const path = join(tmpdir(), `readJsonFile-test-${RELAY_PID_FILE_NAME}`);
     await fsPromises.writeFile(path, contents);
 
     await expect(readJsonFile(path)).rejects.toThrowError();
-
-    await fsPromises.unlink(path);
   });
 });
