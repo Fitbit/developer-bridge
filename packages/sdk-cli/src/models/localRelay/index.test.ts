@@ -23,7 +23,7 @@ describe('instance', () => {
       .mockResolvedValueOnce(false);
 
     await expect(instance()).rejects.toThrow(
-      `To use local relay (-l, --local flag), you should have ${RELAY_PKG_NAME} installed. No ${RELAY_PKG_NAME} dependency found in package.json`,
+      `To launch local relay (-l, --local flag), you should have ${RELAY_PKG_NAME} installed. No ${RELAY_PKG_NAME} dependency found in package.json`,
     );
   });
 
