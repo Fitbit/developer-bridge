@@ -42,7 +42,7 @@ describe('instance', () => {
       );
 
       await expect(instance()).resolves.toEqual(relayInfo);
-      // launch() is an empty moc
+      // launch() is an empty mock
       expect(launchUtils.launch).toHaveBeenCalled();
     });
 
