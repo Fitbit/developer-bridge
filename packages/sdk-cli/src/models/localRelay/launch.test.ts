@@ -4,15 +4,6 @@ import { launch } from './launch';
 describe('launch', () => {
   it('logs output to a log stream', async (done) => {
     const logOutput = 'test output';
-    const logStream = new Writable({
-      write: (chunk: Buffer) => {
-        const data = chunk.toString();
-        // The default highWaterMark (buffer/chunk size) for streams is somewhere in KBs,
-        // which should be more than enough to get out logOutput in full.
-        expect(data).toMatch(logOutput);
-        done();
-      },
-    });
 
     const nodeArgs = ['-e', `console.log('${logOutput}')`];
     const subprocess = launch(nodeArgs, 'pipe');
@@ -22,6 +13,17 @@ describe('launch', () => {
         "child_process.spawn()'ed subprocess doesn't have stdout",
       );
     }
+
+    const logStream = new Writable({
+      write: (chunk: Buffer) => {
+        const data = chunk.toString();
+        // The default highWaterMark (buffer/chunk size) for streams is somewhere in KBs,
+        // which should be more than enough to get out logOutput in full.
+        expect(data).toMatch(logOutput);
+        subprocess.kill();
+        done();
+      },
+    });
 
     subprocess.stdout.pipe(logStream);
   });
