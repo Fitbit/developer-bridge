@@ -15,7 +15,7 @@ describe('launch', () => {
     });
 
     const nodeArgs = ['-e', `console.log('${logOutput}')`];
-    const subprocess = await launch(nodeArgs, 'pipe');
+    const subprocess = launch(nodeArgs, 'pipe');
 
     if (!subprocess.stdout) {
       throw new Error(
@@ -37,7 +37,7 @@ describe('launch', () => {
     });
 
     const nodeArgs = ['-e', `console.error('${logError}')`];
-    const subprocess = await launch(nodeArgs, 'pipe');
+    const subprocess = launch(nodeArgs, 'pipe');
 
     if (!subprocess.stderr) {
       throw new Error(

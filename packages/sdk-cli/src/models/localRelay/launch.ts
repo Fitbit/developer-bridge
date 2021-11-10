@@ -1,12 +1,12 @@
-import * as child_process from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { Writable } from 'stream';
 
-export async function launch(
+export function launch(
   nodeArgs: string[],
   logStream: Writable | 'pipe' | 'ignore' | 'inherit',
-): Promise<child_process.ChildProcess> {
+): ChildProcess {
   // Fork() doesn't support unref()
-  const relayChildProcess = child_process.spawn('node', nodeArgs, {
+  const relayChildProcess = spawn('node', nodeArgs, {
     detached: true,
     // Could be ['ignore', 'inherit', 'inherit'], to let child's messages appear in the parent's console.
     // However, 'inherit' isn't compatible with 'detached: true':

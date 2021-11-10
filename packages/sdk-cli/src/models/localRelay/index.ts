@@ -31,7 +31,7 @@ export async function instance(): Promise<RelayInfo> {
   const relayJsPath = await relayEntryPointPath();
   const logStream = createWriteStream(RELAY_LOG_FILE_PATH);
 
-  await launch([relayJsPath], logStream);
+  launch([relayJsPath], logStream);
   const relayInfo = await pollRelayInfo();
 
   if (!relayInfo) {

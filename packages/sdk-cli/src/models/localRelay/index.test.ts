@@ -42,6 +42,7 @@ describe('instance', () => {
       );
 
       await expect(instance()).resolves.toEqual(relayInfo);
+      // launch() is an empty moc
       expect(launchUtils.launch).toHaveBeenCalled();
     });
 
@@ -52,6 +53,8 @@ describe('instance', () => {
       await expect(instance()).rejects.toThrow(
         "Couldn't obtain Local Relay port and pid from PID file",
       );
+
+      // launch() is an empty mock
       expect(launchUtils.launch).toHaveBeenCalled();
     });
   });
