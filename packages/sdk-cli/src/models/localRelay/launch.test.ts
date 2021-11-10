@@ -6,10 +6,6 @@ import { launch } from './launch';
 describe('launch', () => {
   let subprocess: ChildProcess | undefined;
 
-  beforeEach(() => {
-    subprocess = undefined;
-  });
-
   afterEach(() => {
     if (subprocess) {
       subprocess.kill(os.constants.signals.SIGKILL);
@@ -52,7 +48,7 @@ describe('launch', () => {
     });
 
     const nodeArgs = ['-e', `console.error('${logError}')`];
-    const subprocess = launch(nodeArgs, 'pipe');
+    subprocess = launch(nodeArgs, 'pipe');
 
     if (!subprocess.stderr) {
       throw new Error(
