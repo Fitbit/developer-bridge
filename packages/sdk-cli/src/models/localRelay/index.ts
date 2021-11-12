@@ -30,26 +30,32 @@ export async function instance(): Promise<RelayInfo> {
 
   const relayJsPath = await relayEntryPointPath();
 
-  createWriteStream(RELAY_LOG_FILE_PATH)
-    .on('open', (fd) => {
-      const relayProcess = launch([relayJsPath], fd);
+  const logStream = createWriteStream(RELAY_LOG_FILE_PATH);
 
-      relayProcess.on('error', (error) => {
-        console.error('Local relay process threw error');
-        relayProcess.kill('SIGKILL');
-        throw error;
-      });
+  // https://stackoverflow.com/a/44846808/6539857
+  // Without 'open' event spawn() won't accept the WriteStream, because
+  // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
+  // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
+  logStream.on('open', (fd) => {
+    const relayProcess = launch([relayJsPath], logStream);
 
-      relayProcess.on('close', async () => {
-        console.log('Local relay process exited and closed');
-      });
-    })
-    .on('error', (error) => {
-      console.error(
-        `Error creating an output stream to file at path: ${RELAY_LOG_FILE_PATH}`,
-      );
+    relayProcess.on('error', (error) => {
+      console.error('Local relay process threw error:', error);
+      relayProcess.kill('SIGKILL');
       throw error;
     });
+
+    relayProcess.on('close', async () => {
+      console.warn('Local relay process exited and closed');
+    });
+  });
+
+  logStream.on('error', (error) => {
+    console.error(
+      `Error creating an output stream to file at path: ${RELAY_LOG_FILE_PATH}`,
+    );
+    throw error;
+  });
 
   const relayInfo = await pollRelayInfo();
 
