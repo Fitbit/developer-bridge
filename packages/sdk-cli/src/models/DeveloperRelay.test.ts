@@ -1,8 +1,10 @@
 import nock from 'nock';
 import stream from 'stream';
+import { promises as fsPromises } from 'fs';
 import websocketStream from 'websocket-stream';
 
 import * as auth from '../auth';
+import * as localRelay from './localRelay';
 import environment from '../auth/environment';
 import DeveloperRelay from './DeveloperRelay';
 import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
@@ -43,6 +45,22 @@ function mockConnectionURLResponse(hostID: string, response: string) {
     .post(`/1/user/-/developer-relay/hosts/${hostID}`)
     .reply(200, response, { 'Content-Type': 'text/uri-list' });
 }
+
+describe('create()', () => {
+  it('local = true', async () => {
+    const mkdirSpy = jest.spyOn(fsPromises, 'mkdir').mockImplementation();
+
+    const port = 1;
+    jest.spyOn(localRelay, 'instance').mockResolvedValueOnce({ port, pid: 1 });
+
+    await expect(DeveloperRelay.create(true)).resolves.toEqual({
+      apiUrl: `http://localhost:${port}`,
+      shouldAuth: false,
+    });
+
+    expect(mkdirSpy).toHaveBeenCalled();
+  });
+});
 
 describe.each([
   {

@@ -1,11 +1,14 @@
-import * as t from 'io-ts';
 import stream from 'stream';
+import { promises as fsPromises } from 'fs';
+
+import * as t from 'io-ts';
 import websocketStream from 'websocket-stream';
 
 import * as localRelay from './localRelay';
 import { apiFetch, assertAPIResponseOK, decodeJSON } from '../api/baseAPI';
 import { assertContentType } from '../util/fetchUtil';
 import environment from '../auth/environment';
+import { RELAY_DIRECTORY_PATH } from './localRelay/const';
 
 // tslint:disable-next-line:variable-name
 export const Host = t.type(
@@ -37,6 +40,8 @@ export default class DeveloperRelay {
 
   static async create(local = false) {
     if (local) {
+      // Create an output directory (if doesn't exist)
+      await fsPromises.mkdir(RELAY_DIRECTORY_PATH);
       const { port } = await localRelay.instance();
       return new DeveloperRelay(`http://localhost:${port}`, false);
     }
