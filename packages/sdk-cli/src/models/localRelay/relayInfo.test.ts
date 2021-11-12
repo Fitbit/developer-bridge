@@ -73,7 +73,7 @@ describe('readRelayInfo', () => {
 });
 
 // https://stackoverflow.com/a/52196951/6539857
-// https://stackoverflow.com/a/58716087/6539857
+// https://github.com/facebook/jest/issues/2157#issuecomment-279171856
 function flushPromises() {
   return new Promise((resolve) => setImmediate(resolve));
 }
@@ -131,8 +131,9 @@ describe('pollRelayInfo', () => {
     await flushPromises();
 
     // Checking if the behaviour is correct a couple of times is sufficient
+    // IMPORTANT: timeout & interval values should allow the interval to actually run for {reps} times before timeout.
     const reps = 2;
-    // We need to ensure the timeout & interval actually allow for "a couple" of runs without timing out
+
     if (timeout / interval < reps) {
       throw new Error(
         `Timeout ${timeout} is too small to allow ${reps} reps/intervals`,
