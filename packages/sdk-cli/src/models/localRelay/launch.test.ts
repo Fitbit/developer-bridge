@@ -3,7 +3,7 @@ import { ChildProcess } from 'child_process';
 import { join } from 'path';
 
 import { launch } from './launch';
-import { console } from 'fp-ts';
+import { RELAY_DIRECTORY_NAME } from './const';
 
 describe('launch', () => {
   let subprocess: ChildProcess;
@@ -34,9 +34,12 @@ describe('launch', () => {
     ['error', 'error'],
   ])(
     'spawns a process and logs %s to a log file',
-    (outputType, consoleMethodName, done) => {
+    async (outputType, consoleMethodName, done) => {
       const logOutput = `test ${outputType}`;
-      logFilePath = join(__dirname, `./launch-test-${outputType}.txt`);
+      logFilePath = join(
+        RELAY_DIRECTORY_NAME,
+        `./launch-test-${outputType}.txt`,
+      );
       const logFile = createWriteStream(logFilePath);
 
       // https://stackoverflow.com/a/44846808/6539857
@@ -47,6 +50,7 @@ describe('launch', () => {
         const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
         subprocess = launch(nodeArgs, fd);
 
+        // subprocess.error event gets emitted when
         subprocess.on('error', (error) => {
           return done!(error);
         });
@@ -55,7 +59,7 @@ describe('launch', () => {
           try {
             await expect(
               fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
-            ).resolves.toMatch(logOutput);
+            ).resolves.toBe(logOutput + '\n');
           } catch (error) {
             return done!(error);
           }
