@@ -36,10 +36,10 @@ export async function instance(): Promise<RelayInfo> {
   // Without 'open' event spawn() won't accept the WriteStream, because
   // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
   // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
-  logStream.on('open', (fd) => {
+  logStream.on('open', (fd: number) => {
     const relayProcess = launch([relayJsPath], logStream);
 
-    relayProcess.on('error', (error) => {
+    relayProcess.on('error', (error: Error) => {
       console.error('Local relay process threw error:', error);
       relayProcess.kill('SIGKILL');
       throw error;
@@ -50,7 +50,7 @@ export async function instance(): Promise<RelayInfo> {
     });
   });
 
-  logStream.on('error', (error) => {
+  logStream.on('error', (error: Error) => {
     console.error(
       `Error creating an output stream to file at path: ${RELAY_LOG_FILE_PATH}`,
     );
