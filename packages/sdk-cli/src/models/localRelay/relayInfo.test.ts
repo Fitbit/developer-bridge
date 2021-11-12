@@ -72,7 +72,24 @@ describe('readRelayInfo', () => {
   });
 });
 
+// https://stackoverflow.com/a/52196951/6539857
+// https://stackoverflow.com/a/58716087/6539857
+function flushPromises() {
+  return new Promise((resolve) => setImmediate(resolve));
+}
+
 describe('pollRelayInfo', () => {
+  let readJsonFileSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    readJsonFileSpy.mockRestore();
+  });
+
   /**
    * Poll for the relay info in interval of 100ms until either:
    * - Valid relay info obtained
@@ -83,87 +100,79 @@ describe('pollRelayInfo', () => {
    */
   it('polls until relay info is obtained', async () => {
     const relayInfo: RelayInfo = { port: 1, pid: 1 };
-    const readJsonFileSpy = jest
+    readJsonFileSpy = jest
       .spyOn(util, 'readJsonFile')
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce(relayInfo);
 
     const poll = pollRelayInfo(500, 100);
+    await flushPromises();
+
+    // readJsonFile() is called once as soon as pollRelayJson() is called
+    // hence we start counter from 1
+    for (let i = 1; i <= 2; i += 1) {
+      jest.advanceTimersByTime(100);
+      await flushPromises();
+      expect(readJsonFileSpy).toHaveBeenCalledTimes(i + 1);
+    }
 
     await expect(poll).resolves.toEqual(relayInfo);
-
-    expect(readJsonFileSpy).toHaveBeenCalledTimes(3);
   });
 
-  /**
-   * With timeout 500ms, and interval 200ms, pollRelayInfo can only make max. 2 poll calls + 1 initial, at t = 0.
-   * We check whether polls are really called in the specified interval and not slower/faster (so exactly 3 times).
-   * setInterval/Timeout/etc. are not guaranteed to call functions at __exactly__ the time specified,
-   * so there is a margin of 100ms (2 x 200ms + 100ms).
-   */
+  // With timeout 500ms, and interval 200ms, pollRelayInfo can only make max. 2 poll calls + 1 initial, at t = 0.
+  // We check whether polls are really called in the specified interval and not slower/faster (so exactly 3 times).
   it('polls in regular intervals', async () => {
-    const timeout = 500;
-    const interval = 200;
-    const readJsonFileSpy = jest
-      .spyOn(util, 'readJsonFile')
-      .mockResolvedValue({});
-
-    await expect(pollRelayInfo(timeout, interval)).rejects.toThrow();
-
-    // Calls: 0, 1000, 2000, 3000
-    expect(readJsonFileSpy).toHaveBeenCalledTimes(
-      Math.floor(timeout / interval) + 1,
-    );
-
-    readJsonFileSpy.mockRestore();
-  });
-
-  /**
-   * With timeout 10 times larger than the interval, pollRelayInfo could be called 10 times.
-   * However, we set the first poll request's execution time at almost the timeline length – 800ms.
-   * The request is successful, so the interval should be cleared and value returned.
-   * Therefore, we check whether the interval is blocked whenever there is an existing request in-flight.
-   */
-  it('has only 1 in-flight poll request at a time', async () => {
-    const timeout = 1000;
+    const timeout = 10000;
     const interval = 100;
-    const pollExecTime = 800;
+    readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockResolvedValue({});
 
-    const value: RelayInfo = { port: 1, pid: 1 };
-    const readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
-      () =>
-        new Promise<RelayInfo>((resolve) =>
-          setTimeout(() => resolve(value), pollExecTime),
-        ),
-    );
+    pollRelayInfo(timeout, interval);
+    await flushPromises();
 
-    await expect(pollRelayInfo(timeout, interval)).resolves.toEqual(value);
+    // Checking if the behaviour is correct a couple of times is sufficient
+    const reps = 2;
+    // We need to ensure the timeout & interval actually allow for "a couple" of runs without timing out
+    if (timeout / interval < reps) {
+      throw new Error(
+        `Timeout ${timeout} is too small to allow ${reps} reps/intervals`,
+      );
+    }
 
-    expect(readJsonFileSpy).toHaveBeenCalledTimes(
-      Math.floor(timeout / pollExecTime),
-    );
+    //    t  | callN
+    // ––––––|–––––––
+    //    0  |   1
+    //   99  |   1
+    //  100  |   2
+    //  199  |   2
+    //  200  |   3
+    //      ...
+    for (let i = 1; i <= reps; i += 1) {
+      expect(readJsonFileSpy).toHaveBeenCalledTimes(i);
+      jest.advanceTimersByTime(interval - 1);
+      await flushPromises();
+      expect(readJsonFileSpy).toHaveBeenCalledTimes(i);
 
-    readJsonFileSpy.mockRestore();
+      jest.advanceTimersByTime(1);
+      await flushPromises();
+      expect(readJsonFileSpy).toHaveBeenCalledTimes(i + 1);
+    }
   });
 
-  /**
-   * First poll request's execution time 2000ms exceeds the total specified 1000ms timeout.
-   */
+  // First poll request's execution time 2000ms exceeds the total specified 1000ms timeout.
   it('rejects on timeout', async () => {
     const timeout = 1000;
-    const readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
+    readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
       () =>
         new Promise<false>((resolve) => setTimeout(() => resolve(false), 2000)),
     );
 
     const poll = pollRelayInfo(timeout, undefined);
+    jest.runAllTimers();
     await expect(poll).rejects.toHaveProperty(
       'message',
       `Timed out after waiting for ${timeout} ms`,
     );
-
-    readJsonFileSpy.mockRestore();
   });
 });
 
