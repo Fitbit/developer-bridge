@@ -151,7 +151,8 @@ describe('instance', () => {
       expect(launchUtils.launch).toHaveBeenCalled();
       expect(kill).toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Local relay process threw error',
+        'Local relay process threw error:',
+        expect.any(Error),
       );
     });
   });
