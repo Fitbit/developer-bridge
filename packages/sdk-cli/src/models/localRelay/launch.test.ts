@@ -1,6 +1,6 @@
-import { createWriteStream, promises as fsPromises } from 'fs';
-import { ChildProcess } from 'child_process';
 import { join } from 'path';
+import { ChildProcess } from 'child_process';
+import { createWriteStream, promises as fsPromises } from 'fs';
 
 import { launch } from './launch';
 import { RELAY_DIRECTORY_NAME } from './const';
@@ -46,11 +46,11 @@ describe('launch', () => {
       // Without 'open' event spawn() won't accept the WriteStream, because
       // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
       // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
-      logFile.on('open', (fd) => {
+      logFile.on('open', async (fd) => {
         const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
-        subprocess = launch(nodeArgs, fd);
+        subprocess = await launch(nodeArgs, fd);
 
-        // subprocess.error event gets emitted when
+        // https://nodejs.org/api/child_process.html#event-error
         subprocess.on('error', (error) => {
           return done!(error);
         });

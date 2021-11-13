@@ -1,11 +1,10 @@
-import { ChildProcess, spawn } from 'child_process';
 import { Writable } from 'stream';
+import { ChildProcess, spawn } from 'child_process';
 
-// TODO: Separate log and error files?
 export function launch(
   nodeArgs: string[],
   logStream: Writable | number | 'pipe' | 'ignore' | 'inherit',
-): ChildProcess {
+): Promise<ChildProcess> {
   // Fork() doesn't support unref()
   const relayChildProcess = spawn('node', nodeArgs, {
     detached: true,
@@ -25,5 +24,7 @@ export function launch(
   // unref()'ing child process allows the parent process (CLI) to exit without waiting for the child (Local Relay) to exit.
   relayChildProcess.unref();
 
-  return relayChildProcess;
+  return new Promise<ChildProcess>((resolve) =>
+    relayChildProcess.on('spawn', () => resolve(relayChildProcess)),
+  );
 }
