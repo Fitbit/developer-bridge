@@ -1,7 +1,5 @@
 import { createWriteStream } from 'fs';
 
-import { RELAY_LOG_FILE_PATH, RELAY_PKG_NAME } from './const';
-import { launch } from './launch';
 import {
   RelayInfo,
   readRelayInfo,
@@ -9,6 +7,20 @@ import {
   pollRelayInfo,
   isRelayPkgInstalled,
 } from './relayInfo';
+import { launch } from './launch';
+import { RELAY_LOG_FILE_PATH, RELAY_PKG_NAME } from './const';
+
+function createLogStream(path: string): Promise<number> {
+  return new Promise<number>((resolve, reject) =>
+    createWriteStream(path)
+      // https://stackoverflow.com/a/44846808/6539857
+      // Without 'open' event spawn() won't accept the WriteStream, because
+      // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
+      // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
+      .on('open', resolve)
+      .on('error', reject),
+  );
+}
 
 export async function instance(): Promise<RelayInfo> {
   // Connect to any existing Relay instance; if doesn't exist, launch a new one.
@@ -29,32 +41,19 @@ export async function instance(): Promise<RelayInfo> {
   }
 
   const relayJsPath = await relayEntryPointPath();
+  const logStream = await createLogStream(RELAY_LOG_FILE_PATH);
+  const relayProcess = await launch([relayJsPath], logStream);
 
-  const logStream = createWriteStream(RELAY_LOG_FILE_PATH);
+  relayProcess.on('error', (error: Error) => {
+    console.error('Local relay process threw error:', error);
+    // 'error' doesn't guarantee that the process exits afterwards
+    relayProcess.kill('SIGKILL');
 
-  // https://stackoverflow.com/a/44846808/6539857
-  // Without 'open' event spawn() won't accept the WriteStream, because
-  // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
-  // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
-  logStream.on('open', (fd: number) => {
-    const relayProcess = launch([relayJsPath], logStream);
-
-    relayProcess.on('error', (error: Error) => {
-      console.error('Local relay process threw error:', error);
-      relayProcess.kill('SIGKILL');
-      throw error;
-    });
-
-    relayProcess.on('close', async () => {
-      console.warn('Local relay process exited and closed');
-    });
+    throw error;
   });
 
-  logStream.on('error', (error: Error) => {
-    console.error(
-      `Error creating an output stream to file at path: ${RELAY_LOG_FILE_PATH}`,
-    );
-    throw error;
+  relayProcess.on('close', async () => {
+    console.warn('Local relay process exited and closed');
   });
 
   const relayInfo = await pollRelayInfo();
@@ -67,3 +66,4 @@ export async function instance(): Promise<RelayInfo> {
 }
 
 export { RelayInfo } from './relayInfo';
+export * from './const';

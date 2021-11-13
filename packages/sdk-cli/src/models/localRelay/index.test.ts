@@ -105,8 +105,6 @@ describe('instance', () => {
     });
 
     it('throws if createWriteStream fails', async () => {
-      const consoleSpy = jest.spyOn(console, 'error');
-
       jest
         .spyOn(fs, 'createWriteStream')
         .mockReturnValueOnce(
@@ -123,11 +121,6 @@ describe('instance', () => {
       3. console.error, throw error
       */
       await expect(instance()).rejects.toThrow();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
-          'Error creating an output stream to file at path',
-        ),
-      );
     });
 
     it('throws if launched relay instance fails and attempts to kill it', async () => {
