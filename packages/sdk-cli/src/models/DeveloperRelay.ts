@@ -8,7 +8,6 @@ import * as localRelay from './localRelay';
 import { apiFetch, assertAPIResponseOK, decodeJSON } from '../api/baseAPI';
 import { assertContentType } from '../util/fetchUtil';
 import environment from '../auth/environment';
-import { RELAY_DIRECTORY_PATH } from './localRelay/const';
 
 // tslint:disable-next-line:variable-name
 export const Host = t.type(
@@ -41,7 +40,14 @@ export default class DeveloperRelay {
   static async create(local = false) {
     if (local) {
       // Create an output directory (if doesn't exist)
-      await fsPromises.mkdir(RELAY_DIRECTORY_PATH);
+      try {
+        await fsPromises.mkdir(localRelay.RELAY_DIRECTORY_PATH);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+          throw new Error('Error creating a directory for Local Relay files');
+        }
+      }
+
       const { port } = await localRelay.instance();
       return new DeveloperRelay(`http://localhost:${port}`, false);
     }

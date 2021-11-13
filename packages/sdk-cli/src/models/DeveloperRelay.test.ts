@@ -47,18 +47,54 @@ function mockConnectionURLResponse(hostID: string, response: string) {
 }
 
 describe('create()', () => {
-  it('local = true', async () => {
-    const mkdirSpy = jest.spyOn(fsPromises, 'mkdir').mockImplementation();
+  describe('local = true', () => {
+    it('creates a local DeveloperRelay instance', async () => {
+      jest
+        .spyOn(localRelay, 'instance')
+        .mockResolvedValueOnce({ port: 1, pid: 1 });
+      jest.spyOn(fsPromises, 'mkdir').mockImplementationOnce(jest.fn());
 
-    const port = 1;
-    jest.spyOn(localRelay, 'instance').mockResolvedValueOnce({ port, pid: 1 });
-
-    await expect(DeveloperRelay.create(true)).resolves.toEqual({
-      apiUrl: `http://localhost:${port}`,
-      shouldAuth: false,
+      await expect(DeveloperRelay.create(true)).resolves.toEqual({
+        apiUrl: `http://localhost:1`,
+        shouldAuth: false,
+      });
     });
 
-    expect(mkdirSpy).toHaveBeenCalled();
+    describe('mkdir', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(localRelay, 'instance')
+          .mockResolvedValueOnce({ port: 1, pid: 1 });
+      });
+
+      it("creates a directory if doesn't exist already", async () => {
+        const mkdirSpy = jest
+          .spyOn(fsPromises, 'mkdir')
+          .mockImplementationOnce(jest.fn());
+
+        await expect(DeveloperRelay.create(true)).resolves.toBeDefined();
+
+        expect(mkdirSpy).toHaveBeenCalledWith(localRelay.RELAY_DIRECTORY_PATH);
+      });
+
+      it('ignores error if directory exists already', async () => {
+        jest
+          .spyOn(fsPromises, 'mkdir')
+          .mockRejectedValueOnce({ code: 'EEXIST' });
+
+        await expect(DeveloperRelay.create(true)).resolves.toBeDefined();
+      });
+
+      it('ignores error if directory exists already', async () => {
+        jest
+          .spyOn(fsPromises, 'mkdir')
+          .mockRejectedValueOnce({ code: 'ANOTHER_CODE' });
+
+        await expect(DeveloperRelay.create(true)).rejects.toThrowError(
+          'Error creating a directory for Local Relay files',
+        );
+      });
+    });
   });
 });
 
