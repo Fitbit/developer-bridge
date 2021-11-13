@@ -2,7 +2,6 @@ import { join } from 'path';
 import { cwd } from 'process';
 
 import * as util from './util';
-import { RELAY_PKG_NAME } from './const';
 import {
   isRelayPkgInstalled,
   pollRelayInfo,
@@ -10,6 +9,7 @@ import {
   relayEntryPointPath,
   RelayInfo,
 } from './relayInfo';
+import { RELAY_PKG_NAME } from './const';
 
 describe('readRelayInfo', () => {
   it.each([
@@ -123,22 +123,15 @@ describe('pollRelayInfo', () => {
   // With timeout 500ms, and interval 200ms, pollRelayInfo can only make max. 2 poll calls + 1 initial, at t = 0.
   // We check whether polls are really called in the specified interval and not slower/faster (so exactly 3 times).
   it('polls in regular intervals', async () => {
-    const timeout = 10000;
     const interval = 100;
-    readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockResolvedValue({});
-
-    pollRelayInfo(timeout, interval);
-    await flushPromises();
-
     // Checking if the behaviour is correct a couple of times is sufficient
-    // IMPORTANT: timeout & interval values should allow the interval to actually run for {reps} times before timeout.
     const reps = 2;
 
-    if (timeout / interval < reps) {
-      throw new Error(
-        `Timeout ${timeout} is too small to allow ${reps} reps/intervals`,
-      );
-    }
+    readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockResolvedValue({});
+
+    // Some padding for timeout not to intersect with the end of the last interval
+    pollRelayInfo(interval * reps * 1.2, interval);
+    await flushPromises();
 
     //    t  | callN
     // ––––––|–––––––
