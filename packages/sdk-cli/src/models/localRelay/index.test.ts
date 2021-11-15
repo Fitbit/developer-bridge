@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ChildProcess } from 'child_process';
+import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 
 import { instance } from '.';
@@ -13,7 +13,10 @@ jest.mock('./launch');
 
 // Mock createWriteStream to return an EventEmitter, that
 // emits `${event}` as soon as an event listener for `${event}` is set.
-function mockStreamWithEventEmit(event: string, payload?: any): EventEmitter {
+export function mockStreamWithEventEmit(
+  event: string,
+  payload?: any,
+): EventEmitter {
   const stream = new EventEmitter();
   const addListener = stream.on.bind(stream);
 
@@ -71,7 +74,7 @@ describe('instance', () => {
 
       (launchUtils.launch as jest.Mock).mockImplementationOnce(() => {
         const stream = new EventEmitter();
-        return stream as ChildProcess;
+        return stream as child_process.ChildProcess;
       });
 
       (relayInfoUtils.readRelayInfo as jest.Mock).mockResolvedValueOnce(false);
@@ -90,7 +93,7 @@ describe('instance', () => {
         .mockReturnValueOnce(mockStreamWithEventEmit('open') as fs.WriteStream);
 
       (launchUtils.launch as jest.Mock).mockReturnValueOnce(
-        new EventEmitter() as ChildProcess,
+        new EventEmitter() as child_process.ChildProcess,
       );
 
       (relayInfoUtils.readRelayInfo as jest.Mock).mockResolvedValueOnce(false);
@@ -121,32 +124,6 @@ describe('instance', () => {
       3. console.error, throw error
       */
       await expect(instance()).rejects.toThrow();
-    });
-
-    it('throws if launched relay instance fails and attempts to kill it', async () => {
-      const consoleSpy = jest.spyOn(console, 'error');
-      const kill = jest.fn();
-
-      jest
-        .spyOn(fs, 'createWriteStream')
-        .mockReturnValueOnce(mockStreamWithEventEmit('open') as fs.WriteStream);
-
-      (launchUtils.launch as jest.Mock).mockReturnValueOnce({
-        ...mockStreamWithEventEmit('error', new Error()),
-        kill,
-      });
-
-      (relayInfoUtils.readRelayInfo as jest.Mock).mockResolvedValueOnce(false);
-      (relayInfoUtils.pollRelayInfo as jest.Mock).mockResolvedValueOnce(false);
-
-      await expect(instance()).rejects.toThrow();
-      // launch() is an empty mock
-      expect(launchUtils.launch).toHaveBeenCalled();
-      expect(kill).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Local relay process threw error:',
-        expect.any(Error),
-      );
     });
   });
 });

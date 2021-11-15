@@ -42,19 +42,7 @@ export async function instance(): Promise<RelayInfo> {
 
   const relayJsPath = await relayEntryPointPath();
   const logStream = await createLogStream(RELAY_LOG_FILE_PATH);
-  const relayProcess = await launch([relayJsPath], logStream);
-
-  relayProcess.on('error', (error: Error) => {
-    console.error('Local relay process threw error:', error);
-    // 'error' doesn't guarantee that the process exits afterwards
-    relayProcess.kill('SIGKILL');
-
-    throw error;
-  });
-
-  relayProcess.on('close', async () => {
-    console.warn('Local relay process exited and closed');
-  });
+  await launch([relayJsPath], logStream, 'Local relay');
 
   const relayInfo = await pollRelayInfo();
 

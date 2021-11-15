@@ -1,18 +1,30 @@
 import { join } from 'path';
-import { ChildProcess } from 'child_process';
+import * as child_process from 'child_process';
 import { createWriteStream, promises as fsPromises } from 'fs';
 
 import { launch } from './launch';
 import { RELAY_DIRECTORY_NAME } from './const';
 
+import { mockStreamWithEventEmit } from './index.test';
+
+// Is there a more idiomatic way to do this? Just using .spy() without mocking
+// doesn't work.
+jest.mock('child_process', () => {
+  const actual = jest.requireActual<typeof child_process>('child_process');
+  return {
+    ...actual,
+    spawn: jest.fn().mockImplementation(actual.spawn),
+  };
+});
+
 describe('launch', () => {
-  let subprocess: ChildProcess;
+  let subprocess: child_process.ChildProcess;
   let logFilePath: string;
 
   afterEach(async () => {
     // 'SIGKILL' is guaranteed to terminate Node.js processes.
     // https://nodejs.org/api/process.html#signal-events
-    if (!subprocess.kill('SIGKILL')) {
+    if (subprocess && !subprocess.kill('SIGKILL')) {
       console.warn(
         "Couldn't SIGKILL the subprocess. Most probably it has already exited.",
       );
@@ -73,4 +85,48 @@ describe('launch', () => {
       });
     },
   );
+
+  it("rejects on child process 'error' event (with processName)", async () => {
+    const consoleSpy = jest.spyOn(console, 'error');
+    const kill = jest.fn();
+    const errorMessage = 'test';
+    const processName = 'test';
+
+    const nodeArgs = ['-e', `console.log('smth')`];
+
+    (child_process.spawn as jest.Mock).mockReturnValueOnce(({
+      ...mockStreamWithEventEmit('error', new Error(errorMessage)),
+      kill,
+      unref: jest.fn(),
+    } as unknown) as child_process.ChildProcess);
+
+    await expect(
+      launch(nodeArgs, undefined as any, processName),
+    ).rejects.toThrowError(errorMessage);
+
+    expect(kill).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      `${processName} child process threw error:`,
+      new Error(errorMessage),
+    );
+  });
+
+  it("resolves with child process on 'spawn' event (without processName)", async () => {
+    const consoleSpy = jest.spyOn(console, 'log');
+    const kill = jest.fn();
+
+    const nodeArgs = ['-e', "console.log('smth')"];
+    const expectedProcessName = `Child process spawned by 'node ${nodeArgs[0]} ${nodeArgs[1]}'`;
+
+    (child_process.spawn as jest.Mock).mockReturnValueOnce(({
+      ...mockStreamWithEventEmit('spawn'),
+      kill,
+      unref: jest.fn(),
+    } as unknown) as child_process.ChildProcess);
+
+    // ChildProcess class not exported in Node
+    await expect(launch(nodeArgs, undefined as any)).resolves.toBeDefined();
+
+    expect(consoleSpy).toHaveBeenCalledWith(`${expectedProcessName} launched`);
+  });
 });
