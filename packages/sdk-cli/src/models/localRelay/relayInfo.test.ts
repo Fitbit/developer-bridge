@@ -86,6 +86,7 @@ describe('pollRelayInfo', () => {
   });
 
   afterEach(() => {
+    jest.clearAllTimers();
     jest.useRealTimers();
     readJsonFileSpy.mockRestore();
   });
@@ -120,8 +121,6 @@ describe('pollRelayInfo', () => {
     await expect(poll).resolves.toEqual(relayInfo);
   });
 
-  // With timeout 500ms, and interval 200ms, pollRelayInfo can only make max. 2 poll calls + 1 initial, at t = 0.
-  // We check whether polls are really called in the specified interval and not slower/faster (so exactly 3 times).
   it('polls in regular intervals', async () => {
     const interval = 100;
     // Checking if the behaviour is correct a couple of times is sufficient
@@ -130,19 +129,27 @@ describe('pollRelayInfo', () => {
     readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockResolvedValue({});
 
     // Some padding for timeout not to intersect with the end of the last interval
-    pollRelayInfo(interval * reps * 1.2, interval);
+    const timeout = interval * reps * 1.2;
+    // There's no `await expect(pollRelayInfoPromise).resolves/rejects` in this use case (unlike others), so, if a timeout occurs
+    // (which can happen only in the warning written below), it will raise an UnhandledPromiseRejectionException
+    pollRelayInfo(timeout, interval).catch((error) => {
+      console.warn(
+        "If you see this message, it means the timeout created in pollRelayInfo has leaked out of this test case.\
+      You probably forgot 'jest.clearAllTimeouts()' after this test or in afterEach().",
+      );
+      console.error(error);
+    });
     await flushPromises();
 
     //    t  | callN
     // ––––––|–––––––
-    //    0  |   1
+    //    0  |   -
     //   99  |   1
     //  100  |   2
     //  199  |   2
     //  200  |   3
     //      ...
     for (let i = 1; i <= reps; i += 1) {
-      expect(readJsonFileSpy).toHaveBeenCalledTimes(i);
       jest.advanceTimersByTime(interval - 1);
       await flushPromises();
       expect(readJsonFileSpy).toHaveBeenCalledTimes(i);
@@ -154,26 +161,20 @@ describe('pollRelayInfo', () => {
   });
 
   // First poll request's execution time 2000ms exceeds the total specified 1000ms timeout.
-  it('rejects on timeout', (done) => {
+  it('rejects on timeout', async () => {
     const timeout = 1000;
     readJsonFileSpy = jest.spyOn(util, 'readJsonFile').mockImplementation(
       () =>
         new Promise<false>((resolve) => setTimeout(() => resolve(false), 2000)),
     );
 
-    pollRelayInfo(timeout, undefined)
-      .then(() => done(new Error('Expected pollRelayInfo to timeout')))
-      .catch((error) => {
-        expect(error).toEqual(
-          expect.objectContaining({
-            message: `Timed out after waiting for ${timeout} ms`,
-          }),
-        );
-
-        return done();
-      });
+    const poll = pollRelayInfo(timeout, timeout);
+    await flushPromises();
 
     jest.runAllTimers();
+    await expect(poll).rejects.toThrowError(
+      `Timed out after waiting for ${timeout} ms`,
+    );
   });
 });
 
