@@ -26,10 +26,6 @@ describe('isPositiveInt', () => {
     ])('%s', (_, test) => {
       expect(isPositiveInt(test)).toBe(false);
     });
-
-    it('number string', () => expect(isPositiveInt('5')).toBe(false));
-    it('number string', () => expect(isPositiveInt('5')).toBe(false));
-    it('number string', () => expect(isPositiveInt('5')).toBe(false));
   });
 
   describe('true', () => {
