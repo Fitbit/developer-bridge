@@ -16,6 +16,8 @@ jest.mock('child_process', () => {
 });
 
 describe('launch', () => {
+  const logDirPath = join(process.cwd(), RELAY_DIRECTORY_NAME);
+
   let subprocess: child_process.ChildProcess;
   let logFilePath: string;
 
@@ -32,9 +34,19 @@ describe('launch', () => {
       try {
         await fsPromises.unlink(logFilePath);
       } catch (error) {
-        if (error !== 'ENOENT') {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
           console.error(error);
         }
+      }
+    }
+  });
+
+  afterAll(async () => {
+    try {
+      await fsPromises.rmdir(logDirPath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        console.error(error);
       }
     }
   });
@@ -46,11 +58,7 @@ describe('launch', () => {
     'spawns a process and logs %s to a log file',
     async (outputType, consoleMethodName, done) => {
       const logOutput = `test ${outputType}`;
-      logFilePath = join(
-        RELAY_DIRECTORY_NAME,
-        `./launch-test-${outputType}.txt`,
-      );
-      const logFile = createWriteStream(logFilePath);
+      logFilePath = join(logDirPath, `./launch-test-${outputType}.txt`);
       const logFile = await createLogStream(logFilePath);
 
       // https://stackoverflow.com/a/44846808/6539857
