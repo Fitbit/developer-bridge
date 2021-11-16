@@ -1,17 +1,27 @@
 import { promises as fsPromises } from 'fs';
-import { isInt, readJsonFile } from './util';
+import { isPositiveInt, readJsonFile } from './util';
 
-describe('isInt', () => {
+describe('isPositiveInt', () => {
   describe('false', () => {
     it.each([undefined, null, Infinity, -Infinity])('%s', (x) =>
-      expect(isInt(x)).toBe(false),
+      expect(isPositiveInt(x)).toBe(false),
     );
 
-    it('number string', () => expect(isInt('5')).toBe(false));
+    it.each([
+      ['number string', '5'],
+      ['negative number', -5],
+      ['float', 3.14],
+    ])('%s', (_, test) => {
+      expect(isPositiveInt(test)).toBe(false);
+    });
+
+    it('number string', () => expect(isPositiveInt('5')).toBe(false));
+    it('number string', () => expect(isPositiveInt('5')).toBe(false));
+    it('number string', () => expect(isPositiveInt('5')).toBe(false));
   });
 
   describe('true', () => {
-    it('number', () => expect(isInt(5)).toBe(true));
+    it('number', () => expect(isPositiveInt(5)).toBe(true));
   });
 });
 

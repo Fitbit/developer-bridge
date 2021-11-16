@@ -7,8 +7,6 @@ import { RELAY_DIRECTORY_NAME } from './const';
 
 import { mockStreamWithEventEmit } from './index.test';
 
-// Is there a more idiomatic way to do this? Just using .spy() without mocking
-// doesn't work.
 jest.mock('child_process', () => {
   const actual = jest.requireActual<typeof child_process>('child_process');
   return {

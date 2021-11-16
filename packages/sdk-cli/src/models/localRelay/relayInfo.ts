@@ -2,7 +2,7 @@ import { cwd } from 'process';
 import { join } from 'path';
 import { waitUntil } from 'async-wait-until';
 
-import { isInt, readJsonFile } from './util';
+import { isPositiveInt, readJsonFile } from './util';
 import { RELAY_PKG_NAME, RELAY_PID_FILE_PATH } from './const';
 
 export type RelayInfo = { port: number; pid: number };
@@ -17,7 +17,7 @@ export async function readRelayInfo(): Promise<ReadRelayInfoResult> {
     )) as RelayInfo;
 
     // [port, pid].every(...) doesn't pass Control Flow Analysis. I.e. TS won't know port & pid are numbers.
-    if (isInt(port) && isInt(pid)) {
+    if (isPositiveInt(port) && isPositiveInt(pid)) {
       return {
         port: Number(port),
         pid: Number(pid),

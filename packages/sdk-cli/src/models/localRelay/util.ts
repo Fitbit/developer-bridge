@@ -5,6 +5,6 @@ export async function readJsonFile(path: string): Promise<unknown> {
   return JSON.parse(contents);
 }
 
-export function isInt(n: any): n is number {
-  return Number.isInteger(n);
+export function isPositiveInt(n: any): n is number {
+  return n >= 0 && Number.isInteger(n);
 }
