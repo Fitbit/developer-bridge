@@ -81,7 +81,7 @@ describe('launch', () => {
       const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
       const subprocessPromise = launch(nodeArgs, logFile);
 
-      // What happened to https://github.com/nodejs/node/issues/1751?
+      // TODO: Use toBeInstanceOf(ChildProcess), resolve typing issue
       await expect(subprocessPromise).resolves.toHaveProperty(
         'constructor.name',
         'ChildProcess',
