@@ -59,42 +59,6 @@ describe('create()', () => {
         shouldAuth: false,
       });
     });
-
-    describe('mkdir', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(localRelay, 'instance')
-          .mockResolvedValueOnce({ port: 1, pid: 1 });
-      });
-
-      it("creates a directory if doesn't exist already", async () => {
-        const mkdirSpy = jest
-          .spyOn(fsPromises, 'mkdir')
-          .mockImplementationOnce(jest.fn());
-
-        await expect(DeveloperRelay.create(true)).resolves.toBeDefined();
-
-        expect(mkdirSpy).toHaveBeenCalledWith(localRelay.RELAY_DIRECTORY_PATH);
-      });
-
-      it('ignores error if directory exists already', async () => {
-        jest
-          .spyOn(fsPromises, 'mkdir')
-          .mockRejectedValueOnce({ code: 'EEXIST' });
-
-        await expect(DeveloperRelay.create(true)).resolves.toBeDefined();
-      });
-
-      it('ignores error if directory exists already', async () => {
-        jest
-          .spyOn(fsPromises, 'mkdir')
-          .mockRejectedValueOnce({ code: 'ANOTHER_CODE' });
-
-        await expect(DeveloperRelay.create(true)).rejects.toThrowError(
-          'Error creating a directory for Local Relay files',
-        );
-      });
-    });
   });
 });
 

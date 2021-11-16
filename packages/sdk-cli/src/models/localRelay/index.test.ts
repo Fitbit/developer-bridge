@@ -2,9 +2,10 @@ import * as fs from 'fs';
 import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 
-import { instance } from '.';
 import * as relayInfoUtils from './relayInfo';
 import * as launchUtils from './launch';
+import * as utils from './util';
+import { instance } from '.';
 import { RELAY_PKG_NAME } from './const';
 
 jest.mock('fs');
@@ -67,9 +68,9 @@ describe('instance', () => {
       const relayInfo = { port: 1, pid: 1 };
 
       jest
-        .spyOn(fs, 'createWriteStream')
-        .mockImplementationOnce(
-          () => mockStreamWithEventEmit('open') as fs.WriteStream,
+        .spyOn(utils, 'createLogStream')
+        .mockResolvedValueOnce(
+          mockStreamWithEventEmit('open') as fs.WriteStream,
         );
 
       (launchUtils.launch as jest.Mock).mockImplementationOnce(() => {
@@ -89,8 +90,10 @@ describe('instance', () => {
 
     it('throws if no launched relay instance info obtained', async () => {
       jest
-        .spyOn(fs, 'createWriteStream')
-        .mockReturnValueOnce(mockStreamWithEventEmit('open') as fs.WriteStream);
+        .spyOn(utils, 'createLogStream')
+        .mockResolvedValueOnce(
+          mockStreamWithEventEmit('open') as fs.WriteStream,
+        );
 
       (launchUtils.launch as jest.Mock).mockReturnValueOnce(
         new EventEmitter() as child_process.ChildProcess,
@@ -109,9 +112,12 @@ describe('instance', () => {
 
     it('throws if createWriteStream fails', async () => {
       jest
-        .spyOn(fs, 'createWriteStream')
-        .mockReturnValueOnce(
-          mockStreamWithEventEmit('error', new Error()) as fs.WriteStream,
+        .spyOn(utils, 'createLogStream')
+        .mockResolvedValueOnce(
+          mockStreamWithEventEmit(
+            'error',
+            new Error('createWriteStream failed'),
+          ) as fs.WriteStream,
         );
 
       /*

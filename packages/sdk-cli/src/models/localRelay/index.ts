@@ -1,5 +1,3 @@
-import { createWriteStream } from 'fs';
-
 import {
   RelayInfo,
   readRelayInfo,
@@ -9,18 +7,7 @@ import {
 } from './relayInfo';
 import { launch } from './launch';
 import { RELAY_LOG_FILE_PATH, RELAY_PKG_NAME } from './const';
-
-function createLogStream(path: string): Promise<number> {
-  return new Promise<number>((resolve, reject) =>
-    createWriteStream(path)
-      // https://stackoverflow.com/a/44846808/6539857
-      // Without 'open' event spawn() won't accept the WriteStream, because
-      // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
-      // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
-      .on('open', resolve)
-      .on('error', reject),
-  );
-}
+import { createLogStream } from './util';
 
 export async function instance(): Promise<RelayInfo> {
   // Connect to any existing Relay instance; if doesn't exist, launch a new one.

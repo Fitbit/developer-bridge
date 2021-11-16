@@ -1,10 +1,10 @@
 import { join } from 'path';
 import * as child_process from 'child_process';
-import { createWriteStream, promises as fsPromises } from 'fs';
+import { promises as fsPromises } from 'fs';
 
 import { launch } from './launch';
+import { createLogStream } from './util';
 import { RELAY_DIRECTORY_NAME } from './const';
-
 import { mockStreamWithEventEmit } from './index.test';
 
 jest.mock('child_process', () => {
@@ -51,35 +51,30 @@ describe('launch', () => {
         `./launch-test-${outputType}.txt`,
       );
       const logFile = createWriteStream(logFilePath);
+      const logFile = await createLogStream(logFilePath);
 
       // https://stackoverflow.com/a/44846808/6539857
       // Without 'open' event spawn() won't accept the WriteStream, because
       // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
       // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
-      logFile.on('open', async (fd) => {
-        const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
-        subprocess = await launch(nodeArgs, fd);
+      const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
+      subprocess = await launch(nodeArgs, logFile);
 
-        // https://nodejs.org/api/child_process.html#event-error
-        subprocess.on('error', (error) => {
-          return done!(error);
-        });
-
-        subprocess.on('close', async () => {
-          try {
-            await expect(
-              fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
-            ).resolves.toBe(logOutput + '\n');
-          } catch (error) {
-            return done!(error);
-          }
-
-          return done!();
-        });
+      // https://nodejs.org/api/child_process.html#event-error
+      subprocess.on('error', (error) => {
+        return done!(error);
       });
 
-      logFile.on('error', (error) => {
-        return done!(error);
+      subprocess.on('close', async () => {
+        try {
+          await expect(
+            fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
+          ).resolves.toBe(logOutput + '\n');
+        } catch (error) {
+          return done!(error);
+        }
+
+        return done!();
       });
     },
   );
