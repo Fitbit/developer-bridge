@@ -1,5 +1,4 @@
 import stream from 'stream';
-import { promises as fsPromises } from 'fs';
 
 import * as t from 'io-ts';
 import websocketStream from 'websocket-stream';
@@ -39,15 +38,6 @@ export default class DeveloperRelay {
 
   static async create(local = false) {
     if (local) {
-      // Create an output directory (if doesn't exist)
-      try {
-        await fsPromises.mkdir(localRelay.RELAY_DIRECTORY_PATH);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
-          throw new Error('Error creating a directory for Local Relay files');
-        }
-      }
-
       const { port } = await localRelay.instance();
       return new DeveloperRelay(`http://localhost:${port}`, false);
     }
