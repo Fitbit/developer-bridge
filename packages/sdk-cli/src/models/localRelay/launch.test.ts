@@ -15,6 +15,19 @@ jest.mock('child_process', () => {
   };
 });
 
+async function awaitProcessClose(
+  processPromise: Promise<child_process.ChildProcess>,
+): Promise<child_process.ChildProcess> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const resolvedProcess = await processPromise;
+      resolvedProcess.on('close', async () => resolve(resolvedProcess));
+    } catch (error) {
+      return reject(error);
+    }
+  });
+}
+
 describe('launch', () => {
   const logDirPath = join(process.cwd(), RELAY_DIRECTORY_NAME);
 
@@ -56,7 +69,7 @@ describe('launch', () => {
     ['error', 'error'],
   ])(
     'spawns a process and logs %s to a log file',
-    async (outputType, consoleMethodName, done) => {
+    async (outputType, consoleMethodName) => {
       const logOutput = `test ${outputType}`;
       logFilePath = join(logDirPath, `./launch-test-${outputType}.txt`);
       const logFile = await createLogStream(logFilePath);
@@ -74,17 +87,13 @@ describe('launch', () => {
         'ChildProcess',
       );
 
-      subprocess = await subprocessPromise;
-
       // Log files aren't guaranteed to exist after 'spawn' event (which subprocessPromise resolves on),
       // wait for 'close'.
-      subprocess.on('close', async () => {
-        await expect(
-          fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
-        ).resolves.toBe(logOutput + '\n');
+      subprocess = await awaitProcessClose(subprocessPromise);
 
-        return done?.();
-      });
+      await expect(
+        fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
+      ).resolves.toBe(logOutput + '\n');
     },
   );
 
