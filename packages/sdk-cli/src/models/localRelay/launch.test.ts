@@ -66,23 +66,24 @@ describe('launch', () => {
       // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
       // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
       const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
-      subprocess = await launch(nodeArgs, logFile);
+      const subprocessPromise = launch(nodeArgs, logFile);
 
-      // https://nodejs.org/api/child_process.html#event-error
-      subprocess.on('error', (error) => {
-        return done!(error);
-      });
+      // What happened to https://github.com/nodejs/node/issues/1751?
+      await expect(subprocessPromise).resolves.toHaveProperty(
+        'constructor.name',
+        'ChildProcess',
+      );
 
+      subprocess = await subprocessPromise;
+
+      // Log files aren't guaranteed to exist after 'spawn' event (which subprocessPromise resolves on),
+      // wait for 'close'.
       subprocess.on('close', async () => {
-        try {
-          await expect(
-            fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
-          ).resolves.toBe(logOutput + '\n');
-        } catch (error) {
-          return done!(error);
-        }
+        await expect(
+          fsPromises.readFile(logFilePath, { encoding: 'utf8' }),
+        ).resolves.toBe(logOutput + '\n');
 
-        return done!();
+        return done?.();
       });
     },
   );
