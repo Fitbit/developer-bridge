@@ -64,7 +64,7 @@ describe('launch', () => {
     }
   });
 
-  it.each<[string, keyof typeof console, jest.DoneCallback?]>([
+  it.skip.each<[string, keyof typeof console, jest.DoneCallback?]>([
     ['output', 'log'],
     ['error', 'error'],
   ])(
