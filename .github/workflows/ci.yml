@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - feature/local-relay
   pull_request:
     branches:
       - master
+      - feature/local-relay
 
 jobs:
   build:
