@@ -78,7 +78,10 @@ describe('launch', () => {
       // Without 'open' event spawn() won't accept the WriteStream, because
       // "[log stream] must have an underlying descriptor (file streams do not until the 'open' event has occurred)"
       // Related: https://github.com/nodejs/node-v0.x-archive/issues/4030
-      const nodeArgs = ['-e', `console.${consoleMethodName}('${logOutput}')`];
+      const nodeArgs = [
+        '-e',
+        `console.${consoleMethodName}('${logOutput}'); process.exit();`,
+      ];
       const subprocessPromise = launch(nodeArgs, logFile);
 
       // TODO: Use toBeInstanceOf(ChildProcess), resolve typing issue
@@ -103,7 +106,7 @@ describe('launch', () => {
     const errorMessage = 'test';
     const processName = 'test';
 
-    const nodeArgs = ['-e', `console.log('smth')`];
+    const nodeArgs = ['-e', `console.log('smth'); process.exit();`];
 
     (child_process.spawn as jest.Mock).mockReturnValueOnce(({
       ...mockStreamWithEventEmit('error', new Error(errorMessage)),
@@ -126,7 +129,7 @@ describe('launch', () => {
     const consoleSpy = jest.spyOn(console, 'log');
     const kill = jest.fn();
 
-    const nodeArgs = ['-e', "console.log('smth')"];
+    const nodeArgs = ['-e', "console.log('smth'); process.exit();"];
     const expectedProcessName = `Child process spawned by 'node ${nodeArgs[0]} ${nodeArgs[1]}'`;
 
     (child_process.spawn as jest.Mock).mockReturnValueOnce(({
