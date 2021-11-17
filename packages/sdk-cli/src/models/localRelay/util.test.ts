@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { dirname, join } from 'path';
+import { join } from 'path';
 import { mockStreamWithEventEmit } from './index.test';
 import { isPositiveInt, readJsonFile, createLogStream } from './util';
 
@@ -60,8 +60,8 @@ describe('readJsonFile – mock file system', () => {
 });
 
 describe('createLogStream', () => {
-  const parentDir = dirname('/non/existent/dir');
-  const fullPath = join(parentDir, 'dir');
+  const parentDir = process.cwd();
+  const fullPath = join(parentDir, 'createLogStream-test');
 
   beforeEach(() => {
     jest
