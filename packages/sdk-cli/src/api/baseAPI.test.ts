@@ -1,9 +1,10 @@
 import nock from 'nock';
 
 import * as auth from '../auth';
+import * as fetchModule from '../fetch';
+
 import environment from '../auth/environment';
 import * as baseAPI from './baseAPI';
-import { Response } from '../fetch';
 import makeResponse from '../testUtils/makeResponse';
 
 jest.mock('../auth');
@@ -21,6 +22,32 @@ describe('apiFetch()', () => {
     return expect(
       baseAPI.apiFetch(fakeAPIPath),
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('can use a custom API URL and skip auth', async () => {
+    jest
+      .spyOn(fetchModule, 'default')
+      .mockImplementationOnce(
+        async (url: RequestInfo, init?: RequestInit) =>
+          ({ url, headers: init?.headers } as Response),
+      );
+
+    const fakeAPIDomain = 'https://fake-dev-relay-test-endpoint.fitbit.com';
+
+    mockAuthToken(null);
+    // apiFetch would throw if it didn't skip auth, because authToken is falsy
+    const responsePromise = baseAPI.apiFetch(
+      fakeAPIPath,
+      undefined,
+      fakeAPIDomain,
+      false,
+    );
+    await expect(responsePromise).resolves.toBeDefined();
+
+    const response = await responsePromise;
+    expect(auth.getAccessToken).toBeCalledTimes(0);
+    expect(response.url).toBe(`${fakeAPIDomain}/${fakeAPIPath}`);
+    expect(response.headers.has('authorization')).toBe(false);
   });
 
   describe('when an auth token is available', () => {
@@ -61,7 +88,7 @@ describe('assertAPIResponseOK()', () => {
   it('resolves to a response object on status code 200', () => {
     return expect(
       baseAPI.assertAPIResponseOK(makeResponse()),
-    ).resolves.toBeInstanceOf(Response);
+    ).resolves.toBeInstanceOf(fetchModule.Response);
   });
 
   it('parses an error response with a valid JSON body', () => {

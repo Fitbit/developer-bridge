@@ -1,8 +1,8 @@
 import { startCase } from 'lodash';
 import vorpal from '@moleculer/vorpal';
 
-import * as developerRelay from '../api/developerRelay';
 import HostConnections from '../models/HostConnections';
+import DeveloperRelay, { Host } from '../models/DeveloperRelay';
 
 export type DeviceType = 'device' | 'phone';
 
@@ -10,18 +10,23 @@ export const connectAction = async (
   cli: vorpal,
   deviceType: DeviceType,
   hostConnections: HostConnections,
+  local = false,
 ) => {
   let hosts: {
-    appHost: developerRelay.Host[];
-    companionHost: developerRelay.Host[];
+    appHost: Host[];
+    companionHost: Host[];
   };
+
+  const developerRelay = await DeveloperRelay.create(local);
 
   try {
     hosts = await developerRelay.hosts();
   } catch (error) {
     cli.log(
       // tslint:disable-next-line:max-line-length
-      `An error was encountered when loading the list of available ${deviceType} hosts: ${error.message}`,
+      `An error was encountered when loading the list of available ${deviceType} hosts: ${
+        (error as Error).message
+      }`,
     );
     return false;
   }
@@ -63,7 +68,8 @@ export const connectAction = async (
     ).hostID;
   }
 
-  const connection = await hostConnections.connect(hostType, host.id);
+  const ws = await developerRelay.connect(host.id);
+  const connection = await hostConnections.connect(hostType, ws);
   connection.ws.once('finish', () =>
     cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`),
   );
@@ -71,14 +77,24 @@ export const connectAction = async (
   return true;
 };
 
-export default function (stores: { hostConnections: HostConnections }) {
+export default function ({
+  hostConnections,
+}: {
+  hostConnections: HostConnections;
+}) {
   return (cli: vorpal) => {
     const deviceTypes: DeviceType[] = ['device', 'phone'];
     for (const deviceType of deviceTypes) {
       cli
         .command(`connect ${deviceType}`, `Connect a ${deviceType}`)
-        .action(async () =>
-          connectAction(cli, deviceType, stores.hostConnections),
+        .option('-l, --local', 'Connect using Local Relay')
+        .action(
+          (
+            args: vorpal.Args & {
+              options: vorpal.Args['options'] & { local?: boolean };
+            },
+          ) =>
+            connectAction(cli, deviceType, hostConnections, args.options.local),
         );
     }
   };

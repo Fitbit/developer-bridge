@@ -6,8 +6,6 @@ import fs from 'fs';
 import stream from 'stream';
 import { SyncEvent } from 'ts-events';
 
-import * as developerRelay from '../api/developerRelay';
-
 import StreamTap from './StreamTap';
 
 export type HostType = 'appHost' | 'companionHost';
@@ -48,8 +46,7 @@ export class HostConnection {
     return transforms;
   }
 
-  static async connect(hostID: string) {
-    const ws = await developerRelay.connect(hostID);
+  static async connect(ws: stream.Duplex) {
     return new this(ws, await RemoteHost.connect(ws, this.getDumpStreamTap()));
   }
 }
@@ -64,11 +61,11 @@ class HostConnections {
   appHost?: HostConnection;
   companionHost?: HostConnection;
 
-  async connect(hostType: HostType, hostID: string) {
+  async connect(hostType: HostType, hostStream: stream.Duplex) {
     const existingHost = this[hostType];
     if (existingHost) existingHost.ws.destroy();
 
-    const hostConnection = await HostConnection.connect(hostID);
+    const hostConnection = await HostConnection.connect(hostStream);
     this[hostType] = hostConnection;
     this.onHostAdded.post({ hostType, host: hostConnection.host });
     return hostConnection;

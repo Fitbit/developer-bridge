@@ -78,17 +78,27 @@ let sideloadCompanionSpy: jest.SpyInstance;
 let appContext: AppContext;
 let hostConnections: HostConnections;
 
-function doInstall({ skipLaunch }: { skipLaunch?: boolean } = {}) {
+function doInstall({
+  skipLaunch,
+  local,
+}: { skipLaunch?: boolean; local?: boolean } = {}) {
   let cmd = 'install';
+
   if (skipLaunch) cmd += ' --skipLaunch';
+  if (local) cmd += ' --local';
+
   return cli.exec(cmd);
 }
 
-function expectConnect(deviceType: string) {
+function expectConnect(
+  deviceType: string,
+  { local }: { local?: boolean } = {},
+) {
   expect(connectAction).toBeCalledWith(
     expect.anything(),
     deviceType,
     hostConnections,
+    local,
   );
 }
 
@@ -148,6 +158,11 @@ describe('when an app is loaded', () => {
   it('connects a device if no device is connected', async () => {
     await doInstall();
     expectConnect('device');
+  });
+
+  it('connects a device if no device is connected through Local Relay', async () => {
+    await doInstall({ local: true });
+    expectConnect('device', { local: true });
   });
 
   describe('when a device is connected', () => {
@@ -225,6 +240,11 @@ describe('when an app with a companion is loaded', () => {
   it('connects a phone if no phone is connected', async () => {
     await doInstall();
     expectConnect('phone');
+  });
+
+  it('connects a phone if no phone is connected through Local Relay', async () => {
+    await doInstall({ local: true });
+    expectConnect('phone', { local: true });
   });
 
   describe('when a phone is connected', () => {

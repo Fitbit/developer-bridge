@@ -1,43 +1,45 @@
 import events from 'events';
+import { Duplex } from 'stream';
 
 import vorpal from '@moleculer/vorpal';
 
 import connect, { DeviceType } from './connect';
+import * as localRelay from '../models/localRelay';
+import DeveloperRelay, { Host } from '../models/DeveloperRelay';
 import commandTestHarness from '../testUtils/commandTestHarness';
-import * as developerRelay from '../api/developerRelay';
 import HostConnections, { HostType } from '../models/HostConnections';
 
 jest.mock('../models/HostConnections');
 
-const mockAppHost: developerRelay.Host = {
+const mockAppHost: Host = {
   id: 'apphost',
   displayName: 'App Host',
   roles: ['APP_HOST'],
   state: 'available',
 };
 
-const mockAppHost2: developerRelay.Host = {
+const mockAppHost2: Host = {
   id: 'apphost2',
   displayName: 'Another App Host',
   roles: ['APP_HOST'],
   state: 'available',
 };
 
-const mockCompanionHost: developerRelay.Host = {
+const mockCompanionHost: Host = {
   id: 'companionhost',
   displayName: 'Companion Host',
   roles: ['COMPANION_HOST'],
   state: 'available',
 };
 
-const mockCompanionHost2: developerRelay.Host = {
+const mockCompanionHost2: Host = {
   id: 'companionhost2',
   displayName: 'Another Companion Host',
   roles: ['COMPANION_HOST'],
   state: 'available',
 };
 
-const mockBusyAppHost: developerRelay.Host = {
+const mockBusyAppHost: Host = {
   id: 'apphost3',
   displayName: 'Yet Another App Host',
   roles: ['APP_HOST'],
@@ -56,28 +58,38 @@ let mockWS: events.EventEmitter;
 
 let hostConnections: HostConnections;
 let relayHostsSpy: jest.SpyInstance;
+let relayConnectSpy: jest.SpyInstance;
 let hostConnectSpy: jest.SpyInstance;
 
 const mockRelayHostsResponse = {
-  device: (hosts: developerRelay.Host[]) =>
+  device: (hosts: Host[]) =>
     relayHostsSpy.mockResolvedValueOnce({ appHost: hosts, companionHost: [] }),
-  phone: (hosts: developerRelay.Host[]) =>
+  phone: (hosts: Host[]) =>
     relayHostsSpy.mockResolvedValueOnce({ appHost: [], companionHost: hosts }),
 };
 
 beforeEach(() => {
   hostConnections = new HostConnections();
+
   ({ cli, mockLog, mockPrompt } = commandTestHarness(
     connect({ hostConnections }),
   ));
-  relayHostsSpy = jest.spyOn(developerRelay, 'hosts');
+  relayHostsSpy = jest.spyOn(DeveloperRelay.prototype, 'hosts');
   hostConnectSpy = jest.spyOn(hostConnections, 'connect');
+  relayConnectSpy = jest.spyOn(DeveloperRelay.prototype, 'connect');
+
+  relayConnectSpy.mockResolvedValueOnce(new Duplex());
+
   mockWS = new events.EventEmitter();
   hostConnectSpy.mockResolvedValueOnce({ ws: mockWS });
 });
 
 function doConnect(type: DeviceType) {
   return cli.exec(`connect ${type}`);
+}
+
+function doConnectLocal(type: DeviceType) {
+  return cli.exec(`connect ${type} --local`);
 }
 
 describe.each<[DeviceType, HostType]>([
@@ -91,7 +103,7 @@ describe.each<[DeviceType, HostType]>([
   });
 
   describe(`when a single ${deviceType} is connected`, () => {
-    let mockHost: developerRelay.Host;
+    let mockHost: Host;
 
     beforeEach(() => {
       mockHost = mockRelayHosts[deviceType][0];
@@ -108,7 +120,7 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(hostType, mockHost.id);
+      expect(hostConnectSpy).toBeCalledWith(hostType, expect.any(Duplex));
     });
 
     it('logs a message when the host disconnects', () => {
@@ -118,7 +130,7 @@ describe.each<[DeviceType, HostType]>([
   });
 
   describe(`when multiple ${deviceType}s are connected`, () => {
-    let mockSelectedHost: developerRelay.Host;
+    let mockSelectedHost: Host;
 
     beforeEach(() => {
       const mockHosts = mockRelayHosts[deviceType];
@@ -138,7 +150,7 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(hostType, mockSelectedHost.id);
+      expect(hostConnectSpy).toBeCalledWith(hostType, expect.any(Duplex));
     });
   });
 
@@ -146,6 +158,19 @@ describe.each<[DeviceType, HostType]>([
     relayHostsSpy.mockRejectedValueOnce(new Error('some error'));
     await doConnect(deviceType);
     expect(mockLog.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('connects using local relay', async () => {
+    const mockHost = mockRelayHosts[deviceType][0];
+    mockRelayHostsResponse[deviceType]([mockHost]);
+
+    jest
+      .spyOn(localRelay, 'instance')
+      .mockResolvedValueOnce({ port: 1, pid: 1 });
+
+    await doConnectLocal(deviceType);
+
+    expect(hostConnectSpy).toBeCalledWith(hostType, expect.any(Duplex));
   });
 });
 

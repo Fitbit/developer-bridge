@@ -14,12 +14,16 @@ type InstallArgs = vorpal.Args & {
   options: {
     skipLaunch?: boolean;
     useDevice?: string;
+    local?: boolean;
   };
 };
 
 export const installAction = async (
   cli: vorpal,
-  stores: { hostConnections: HostConnections; appContext: AppContext },
+  stores: {
+    hostConnections: HostConnections;
+    appContext: AppContext;
+  },
   args: InstallArgs,
 ) => {
   const makeProgressCallback = (componentType: string) => {
@@ -76,7 +80,12 @@ export const installAction = async (
     (!hostConnections.appHost || hostConnections.appHost.host.rpc.ended)
   ) {
     cli.activeCommand.log('App requires a device, connecting...');
-    const result = await connectAction(cli, 'device', hostConnections);
+    const result = await connectAction(
+      cli,
+      'device',
+      hostConnections,
+      args.options.local,
+    );
     if (!result) return false;
   }
 
@@ -86,7 +95,12 @@ export const installAction = async (
       hostConnections.companionHost.host.rpc.ended)
   ) {
     cli.activeCommand.log('App requires a phone, connecting...');
-    const result = await connectAction(cli, 'phone', hostConnections);
+    const result = await connectAction(
+      cli,
+      'phone',
+      hostConnections,
+      args.options.local,
+    );
     if (!result) return false;
   }
 
@@ -116,8 +130,8 @@ export const installAction = async (
         )
         .then(printCompletionStatus('Companion'));
     }
-  } catch (ex) {
-    cli.activeCommand.log(`Install failed: ${ex.message}`);
+  } catch (error) {
+    cli.activeCommand.log(`Install failed: ${(error as Error).message}`);
     return false;
   }
 
@@ -149,6 +163,7 @@ export default function install(stores: {
     cli
       .command('install [packagePath]', 'Install an app package')
       .types({ string: ['packagePath', 'useDevice'] })
+      .option('-l, --local', 'Connect using Local Relay')
       .option('--skipLaunch', "Don't launch the app after installing")
       .option(
         '--useDevice <device>',
