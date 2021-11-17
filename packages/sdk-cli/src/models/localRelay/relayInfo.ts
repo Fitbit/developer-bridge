@@ -50,8 +50,9 @@ export async function isRelayPkgInstalled(): Promise<boolean> {
   // package.json _must_ be at the project root, and all dependencies _must_ be declared in package.json,
   // so this is standard way to check for installed dependencies.
   try {
+    const pkgJsonPath = join(process.cwd(), 'package.json');
     const { dependencies, devDependencies } = (await readJsonFile(
-      join(process.cwd(), 'package.json'),
+      pkgJsonPath,
     )) as {
       dependencies: Record<string, any>;
       devDependencies: Record<string, any>;
