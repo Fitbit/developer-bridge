@@ -100,6 +100,25 @@ describe('launch', () => {
     },
   );
 
+  it("resolves with child process on 'spawn' event (without processName)", async () => {
+    const consoleSpy = jest.spyOn(console, 'log');
+    const kill = jest.fn();
+
+    const nodeArgs = ['-e', "console.log('smth'); process.exit();"];
+    const expectedProcessName = `Child process spawned by 'node ${nodeArgs[0]} ${nodeArgs[1]}'`;
+
+    (child_process.spawn as jest.Mock).mockReturnValueOnce(({
+      ...mockStreamWithEventEmit('spawn'),
+      kill,
+      unref: jest.fn(),
+    } as unknown) as child_process.ChildProcess);
+
+    // ChildProcess class not exported in Node
+    await expect(launch(nodeArgs, undefined as any)).resolves.toBeDefined();
+
+    expect(consoleSpy).toHaveBeenCalledWith(`${expectedProcessName} launched`);
+  });
+
   it("rejects on child process 'error' event (with processName)", async () => {
     const consoleSpy = jest.spyOn(console, 'error');
     const kill = jest.fn();
@@ -125,22 +144,25 @@ describe('launch', () => {
     );
   });
 
-  it("resolves with child process on 'spawn' event (without processName)", async () => {
-    const consoleSpy = jest.spyOn(console, 'log');
-    const kill = jest.fn();
+  it('warns when the child process has closed (with processName)', async () => {
+    const consoleSpy = jest.spyOn(console, 'warn');
+    const processName = 'test';
 
-    const nodeArgs = ['-e', "console.log('smth'); process.exit();"];
-    const expectedProcessName = `Child process spawned by 'node ${nodeArgs[0]} ${nodeArgs[1]}'`;
+    const nodeArgs = ['-e', `console.log('smth'); process.exit();`];
 
     (child_process.spawn as jest.Mock).mockReturnValueOnce(({
-      ...mockStreamWithEventEmit('spawn'),
-      kill,
+      ...mockStreamWithEventEmit('close'),
       unref: jest.fn(),
     } as unknown) as child_process.ChildProcess);
 
-    // ChildProcess class not exported in Node
-    await expect(launch(nodeArgs, undefined as any)).resolves.toBeDefined();
+    await expect(
+      launch(nodeArgs, undefined as any, processName),
+    ).rejects.toThrowError(
+      `${processName} child process exited without 'spawn' or 'error' events firing`,
+    );
 
-    expect(consoleSpy).toHaveBeenCalledWith(`${expectedProcessName} launched`);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      `${processName} child process closed`,
+    );
   });
 });

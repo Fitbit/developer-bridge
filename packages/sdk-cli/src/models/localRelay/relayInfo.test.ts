@@ -215,6 +215,15 @@ describe('isRelayPkgInstalled', () => {
         'No package.json found for the project at',
       );
     });
+
+    it('unknown reason', async () => {
+      const errorMessage = 'test error';
+      jest
+        .spyOn(util, 'readJsonFile')
+        .mockRejectedValueOnce(new Error(errorMessage));
+
+      await expect(isRelayPkgInstalled()).rejects.toThrow(errorMessage);
+    });
   });
 });
 

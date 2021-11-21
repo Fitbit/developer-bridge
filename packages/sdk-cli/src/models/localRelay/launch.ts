@@ -49,8 +49,16 @@ export function launch(
       return reject(error);
     });
 
-    childProcess.on('close', async () => {
+    childProcess.on('close', () => {
       console.warn(`${childProcessName} closed`);
+
+      // 'close' should theoretically always go after 'spawn' or 'error' (which both resolve/reject the Promise),
+      // so reject()'ing here won't have any effect.
+      return reject(
+        new Error(
+          `${childProcessName} exited without 'spawn' or 'error' events firing`,
+        ),
+      );
     });
   });
 }
