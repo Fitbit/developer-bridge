@@ -72,13 +72,6 @@ export default class Host {
   }
 
   canConnectPeer() {
-    // ASK: Error throw, or return false? I'd consider an error throw
-    // as the 3rd value in "three-valued logic" —
-    // the host is either halfopen (true), closed (false) or not connected (error)
-    if (!this.connection) {
-      throw new Error(`Host ${this._id} is not connected`);
-    }
-
-    return this.connection.isHalfOpen();
+    return this.connection?.isHalfOpen();
   }
 }
