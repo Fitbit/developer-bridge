@@ -113,10 +113,18 @@ export default class RelayServer {
     }
 
     if (isHostConnectionAttempted) {
+      let roles: string[];
+
+      try {
+        roles = this.getHostRoles(rolesHeader);
+      } catch (error) {
+        return this.reject(request, 400, (error as Error).message);
+      }
+
       const host: Host = this.hostStore.addOrReplace({
         id: hostId,
         displayName,
-        roles: this.getHostRoles(rolesHeader),
+        roles,
       });
 
       // Emitted after request.accept() (see end of fn)
@@ -199,8 +207,9 @@ export default class RelayServer {
 
     for (const role of roles) {
       if (!role.match(roleRegex)) {
-        // Should I throw?
-        throw new Error(`Invalid role specified: ${role}`);
+        throw new Error(
+          `Invalid role specified: ${role}. Only alphanumeric and _ characters allowed.`,
+        );
       }
     }
 
