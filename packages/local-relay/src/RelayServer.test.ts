@@ -1,8 +1,9 @@
-import supertest from 'supertest';
+import * as net from 'net';
 import * as websocket from 'websocket';
+import supertest from 'supertest';
+
 import Host from './Host';
 import HostStore from './HostStore';
-
 import RelayServer from './RelayServer';
 
 let server: RelayServer;
@@ -24,6 +25,14 @@ afterEach(() => {
 
 afterAll(() => {
   server.close();
+});
+
+describe('port', () => {
+  it('returns the http server port', () => {
+    expect(server.port).toBe(
+      (server.httpServer.address() as net.AddressInfo).port,
+    );
+  });
 });
 
 describe('auth', () => {

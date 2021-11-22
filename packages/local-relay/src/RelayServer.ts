@@ -55,17 +55,7 @@ export default class RelayServer {
     status: number,
     reason?: string,
   ): RequestResponse {
-    const fitbitRequestUUID =
-      request.httpRequest.headers['x-fitbit-request-uuid'];
-
-    if (fitbitRequestUUID) {
-      request.reject(status, reason, {
-        'x-fitbit-request-uuid': fitbitRequestUUID,
-      });
-    } else {
-      request.reject(status, reason);
-    }
-
+    request.reject(status, reason);
     return { status };
   }
 
