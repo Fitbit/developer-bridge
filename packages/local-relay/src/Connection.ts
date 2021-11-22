@@ -24,9 +24,7 @@ export default class Connection {
 
   public close(code: CloseCode): void {
     this.masterPeer.close(code);
-    if (this.slavePeer) {
-      this.slavePeer.close(code);
-    }
+    this.slavePeer?.close(code);
   }
 
   private sendHostHello(): void {
