@@ -5,7 +5,7 @@
   "author": "Fitbit, Inc.",
   "homepage": "https://github.com/Fitbit/developer-bridge/tree/main/packages/local-relay#readme",
   "license": "BSD-3-Clause",
-  "main": "lib/local-relay.js",
+  "main": "lib/index.js",
   "publishConfig": {
     "registry": "http://registry.npmjs.org/"
   },
@@ -45,6 +45,6 @@
     "/lib/**/*.json"
   ],
   "engines": {
-    "node": ">=8.6.0"
+    "node": ">=12.0.0"
   }
 }
