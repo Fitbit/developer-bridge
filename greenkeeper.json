@@ -7,7 +7,8 @@
         "packages/fdb-debugger/package.json",
         "packages/fdb-host/package.json",
         "packages/fdb-protocol/package.json",
-        "packages/sdk-cli/package.json"
+        "packages/sdk-cli/package.json",
+        "packages/local-relay/package.json"
       ]
     }
   }

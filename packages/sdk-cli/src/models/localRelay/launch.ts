@@ -45,12 +45,20 @@ export function launch(
       // the event listener  handles only the case when the child process couldn't be spawned.
       // However, the other 2 cases are not applicable in our case: the only place the child process
       // is killed is here, and we don't use IPC channel/pipes to communicate between processes.
-      // So handling only the 'error on spawn' case is okay.
+      // Handling only the 'error on spawn' case is okay.
       return reject(error);
     });
 
-    childProcess.on('close', async () => {
+    childProcess.on('close', () => {
       console.warn(`${childProcessName} closed`);
+
+      // 'close' should theoretically always go after 'spawn' or 'error' (which both resolve/reject the Promise),
+      // so reject()'ing here won't have any effect.
+      return reject(
+        new Error(
+          `${childProcessName} exited without 'spawn' or 'error' events firing`,
+        ),
+      );
     });
   });
 }
