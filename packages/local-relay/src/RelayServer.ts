@@ -112,11 +112,9 @@ export default class RelayServer {
       }
 
       const host: Host = this.hostStore.addOrReplace({
-        id: hostId,
-        // tslint:disable-next-line:object-shorthand-properties-first
         displayName,
-        // tslint:disable-next-line:object-shorthand-properties-first
         roles,
+        id: hostId,
       });
 
       // Emitted after request.accept() (see end of fn)
