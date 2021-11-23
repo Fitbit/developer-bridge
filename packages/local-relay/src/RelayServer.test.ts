@@ -1,5 +1,6 @@
 import * as net from 'net';
 import * as websocket from 'websocket';
+import * as nock from 'nock';
 import supertest from 'supertest';
 
 import Host from './Host';
@@ -16,7 +17,7 @@ beforeAll(() => {
   const port = server.listen();
 
   httpRequest = supertest(server.httpServer);
-  wsUrl = `ws://localhost:${port}`;
+  wsUrl = `ws://127.0.0.1:${port}`;
 });
 
 afterEach(() => {
@@ -25,6 +26,7 @@ afterEach(() => {
 
 afterAll(() => {
   server.close();
+  nock.cleanAll();
 });
 
 describe('port', () => {
