@@ -9,6 +9,7 @@ export type HostInfo = {
 };
 
 export default class Host {
+  /* tslint:disable:variable-name */
   private _id: string;
 
   get id(): string {
@@ -28,6 +29,7 @@ export default class Host {
   }
 
   private connection?: Connection;
+  /* tslint:enable:variable-name */
 
   constructor({ id, displayName, roles }: HostInfo) {
     this._id = id;

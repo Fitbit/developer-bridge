@@ -1,7 +1,7 @@
-import EventEmitter from 'events';
 import * as websocket from 'websocket';
-import CloseCode from './CloseCode';
+import { EventEmitter } from 'events';
 
+import CloseCode from './CloseCode';
 import Connection from './Connection';
 
 describe('Connection', () => {
@@ -32,7 +32,7 @@ describe('Connection', () => {
 
     it('binary', (done) => {
       const binaryData = Buffer.from('imaginary binary data');
-      messageTest({ type: 'binary', binaryData }, binaryData, done);
+      messageTest({ binaryData, type: 'binary' }, binaryData, done);
     });
 
     it('neither (error)', (done) => {
