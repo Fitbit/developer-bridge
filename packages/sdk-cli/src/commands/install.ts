@@ -116,8 +116,10 @@ export const installAction = async (
         )
         .then(printCompletionStatus('Companion'));
     }
-  } catch (ex) {
-    cli.activeCommand.log(`Install failed: ${ex.message}`);
+  } catch (ex: any) {
+    if (ex instanceof Error) {
+      cli.activeCommand.log(`Install failed: ${ex.message}`);
+    } else { cli.activeCommand.log(`Install failed: ${ex}`); }
     return false;
   }
 
@@ -127,11 +129,22 @@ export const installAction = async (
       appHost.host.info.capabilities.appHost!.launch!.appComponent!.canLaunch
     ) {
       if (args.options.skipLaunch !== true) {
-        cli.activeCommand.log('Launching app');
-        await appHost.host.launchAppComponent({
-          uuid: appPackage.uuid,
-          component: 'app',
-        });
+        // let the compagnion unload before launching the app again.
+        if (companionHost && !companionHost.host.info.device.startsWith('Fitbit OS Simulator')) {
+          setTimeout(() => {
+            cli.activeCommand.log('Launching app');
+            appHost.host.launchAppComponent({
+              uuid: appPackage.uuid,
+              component: 'app',
+            });
+          }, 3000); 
+        } else {
+          cli.activeCommand.log('Launching app');
+          await appHost.host.launchAppComponent({
+            uuid: appPackage.uuid,
+            component: 'app',
+          });
+        }
       }
     } else {
       cli.activeCommand.log('Device does not support launching app remotely');
