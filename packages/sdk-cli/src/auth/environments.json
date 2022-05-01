@@ -1,6 +1,6 @@
 {
   "production": {
-    "clientId": "22D2CP",
+    "clientId": "228TQF",
     "apiUrl": "https://api.fitbit.com:443",
     "devRelayUrl": "wss://027-v3-api-soa.fitbit.com:443/dbridge/"
   },
