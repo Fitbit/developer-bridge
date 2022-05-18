@@ -1,1 +1,1 @@
-export { default as unpack } from './unpack';
+export { generateGraph as convert } from './convert';
