@@ -24,6 +24,26 @@ export const NodeTypes = t.union([
   t.literal('Bigint'),
 ]);
 
+// This is used to map the JerryScript-1 node types to the v8 snapshot node type names (where they
+// exist).  This makes the Chrome DevTools viewer show summary statistics.
+export const v8NodeTypes = new Map<t.TypeOf<typeof NodeTypes>, string>([
+  ['Hidden', 'hidden'],
+  ['Array', 'array'],
+  ['String', 'string'],
+  ['Object', 'object'],
+  ['Code', 'code'],
+  ['Sourcemap', 'source map'],
+  ['Closure', 'closure'],
+  ['Regexp', 'regexp'],
+  ['Heapnumber', 'heap number'],
+  ['Native', 'native'],
+  ['Synthetic', 'synthetic'],
+  ['Constring', 'concatenated string'],
+  ['Slicedstring', 'sliced string'],
+  ['Symbol', 'symbol'],
+  ['Bigint', 'bigint'],
+]);
+
 export const EdgeTypes = t.union([
   t.literal('hidden'),
   t.literal('lexenv'),
@@ -148,6 +168,8 @@ export const Node = t.intersection(
 );
 export type Node = t.TypeOf<typeof Node>;
 
+export type SourcePosition = t.TypeOf<typeof FDBTypes.Position>;
+
 export const Edge = t.intersection(
   [
     t.interface({
@@ -173,3 +195,65 @@ export const RawEdge = t.interface(
   'RawEdge',
 );
 export type RawEdge = t.TypeOf<typeof RawEdge>;
+
+export interface GraphNodeAttributes {
+  name: string;
+  type: t.TypeOf<typeof NodeTypes>;
+  memory_size: number | null;
+}
+
+export interface GraphEdgeAttributes {
+  name: string | null;
+  type: t.TypeOf<typeof EdgeTypes>;
+}
+
+export type ChromeDevNode = [
+  typ: t.TypeOf<typeof NodeTypes>,
+  name: string,
+  id: number,
+  self_size: number,
+  edge_count: number,
+  trace_node_id: 0,
+  detachedness: 0,
+];
+
+export type ChromeDevEdge = [
+  typ: t.TypeOf<typeof EdgeTypes>,
+  // Element and Hidden edge types have index, otherwise string
+  name_or_index: string | number,
+  // node by ordinal index
+  to_node: number,
+];
+
+export const nodeTypeMap = new Map<t.TypeOf<typeof NodeTypes>, number>(
+  NodeTypes.types.map((t, i) => [t.value, i]),
+);
+export const nodeTypeList = [...nodeTypeMap.keys()];
+type NodeTypeList = typeof nodeTypeList;
+
+export const edgeTypeMap = new Map<t.TypeOf<typeof EdgeTypes>, number>(
+  EdgeTypes.types.map((t, i) => [t.value, i]),
+);
+export const edgeTypeList = [...edgeTypeMap.keys()];
+type EdgeTypeList = typeof edgeTypeList;
+
+export interface V8HeapSnapshot {
+  snapshot: {
+    meta: {
+      node_fields: string[];
+      node_types: [type_types: NodeTypeList, ...other_field_types: string[]];
+      edge_fields: string[];
+      edge_types: [type_types: EdgeTypeList, ...other_field_types: string[]];
+      location_fields?: string[];
+    };
+    node_count: number;
+    edge_count: number;
+    trace_function_count: 0;
+  };
+  nodes: number[];
+  edges: number[];
+  // It seems as if we cannot make use of this at all with Chrome since it relies upon a scriptId to
+  // link the location to an internal script id in Chrome.
+  locations?: number[];
+  strings: string[];
+}
