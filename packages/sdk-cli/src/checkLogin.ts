@@ -19,7 +19,7 @@ async function checkEnvVarLogin() {
   try {
     await auth.loginResourceOwnerFlow(username, password);
   } catch (ex) {
-    console.error(`Resource owner login failed: ${ex.message}`);
+    console.error(`Resource owner login failed: ${(ex as Error).message}`);
     process.exit(1);
   }
 
@@ -33,7 +33,9 @@ async function checkStoredLogin() {
     // thrown is a fatal error.
     accessToken = await auth.getAccessToken();
   } catch (ex) {
-    console.error(`Failed to read auth token from keychain: ${ex.message}`);
+    console.error(
+      `Failed to read auth token from keychain: ${(ex as Error).message}`,
+    );
     if (os.platform() === 'darwin') {
       console.error(
         "Try locking and then unlocking your 'login' keychain using the Keychain Access app.",
@@ -47,7 +49,7 @@ async function checkStoredLogin() {
     try {
       await auth.loginAuthCodeFlow();
     } catch (ex) {
-      console.error(`Login failed: ${ex.message}`);
+      console.error(`Login failed: ${(ex as Error).message}`);
       process.exit(1);
     }
   }

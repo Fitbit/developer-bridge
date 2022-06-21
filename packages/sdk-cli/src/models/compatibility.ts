@@ -134,9 +134,8 @@ export function assertCompanionComponentIsCompatible(
   appPackage: AppPackage,
   hostInfo: FDBTypes.InitializeResult,
 ) {
-  const hostCompatibilityDescriptor = getCompanionHostCompatibilityMatrix(
-    hostInfo,
-  );
+  const hostCompatibilityDescriptor =
+    getCompanionHostCompatibilityMatrix(hostInfo);
   if (
     !isAPICompatible(
       appPackage.sdkVersion.companionApi!,

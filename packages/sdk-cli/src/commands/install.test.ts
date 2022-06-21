@@ -108,7 +108,8 @@ beforeEach(() => {
   sideloadCompanionSpy.mockResolvedValue({ installType: 'full' });
 
   mockDevice.host.hasCapability.mockReturnValue(true);
-  mockDevice.host.info.capabilities.appHost.launch.appComponent.canLaunch = true;
+  mockDevice.host.info.capabilities.appHost.launch.appComponent.canLaunch =
+    true;
 });
 
 it('loads the app at provided path', async () => {
@@ -187,7 +188,8 @@ describe('when an app is loaded', () => {
     describe('app launch is not supported', () => {
       beforeEach(() => {
         mockDevice.host.hasCapability.mockReturnValueOnce(false);
-        mockDevice.host.info.capabilities.appHost.launch.appComponent.canLaunch = false;
+        mockDevice.host.info.capabilities.appHost.launch.appComponent.canLaunch =
+          false;
         return doInstall();
       });
       it('does not launch the app', () => {

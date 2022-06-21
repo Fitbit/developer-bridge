@@ -1,23 +1,29 @@
 import * as fs from 'fs';
-
-import mockFS from 'mock-fs';
+import * as util from 'util';
 
 import captureScreenshot from './captureScreenshot';
 import { RemoteHost } from '@fitbit/fdb-debugger';
 
-// mockFS is a bit problematic to use when mixed with snapshot tests
-// as the snapshots hit the mock FS instead of the real one!
-// We have to be careful to call mockFS.restore() before invoking any
-// Jest matchers that use snapshots. You'll know when this has been
-// missed in a test if you see Jest logging that it has written
-// snapshots on every test run.
-beforeEach(() =>
-  mockFS({
-    'collide.png': 'Old file contents',
-  }),
-);
+const fsPromises = {
+  mkdtemp: util.promisify(fs.mkdtemp),
+  writeFile: util.promisify(fs.writeFile),
+  rm: util.promisify(fs.rm),
+};
 
-afterEach(() => mockFS.restore());
+let tmpDir: string;
+let cwd: string;
+
+beforeEach(async () => {
+  tmpDir = await fsPromises.mkdtemp('fitbit-sdk-cli-tests');
+  cwd = process.cwd();
+  process.chdir(tmpDir);
+  fsPromises.writeFile('collide.png', Buffer.from('Old file contents'));
+});
+
+afterEach(() => {
+  process.chdir(cwd);
+  return fsPromises.rm(tmpDir, { recursive: true, force: true });
+});
 
 describe('when everything should work', () => {
   let takeScreenshot: jest.Mock;
@@ -70,7 +76,6 @@ describe.each<[string, string[]]>([
   });
 
   it('rejects', () => {
-    mockFS.restore();
     return expect(result).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -99,8 +104,7 @@ describe('when destPath is an existing file', () => {
   });
 
   it('rejects', () => {
-    mockFS.restore();
-    return expect(result).rejects.toThrowError(/EEXIST,.*collide.png'/);
+    return expect(result).rejects.toThrowError(/EEXIST:.*collide.png'/);
   });
 
   it('does not overwrite the file on disk', () =>
@@ -133,7 +137,6 @@ describe('when the PPM fails to parse', () => {
   });
 
   it('rejects', () => {
-    mockFS.restore();
     expect(result).rejects.toThrowErrorMatchingSnapshot();
   });
 

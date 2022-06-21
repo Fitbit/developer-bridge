@@ -51,10 +51,10 @@ export const assertAPIResponseOK = okOrElse((response) => {
     );
 });
 
-export const decodeJSON = <A, O, I>(endpointType: t.Type<A, O, I>) => (
-  response: Response,
-): Promise<A> =>
-  assertAPIResponseOK(response).then(assertJSON()).then(decode(endpointType));
+export const decodeJSON =
+  <A, O, I>(endpointType: t.Type<A, O, I>) =>
+  (response: Response): Promise<A> =>
+    assertAPIResponseOK(response).then(assertJSON()).then(decode(endpointType));
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const authToken = await auth.getAccessToken();

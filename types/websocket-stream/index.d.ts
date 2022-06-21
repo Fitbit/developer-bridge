@@ -24,7 +24,7 @@ declare function WebSocketStream(
 declare namespace WebSocketStream {
   interface Stream extends stream.Duplex {
     socket: WebSocket;
-    destroy(err?: any): void;
+    destroy(err?: any): this;
   }
 
   interface IClientOptions extends WebSocket.ClientOptions {

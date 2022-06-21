@@ -14,7 +14,7 @@ import {
 
 import { Host, HostInfo, InstallHandlerReturn } from '.';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 function wrapPeer(peer: Peer) {
   const parser = new ParseJSON();
@@ -206,8 +206,9 @@ describe('app install', () => {
 
     it('can start a new install after it has successfully finalized', async () => {
       await host.handleAppInstallFinalize({ stream });
-      const newStream = host.handleAppInstallBegin({ componentBundle: 'app' })
-        .stream;
+      const newStream = host.handleAppInstallBegin({
+        componentBundle: 'app',
+      }).stream;
       expect(newStream).not.toEqual(stream);
     });
   });
@@ -227,8 +228,9 @@ describe('app install', () => {
 
     it('can start a new install after it has aborted', async () => {
       await host.handleAppInstallAbort({ stream });
-      const newStream = host.handleAppInstallBegin({ componentBundle: 'app' })
-        .stream;
+      const newStream = host.handleAppInstallBegin({
+        componentBundle: 'app',
+      }).stream;
       expect(newStream).not.toEqual(stream);
     });
   });

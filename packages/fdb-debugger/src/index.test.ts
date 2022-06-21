@@ -18,7 +18,7 @@ import {
 
 import { ConsoleMessage, ConsoleTrace, RemoteHost } from '.';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 function wrapPeer(peer: Peer) {
   const parser = new ParseJSON();
@@ -90,10 +90,11 @@ describe('connect()', () => {
 
   it('waits a nonzero amount of time for the initialize response', () => {
     waitInit();
+    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
     const hostPromise = RemoteHost.connect(mockStream, { timeout: 10000 });
     // The obvious way to test doesn't work because of a Jest bug.
     // https://github.com/facebook/jest/issues/5960
-    expect(setTimeout).toHaveBeenLastCalledWith(expect.anything(), 10000);
+    expect(setTimeoutSpy).toHaveBeenLastCalledWith(expect.anything(), 10000);
     return expect(hostPromise).resolves.toEqual(expect.anything());
   });
 
@@ -231,8 +232,9 @@ it('sideloads an app', async () => {
   // Pump the promise queue in between timers so that timer-triggered
   // promises get a chance to run before the next set of timers expire.
   for (let i = 0; i < 250; i += 1) {
-    await new Promise((resolve) => setImmediate(resolve));
-    await jest.runTimersToTime(100);
+    const delay = new Promise((resolve) => setImmediate(resolve));
+    jest.advanceTimersByTime(100);
+    await delay;
   }
   await expect(install).resolves.toEqual(expectedInstallResult);
   expect(events).toEqual(['begin', 'finalize']);
@@ -422,7 +424,7 @@ it('successfully sideloads if the finalize response is slow', async () => {
       () =>
         new Promise((resolve) =>
           setImmediate(() => {
-            jest.runTimersToTime(25000);
+            jest.advanceTimersByTime(25000);
             resolve(expectedInstallResult);
           }),
         ),

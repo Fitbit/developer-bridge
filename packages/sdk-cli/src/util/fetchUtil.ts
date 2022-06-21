@@ -12,13 +12,14 @@ export const assertContentType = (expected: string) => (response: Response) => {
   return Promise.resolve(response);
 };
 
-export const assertJSON = (expected = 'application/json') => async (
-  response: Response,
-) => {
-  await assertContentType(expected)(response);
-  return response.json();
-};
+export const assertJSON =
+  (expected = 'application/json') =>
+  async (response: Response) => {
+    await assertContentType(expected)(response);
+    return response.json();
+  };
 
-export const okOrElse = <T>(failure: (response: Response) => Promise<T>) => (
-  response: Response,
-) => (response.ok ? Promise.resolve(response) : failure(response));
+export const okOrElse =
+  <T>(failure: (response: Response) => Promise<T>) =>
+  (response: Response) =>
+    response.ok ? Promise.resolve(response) : failure(response);
