@@ -382,16 +382,17 @@ export class RemoteHost extends EventEmitter {
      */
     const writes: Promise<any>[] = [];
     for (let cursor = 0; cursor < data.length; cursor += maxDataBytes) {
-      const chunk: FDBTypes.IOWriteParams = this.serializerTransform.canAcceptRawBuffers()
-        ? {
-            stream,
-            data: data.slice(cursor, cursor + maxDataBytes),
-            encoding: 'none',
-          }
-        : {
-            stream,
-            data: data.toString('base64', cursor, cursor + maxDataBytes),
-          };
+      const chunk: FDBTypes.IOWriteParams =
+        this.serializerTransform.canAcceptRawBuffers()
+          ? {
+              stream,
+              data: data.slice(cursor, cursor + maxDataBytes),
+              encoding: 'none',
+            }
+          : {
+              stream,
+              data: data.toString('base64', cursor, cursor + maxDataBytes),
+            };
 
       writes.push(
         this.ioWrite(chunk).then(() => {

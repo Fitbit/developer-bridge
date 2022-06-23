@@ -10,10 +10,10 @@ let appContext: AppContext;
 let readFileSpy: jest.SpyInstance;
 let appPackageLoadedSpy: jest.Mock;
 
-const mockPreviousApp: AppPackage = ({
+const mockPreviousApp: AppPackage = {
   uuid: 'Old',
   buildId: 'app',
-} as Partial<AppPackage>) as AppPackage;
+} as Partial<AppPackage> as AppPackage;
 
 function loadAppPackage() {
   return appContext.loadAppPackage('app.fba');

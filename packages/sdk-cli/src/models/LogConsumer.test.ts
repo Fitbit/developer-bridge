@@ -250,9 +250,9 @@ describe('LogConsumer', () => {
     it('does not register app source maps if there is no compatible family', async () => {
       // Return value is mocked in the beforeEach reset it so we can return meson instead
       (compatibility.findCompatibleAppComponent as jest.Mock).mockReset();
-      (compatibility.findCompatibleAppComponent as jest.Mock).mockReturnValueOnce(
-        'meson',
-      );
+      (
+        compatibility.findCompatibleAppComponent as jest.Mock
+      ).mockReturnValueOnce('meson');
       await logConsumer.registerHost(registerAppHostObject);
 
       expect(logConsumer.componentSourceMapConsumers).toEqual({

@@ -32,19 +32,18 @@ export const installAction = async (
     };
   };
 
-  const printCompletionStatus = (componentType: string) => (
-    result: { installType: string } | null,
-  ) => {
-    if (result) {
-      cli.ui.redraw(
-        `${componentType} install complete (${result.installType})`,
-      );
-    } else {
-      cli.ui.redraw(`${componentType} is already installed`);
-    }
+  const printCompletionStatus =
+    (componentType: string) => (result: { installType: string } | null) => {
+      if (result) {
+        cli.ui.redraw(
+          `${componentType} install complete (${result.installType})`,
+        );
+      } else {
+        cli.ui.redraw(`${componentType} is already installed`);
+      }
 
-    cli.ui.redraw.done();
-  };
+      cli.ui.redraw.done();
+    };
 
   const { appContext, hostConnections } = stores;
 
@@ -117,7 +116,7 @@ export const installAction = async (
         .then(printCompletionStatus('Companion'));
     }
   } catch (ex) {
-    cli.activeCommand.log(`Install failed: ${ex.message}`);
+    cli.activeCommand.log(`Install failed: ${(ex as Error).message}`);
     return false;
   }
 
