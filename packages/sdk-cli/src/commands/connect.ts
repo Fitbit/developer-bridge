@@ -21,7 +21,9 @@ export const connectAction = async (
   } catch (error) {
     cli.log(
       // tslint:disable-next-line:max-line-length
-      `An error was encountered when loading the list of available ${deviceType} hosts: ${error.message}`,
+      `An error was encountered when loading the list of available ${deviceType} hosts: ${
+        (error as Error).message
+      }`,
     );
     return false;
   }

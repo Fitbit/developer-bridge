@@ -31,20 +31,20 @@ describe('apiFetch()', () => {
           Authorization: `Bearer ${mockAccessTokenContent}`,
         },
       });
-
-      it.each(['GET', 'POST'])(
-        'sends an authorization header with requests where method is %s',
-        async (method) => {
-          const endpointCall = endpointScope
-            .intercept(fakeAPIPath, method)
-            .reply(200);
-
-          mockAuthToken();
-          await baseAPI.apiFetch(fakeAPIPath, { method });
-          expect(endpointCall.isDone()).toBe(true);
-        },
-      );
     });
+
+    it.each(['GET', 'POST'])(
+      'sends an authorization header with requests where method is %s',
+      async (method) => {
+        const endpointCall = endpointScope
+          .intercept(`/${fakeAPIPath}`, method)
+          .reply(200);
+
+        mockAuthToken();
+        await baseAPI.apiFetch(fakeAPIPath, { method });
+        expect(endpointCall.isDone()).toBe(true);
+      },
+    );
   });
 });
 

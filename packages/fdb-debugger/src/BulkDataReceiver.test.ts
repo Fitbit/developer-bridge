@@ -67,13 +67,13 @@ describe('when the stream open promise resolution is delayed', () => {
     };
 
     receiver = new BulkDataReceiver(
-      (mockBulkData as Partial<BulkData>) as BulkData,
+      mockBulkData as Partial<BulkData> as BulkData,
       'test',
     );
 
     openPromise = receiver.receiveFromStream(
       () =>
-        new Promise((resolve, reject) => {
+        new Promise<void>((resolve, reject) => {
           openResolve = resolve;
           openReject = reject;
         }),
