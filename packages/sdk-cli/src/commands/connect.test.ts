@@ -2,49 +2,49 @@ import events from 'events';
 
 import vorpal from '@moleculer/vorpal';
 
-import connect, { DeviceType } from './connect';
+import connect from './connect';
 import commandTestHarness from '../testUtils/commandTestHarness';
-import * as developerRelay from '../api/developerRelay';
-import HostConnections, { HostType } from '../models/HostConnections';
+import HostConnections, { Host } from '../models/HostConnections';
+import { DeviceType, HostType } from '../models/HostTypes';
 
 jest.mock('../models/HostConnections');
 
-const mockAppHost: developerRelay.Host = {
-  id: 'apphost',
+const mockAppHost: Host = {
+  connect: jest.fn(),
   displayName: 'App Host',
   roles: ['APP_HOST'],
-  state: 'available',
+  available: true,
 };
 
-const mockAppHost2: developerRelay.Host = {
-  id: 'apphost2',
+const mockAppHost2: Host = {
+  connect: jest.fn(),
   displayName: 'Another App Host',
   roles: ['APP_HOST'],
-  state: 'available',
+  available: true,
 };
 
-const mockCompanionHost: developerRelay.Host = {
-  id: 'companionhost',
+const mockCompanionHost: Host = {
+  connect: jest.fn(),
   displayName: 'Companion Host',
   roles: ['COMPANION_HOST'],
-  state: 'available',
+  available: true,
 };
 
-const mockCompanionHost2: developerRelay.Host = {
-  id: 'companionhost2',
+const mockCompanionHost2: Host = {
+  connect: jest.fn(),
   displayName: 'Another Companion Host',
   roles: ['COMPANION_HOST'],
-  state: 'available',
+  available: true,
 };
 
-const mockBusyAppHost: developerRelay.Host = {
-  id: 'apphost3',
+const mockBusyAppHost: Host = {
+  connect: jest.fn(),
   displayName: 'Yet Another App Host',
   roles: ['APP_HOST'],
-  state: 'busy',
+  available: false,
 };
 
-const mockRelayHosts = {
+const mockRelayHosts: { [key in DeviceType]: Host[] } = {
   device: [mockAppHost, mockAppHost2],
   phone: [mockCompanionHost, mockCompanionHost2],
 };
@@ -52,28 +52,21 @@ const mockRelayHosts = {
 let cli: vorpal;
 let mockLog: jest.Mock;
 let mockPrompt: jest.Mock;
-let mockWS: events.EventEmitter;
+let mockStream: events.EventEmitter;
 
 let hostConnections: HostConnections;
-let relayHostsSpy: jest.SpyInstance;
+let listOfTypeSpy: jest.SpyInstance;
 let hostConnectSpy: jest.SpyInstance;
-
-const mockRelayHostsResponse = {
-  device: (hosts: developerRelay.Host[]) =>
-    relayHostsSpy.mockResolvedValueOnce({ appHost: hosts, companionHost: [] }),
-  phone: (hosts: developerRelay.Host[]) =>
-    relayHostsSpy.mockResolvedValueOnce({ appHost: [], companionHost: hosts }),
-};
 
 beforeEach(() => {
   hostConnections = new HostConnections();
   ({ cli, mockLog, mockPrompt } = commandTestHarness(
     connect({ hostConnections }),
   ));
-  relayHostsSpy = jest.spyOn(developerRelay, 'hosts');
+  listOfTypeSpy = jest.spyOn(hostConnections, 'listOfType');
   hostConnectSpy = jest.spyOn(hostConnections, 'connect');
-  mockWS = new events.EventEmitter();
-  hostConnectSpy.mockResolvedValueOnce({ ws: mockWS });
+  mockStream = new events.EventEmitter();
+  hostConnectSpy.mockResolvedValueOnce({ stream: mockStream });
 });
 
 function doConnect(type: DeviceType) {
@@ -85,17 +78,17 @@ describe.each<[DeviceType, HostType]>([
   ['phone', 'companionHost'],
 ])('when the device type argument is %s', (deviceType, hostType) => {
   it(`logs an error if no ${deviceType}s are connected`, async () => {
-    mockRelayHostsResponse[deviceType]([]);
+    listOfTypeSpy.mockResolvedValueOnce([]);
     await doConnect(deviceType);
     expect(mockLog.mock.calls[0]).toMatchSnapshot();
   });
 
   describe(`when a single ${deviceType} is connected`, () => {
-    let mockHost: developerRelay.Host;
+    let mockHost: Host;
 
     beforeEach(() => {
       mockHost = mockRelayHosts[deviceType][0];
-      mockRelayHostsResponse[deviceType]([mockHost]);
+      listOfTypeSpy.mockResolvedValueOnce([mockHost]);
       return doConnect(deviceType);
     });
 
@@ -107,28 +100,25 @@ describe.each<[DeviceType, HostType]>([
       expect(mockLog.mock.calls[0]).toMatchSnapshot();
     });
 
-    it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(hostType, mockHost.id);
+    it('acquires a connection for the selected host', () => {
+      expect(hostConnectSpy).toBeCalledWith(mockHost, deviceType);
     });
 
     it('logs a message when the host disconnects', () => {
-      mockWS.emit('finish');
+      mockStream.emit('finish');
       expect(mockLog.mock.calls[1]).toMatchSnapshot();
     });
   });
 
   describe(`when multiple ${deviceType}s are connected`, () => {
-    let mockSelectedHost: developerRelay.Host;
+    let mockSelectedHost: Host;
 
     beforeEach(() => {
       const mockHosts = mockRelayHosts[deviceType];
       mockSelectedHost = mockHosts[1];
-      mockRelayHostsResponse[deviceType](mockHosts);
+      listOfTypeSpy.mockResolvedValueOnce(mockHosts);
       mockPrompt.mockResolvedValueOnce({
-        hostID: {
-          id: mockSelectedHost.id,
-          displayName: mockSelectedHost.displayName,
-        },
+        host: mockSelectedHost,
       });
       return doConnect(deviceType);
     });
@@ -137,33 +127,34 @@ describe.each<[DeviceType, HostType]>([
       expect(mockPrompt).toBeCalled();
     });
 
-    it('acquires a developer relay connection for the given host type and ID', () => {
-      expect(hostConnectSpy).toBeCalledWith(hostType, mockSelectedHost.id);
+    it('acquires a connection for the selected host', () => {
+      expect(hostConnectSpy).toBeCalledWith(mockSelectedHost, deviceType);
     });
   });
 
   it('logs an error if the hosts call throws', async () => {
-    relayHostsSpy.mockRejectedValueOnce(new Error('some error'));
+    listOfTypeSpy.mockRejectedValueOnce(new Error('some error'));
     await doConnect(deviceType);
     expect(mockLog.mock.calls[0]).toMatchSnapshot();
   });
 });
 
 it('does not show busy hosts', async () => {
-  mockRelayHostsResponse.device([mockAppHost, mockAppHost2, mockBusyAppHost]);
+  listOfTypeSpy.mockResolvedValueOnce([
+    mockAppHost,
+    mockAppHost2,
+    mockBusyAppHost,
+  ]);
 
   mockPrompt.mockResolvedValueOnce({
-    hostID: {
-      id: mockAppHost.id,
-      displayName: mockAppHost.displayName,
-    },
+    host: mockAppHost,
   });
 
   await doConnect('device');
   expect(mockPrompt).toBeCalledWith(
     expect.objectContaining({
       choices: [mockAppHost, mockAppHost2].map((host) => ({
-        value: { id: host.id, displayName: host.displayName },
+        value: host,
         name: host.displayName,
       })),
     }),
@@ -171,7 +162,7 @@ it('does not show busy hosts', async () => {
 });
 
 it('does not auto-connect a busy host', async () => {
-  mockRelayHostsResponse.device([mockBusyAppHost]);
+  listOfTypeSpy.mockResolvedValueOnce([mockBusyAppHost]);
   await doConnect('device');
   expect(mockLog.mock.calls[0]).toMatchSnapshot();
 });

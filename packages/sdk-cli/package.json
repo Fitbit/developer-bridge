@@ -20,6 +20,7 @@
     "@fitbit/fdb-protocol": "^1.8.0-pre.0",
     "@fitbit/jsonrpc-ts": "^3.2.1",
     "@fitbit/portable-pixmap": "^1.0.3",
+    "@fitbit/pulse": "^0.1.0",
     "@moleculer/vorpal": "^1.11.5",
     "@openid/appauth": "^1.2.8",
     "chalk": "^4.1.0",
@@ -42,6 +43,7 @@
     "tslib": "^2.0.1",
     "untildify": "^4.0.0",
     "update-notifier": "^4.1.1",
+    "usb": "^2.4.3",
     "websocket-stream": "^5.5.2"
   },
   "devDependencies": {

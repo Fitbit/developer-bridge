@@ -44,7 +44,7 @@ cli.use(logout);
 cli.use(repl({ hostConnections }));
 
 if (enableQACommands) {
-  cli.use(hosts);
+  cli.use(hosts({ hostConnections }));
   cli.use(mockHost);
 }
 

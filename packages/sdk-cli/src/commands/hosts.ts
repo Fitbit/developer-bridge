@@ -1,14 +1,21 @@
 import vorpal from '@moleculer/vorpal';
 
-import { hosts } from '../api/developerRelay';
+import HostConnections from '../models/HostConnections';
 
-export default (cli: vorpal) => {
-  cli.command('hosts', 'lists hosts and their status').action(async () => {
-    const { appHost, companionHost } = await hosts();
+async function hostsAction(
+  cli: vorpal,
+  { hostConnections }: { hostConnections: HostConnections },
+) {
+  const hosts = await hostConnections.list();
 
-    cli.activeCommand.log('Devices:');
-    cli.activeCommand.log(appHost);
-    cli.activeCommand.log('Phones:');
-    cli.activeCommand.log(companionHost);
-  });
-};
+  cli.activeCommand.log('Hosts:');
+  cli.activeCommand.log(hosts);
+}
+
+export default function (stores: { hostConnections: HostConnections }) {
+  return (cli: vorpal) => {
+    cli
+      .command('hosts', 'lists hosts and their status')
+      .action(async () => hostsAction(cli, stores));
+  };
+}
