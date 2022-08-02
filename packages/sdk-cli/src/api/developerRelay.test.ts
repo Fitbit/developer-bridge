@@ -10,8 +10,6 @@ import mockWithPromiseWaiter from '../testUtils/mockWithPromiseWaiter';
 jest.mock('websocket-stream', () => jest.fn());
 jest.mock('../auth');
 
-const mockHostID = 'fakeHost';
-
 const mockAppHost = {
   id: 'apphostA',
   displayName: 'App Host',
@@ -27,6 +25,15 @@ const mockCompanionHost = {
 };
 
 let endpointMock: nock.Scope;
+
+function relayHostToHost(relayHost: typeof mockAppHost) {
+  return {
+    displayName: relayHost.displayName,
+    roles: relayHost.roles,
+    available: relayHost.state === 'available',
+    connect: expect.any(Function),
+  };
+}
 
 function mockHostsResponse(status: number, payload?: any) {
   endpointMock
@@ -45,48 +52,22 @@ function mockConnectionURLResponse(hostID: string, response: string) {
 }
 
 beforeEach(() => {
-  (auth.getAccessToken as jest.Mock).mockResolvedValueOnce('mockToken');
+  (auth.getAccessToken as jest.Mock).mockResolvedValue('mockToken');
   endpointMock = nock(environment().config.apiUrl);
 });
 
 describe('hosts()', () => {
-  it('returns list of connected app hosts', async () => {
+  it('returns list of connected hosts', async () => {
     mockHostsSuccessResponse();
-    return expect(developerRelay.hosts()).resolves.toEqual(
-      expect.objectContaining({
-        appHost: [mockAppHost],
-      }),
-    );
-  });
-
-  it('returns list of connected companion hosts', async () => {
-    mockHostsSuccessResponse();
-    return expect(developerRelay.hosts()).resolves.toEqual(
-      expect.objectContaining({
-        companionHost: [mockCompanionHost],
-      }),
-    );
+    return expect(developerRelay.hosts()).resolves.toEqual([
+      relayHostToHost(mockAppHost),
+      relayHostToHost(mockCompanionHost),
+    ]);
   });
 
   it('returns empty lists if no hosts are connected', async () => {
     mockHostsSuccessResponse([]);
-    return expect(developerRelay.hosts()).resolves.toEqual({
-      appHost: [],
-      companionHost: [],
-    });
-  });
-
-  it('ignores hosts with unknown roles', async () => {
-    mockHostsSuccessResponse([
-      {
-        ...mockAppHost,
-        roles: ['__bad_role__'],
-      },
-    ]);
-    return expect(developerRelay.hosts()).resolves.toEqual({
-      appHost: [],
-      companionHost: [],
-    });
+    return expect(developerRelay.hosts()).resolves.toEqual([]);
   });
 
   it('parses a 403 response for error reasons', async () => {
@@ -122,12 +103,14 @@ describe('connect()', () => {
 
   beforeEach(async () => {
     mockWebSocket = new stream.Duplex();
+    mockHostsSuccessResponse([mockAppHost]);
     socketPromise = mockWithPromiseWaiter(
       websocketStream as any,
       mockWebSocket,
     );
-    mockConnectionURLResponse(mockHostID, `${mockConnectionURL}\r\n`);
-    connectPromise = developerRelay.connect(mockHostID);
+    const host = (await developerRelay.hosts())[0];
+    mockConnectionURLResponse(mockAppHost.id, `${mockConnectionURL}\r\n`);
+    connectPromise = host.connect();
     await socketPromise;
   });
 

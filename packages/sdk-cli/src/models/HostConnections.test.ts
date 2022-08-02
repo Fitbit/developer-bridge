@@ -3,18 +3,37 @@ import stream from 'stream';
 import { RemoteHost } from '@fitbit/fdb-debugger';
 
 import * as developerRelay from '../api/developerRelay';
-import HostConnections, { HostType } from '../models/HostConnections';
+import HostConnections, { Host } from '../models/HostConnections';
+import { DeviceType, HostType } from '../models//HostTypes';
+import * as USBDebugHost from './USBDebugHost';
 
 jest.mock('@fitbit/fdb-debugger');
 
-const mockHostID = 'mockHostID';
 const hostConnectedSpy = jest.fn();
 
 let hostConnections: HostConnections;
-let relayConnectSpy: jest.SpyInstance;
 let remoteHostSpy: jest.SpyInstance;
+let mockHost: Host;
+let mockStream: jest.Mocked<stream.Duplex>;
+let mockRemoteHost: {};
+let developerRelaySpy: jest.SpyInstance;
+let usbSpy: jest.SpyInstance;
 
-function mockSentinel(spy: jest.SpyInstance) {
+const relayHost = {
+  displayName: 'RelayHost',
+  connect: jest.fn(),
+  available: true,
+  roles: ['COMPANION_HOST'],
+};
+
+const usbHost = {
+  displayName: 'USBHost',
+  connect: jest.fn(),
+  available: true,
+  roles: ['APP_HOST'],
+};
+
+function mockSentinel(spy: jest.SpyInstance | jest.MockedFunction<any>) {
   const sentinel = {};
   spy.mockResolvedValueOnce(sentinel);
   return sentinel;
@@ -23,53 +42,109 @@ function mockSentinel(spy: jest.SpyInstance) {
 beforeEach(() => {
   hostConnections = new HostConnections();
   hostConnections.onHostAdded.attach(hostConnectedSpy);
-  relayConnectSpy = jest.spyOn(developerRelay, 'connect');
   remoteHostSpy = jest.spyOn(RemoteHost, 'connect');
+  mockHost = {
+    displayName: 'Mock Host',
+    available: true,
+    connect: jest.fn(),
+    roles: ['APP_HOST'],
+  };
+  developerRelaySpy = jest.spyOn(developerRelay, 'hosts');
+  usbSpy = jest.spyOn(USBDebugHost, 'list');
+  mockStream = mockSentinel(mockHost.connect) as jest.Mocked<stream.Duplex>;
+  mockStream.destroy = jest.fn();
 });
 
-function doConnect(type: HostType) {
-  return hostConnections.connect(type, mockHostID);
-}
+describe('connect()', () => {
+  describe.each<DeviceType>(['device', 'phone'])(
+    'when the device type argument is %s',
+    (deviceType) => {
+      const hostTypes: { [key in DeviceType]: HostType } = {
+        device: 'appHost',
+        phone: 'companionHost',
+      };
+      const hostType = hostTypes[deviceType];
 
-describe.each<HostType>(['appHost', 'companionHost'])(
-  'when the host type argument is %s',
-  (hostType) => {
-    let mockWS: jest.Mocked<stream.Duplex>;
-    let mockRemoteHost: {};
-
-    beforeEach(() => {
-      mockWS = mockSentinel(relayConnectSpy) as jest.Mocked<stream.Duplex>;
-      mockWS.destroy = jest.fn();
-
-      mockRemoteHost = mockSentinel(remoteHostSpy);
-      return doConnect(hostType);
-    });
-
-    it('acquires a developer relay connection for the given host ID', () => {
-      expect(relayConnectSpy).toBeCalledWith(mockHostID);
-    });
-
-    it('creates a debugger client from the developer relay connection', () => {
-      expect(remoteHostSpy).toBeCalledWith(mockWS, undefined);
-    });
-
-    it('stores the connection in the application state', () => {
-      expect(hostConnections[hostType]!.ws).toBe(mockWS);
-      expect(hostConnections[hostType]!.host).toBe(mockRemoteHost);
-    });
-
-    it('emits a host-connected event with the HostType and HostConnection', () => {
-      expect(hostConnectedSpy).toBeCalledWith({
-        hostType,
-        host: mockRemoteHost,
+      beforeEach(() => {
+        mockRemoteHost = mockSentinel(remoteHostSpy);
+        return hostConnections.connect(mockHost, deviceType);
       });
-    });
 
-    it('closes any existing connection', async () => {
-      mockSentinel(relayConnectSpy);
-      mockSentinel(remoteHostSpy);
-      await doConnect(hostType);
-      expect(mockWS.destroy).toBeCalled();
-    });
-  },
-);
+      it('acquires a connection from the provided host', () => {
+        expect(mockHost.connect).toBeCalledWith();
+      });
+
+      it('creates a debugger client from the developer relay connection', () => {
+        expect(remoteHostSpy).toBeCalledWith(mockStream, undefined);
+      });
+
+      it('stores the connection in the application state', () => {
+        expect(hostConnections[hostType]!.stream).toBe(mockStream);
+        expect(hostConnections[hostType]!.host).toBe(mockRemoteHost);
+      });
+
+      it('emits a host-connected event with the HostType and HostConnection', () => {
+        expect(hostConnectedSpy).toBeCalledWith({
+          hostType,
+          host: mockRemoteHost,
+        });
+      });
+
+      it('closes any existing connection', async () => {
+        mockSentinel(mockHost.connect);
+        mockSentinel(remoteHostSpy);
+        await hostConnections.connect(mockHost, deviceType);
+        expect(mockStream.destroy).toBeCalled();
+      });
+    },
+  );
+
+  it('closes the underlying transport if devbridge initialisation fails', async () => {
+    remoteHostSpy.mockRejectedValueOnce(new Error('init failed :('));
+    await expect(
+      hostConnections.connect(mockHost, 'device'),
+    ).rejects.toThrowError();
+    expect(mockStream.destroy).toBeCalled();
+  });
+});
+
+describe('list()', () => {
+  it('returns a list of both USB and Developer Relay hosts', () => {
+    developerRelaySpy.mockResolvedValue([relayHost]);
+    usbSpy.mockResolvedValue([usbHost]);
+    expect(hostConnections.list()).resolves.toEqual([relayHost, usbHost]);
+  });
+
+  it('throws if fetching developer relay hosts fails', () => {
+    developerRelaySpy.mockRejectedValue(new Error('fail devrelay'));
+    return expect(hostConnections.list()).rejects.toThrowError(
+      'An error was encountered when loading the list of available Developer Relay hosts: fail devrelay',
+    );
+  });
+
+  it('throws if fetching USB hosts fails', () => {
+    developerRelaySpy.mockResolvedValue([relayHost]);
+    usbSpy.mockRejectedValue(new Error('fail usb'));
+    return expect(hostConnections.list()).rejects.toThrowError(
+      'An error was encountered when loading the list of available USB hosts: fail usb',
+    );
+  });
+});
+
+describe('listOfType()', () => {
+  it('returns only app hosts', () => {
+    developerRelaySpy.mockResolvedValue([relayHost]);
+    usbSpy.mockResolvedValue([usbHost]);
+    return expect(hostConnections.listOfType('device')).resolves.toEqual([
+      usbHost,
+    ]);
+  });
+
+  it('returns only companion hosts', () => {
+    developerRelaySpy.mockResolvedValue([relayHost]);
+    usbSpy.mockResolvedValue([usbHost]);
+    return expect(hostConnections.listOfType('phone')).resolves.toEqual([
+      relayHost,
+    ]);
+  });
+});

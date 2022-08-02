@@ -6,7 +6,7 @@ import { apiFetch, assertAPIResponseOK, decodeJSON } from './baseAPI';
 import { assertContentType } from '../util/fetchUtil';
 
 // tslint:disable-next-line:variable-name
-export const Host = t.type(
+export const RelayHost = t.type(
   {
     id: t.string,
     displayName: t.string,
@@ -15,12 +15,12 @@ export const Host = t.type(
   },
   'Host',
 );
-export type Host = t.TypeOf<typeof Host>;
+export type RelayHost = t.TypeOf<typeof RelayHost>;
 
 // tslint:disable-next-line:variable-name
 const HostsResponse = t.type(
   {
-    hosts: t.array(Host),
+    hosts: t.array(RelayHost),
   },
   'HostsResponse',
 );
@@ -45,7 +45,7 @@ function createWebSocket(uri: string) {
   });
 }
 
-export async function connect(hostID: string) {
+async function connect(hostID: string) {
   const url = await getConnectionURL(hostID);
   return createWebSocket(url);
 }
@@ -55,11 +55,10 @@ export async function hosts() {
     decodeJSON(HostsResponse),
   );
 
-  const hostsWithRole = (role: string) =>
-    response.hosts.filter((host) => host.roles.includes(role));
-
-  return {
-    appHost: hostsWithRole('APP_HOST'),
-    companionHost: hostsWithRole('COMPANION_HOST'),
-  };
+  return response.hosts.map((host) => ({
+    available: host.state === 'available',
+    connect: () => connect(host.id),
+    displayName: host.displayName,
+    roles: host.roles,
+  }));
 }
