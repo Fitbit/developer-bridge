@@ -4,36 +4,50 @@ import dateformat from 'dateformat';
 import untildify from 'untildify';
 import vorpal from '@moleculer/vorpal';
 
-import HostConnections from '../models/HostConnections';
+import AppContext from '../models/AppContext';
 import captureHeapSnapshot from '../models/captureHeapSnapshot';
+import * as compatibility from '../models/compatibility';
+import HostConnections from '../models/HostConnections';
+import { ComponentSourceMaps } from '@fitbit/app-package';
 
-type HeapSnapshotArgs = vorpal.Args & {
-  uuid?: string;
-};
-
-export default function install(stores: { hostConnections: HostConnections }) {
+export default function heapSnapshot(stores: {
+  hostConnections: HostConnections;
+  appContext: AppContext;
+}) {
   return (cli: vorpal) => {
     cli
       .command(
-        'heap-snapshot [path] [uuid]',
+        'heap-snapshot [path]',
         // tslint:disable-next-line:max-line-length
-        'Capture a JS heap snapshot from the connected device and write the raw data to a file (experimental)',
+        'Capture a JS heap snapshot from the connected device and write the data to a file (experimental)',
       )
-      .hidden()
       .option('-f, --format <fmt>', 'heap snapshot format to request', () => {
         if (!stores.hostConnections.appHost) return [];
-        return stores.hostConnections.appHost.host.getHeapSnapshotSupport()
-          .formats;
+        return [
+          ...stores.hostConnections.appHost.host.getHeapSnapshotSupport()
+            .formats,
+          'v8',
+        ];
       })
-      .types({ string: ['f', 'format', 'path', 'uuid'] })
-      .action(async (args: HeapSnapshotArgs & { path?: string }) => {
+      .types({ string: ['f', 'format', 'path'] })
+      .action(async (args: vorpal.Args & { path?: string }) => {
         const { appHost } = stores.hostConnections;
         if (!appHost) {
           cli.activeCommand.log('Not connected to a device');
           return false;
         }
 
+        const { appPackage } = stores.appContext;
+        if (!appPackage) {
+          cli.activeCommand.log(
+            'App package not loaded, use `install` or `set-app-package` commands first',
+          );
+          return false;
+        }
+
         const { supported, formats } = appHost.host.getHeapSnapshotSupport();
+
+        const snapshotFormats = ['v8', ...formats];
 
         if (!supported) {
           cli.activeCommand.log(
@@ -43,15 +57,14 @@ export default function install(stores: { hostConnections: HostConnections }) {
         }
 
         let { format } = args.options;
-
         if (!format) {
-          if (formats.length === 0) {
+          if (snapshotFormats.length === 0) {
             cli.activeCommand.log(
               'Device does not support any heap snapshot formats',
             );
             return false;
           }
-          if (formats.length === 1) {
+          if (snapshotFormats.length === 1) {
             format = formats[0];
             cli.activeCommand.log(
               `Requesting a JS heap snapshot in ${JSON.stringify(
@@ -65,20 +78,39 @@ export default function install(stores: { hostConnections: HostConnections }) {
                 name: 'format',
                 message:
                   'Which format would you like the JS heap snapshot to be in?',
-                choices: formats,
+                choices: snapshotFormats,
               })
             ).format;
           }
         }
 
+        const extension = format === 'v8' ? 'heapsnapshot' : 'bin';
         const destPath = path.resolve(
           args.path
             ? untildify(args.path)
-            : dateformat('"js-heap." yyyy-mm-dd.H.MM.ss."bin"'),
+            : dateformat(`"js-heap." yyyy-mm-dd.H.MM.ss."${extension}"`),
         );
 
+        let sourceMaps: ComponentSourceMaps | undefined;
+        if (
+          appPackage.sourceMaps !== undefined &&
+          appPackage.sourceMaps.device
+        ) {
+          const deviceFamily = compatibility.findCompatibleAppComponent(
+            appPackage,
+            appHost.host.info,
+          );
+          sourceMaps = appPackage.sourceMaps.device[deviceFamily];
+        }
+
         try {
-          await captureHeapSnapshot(appHost.host, format, destPath, args.uuid);
+          await captureHeapSnapshot(
+            appHost.host,
+            format,
+            destPath,
+            appPackage.uuid,
+            sourceMaps,
+          );
           cli.activeCommand.log(`JS heap snapshot saved to ${destPath}`);
           return true;
         } catch (ex) {

@@ -36,7 +36,7 @@ cli.history('Fitbit-Command-Line-SDK');
 cli.use(build);
 cli.use(buildAndInstall({ hostConnections, appContext }));
 cli.use(connect({ hostConnections }));
-cli.use(heapSnapshot({ hostConnections }));
+cli.use(heapSnapshot({ hostConnections, appContext }));
 cli.use(install({ hostConnections, appContext }));
 cli.use(screenshot({ hostConnections }));
 cli.use(setAppPackage({ appContext }));
