@@ -22,21 +22,15 @@ enough.  The following resources are helpful in understanding it:
 
 ## V8 heap snapshot
 
-First, make a heap snapshot with the hidden sdk-cli command `heap-snapshot`.  Then,
+With your device connected (`connect device`) and FBA loaded (`set-app-package` or `install`), simply run the `heap-snapshot` command. A `.heapsnapshot` file will be produced in the current directory.
 
-```
-$ node lib/cli.js v8 /path/to/fitbit-project/js-heap.bin /path/to/fitbit-project/build/app.fba /path/to/fitbit.heapsnapshot atlas
-```
-
-(replacing the paths and `atlas` with your device type).
-
-Then load the file `fitbit.heapsnapshot` in Chrome Dev Tools under the Memory tab. You can also take
+Then load the `.heapsnapshot` file in Chrome Dev Tools under the Memory tab. You can also take
 successive snapshots and load them in Chrome Dev Tools and compare them to see how the heap has
-changed.
+changed, though note that IDs are not stable currently which limits the usefulness of this.
 
 ## Explore in a REPL
 
-If you want to manually explore the heap graph to really dig into things, you can load a repl
+If you want to manually explore the heap graph to really dig into things, you can load a REPL
 with the graph of the jerryscript heap snapshot already loaded. Run:
 
 ```

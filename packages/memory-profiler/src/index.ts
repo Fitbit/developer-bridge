@@ -1,1 +1,1 @@
-export { generateGraph as convert } from './convert';
+export { generateGraph, generateV8HeapSnapshot } from './convert';
