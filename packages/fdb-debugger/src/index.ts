@@ -303,7 +303,7 @@ export class RemoteHost extends EventEmitter {
     'app.launchComponent',
     FDBTypes.LaunchComponentParams,
     FDBTypes.AppComponent,
-    { minTimeout: 15000 },
+    { minTimeout: 20000 },
   );
 
   private changeSerialization = (serialization: FDBTypes.SerializationType) => {
