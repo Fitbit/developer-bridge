@@ -1,6 +1,6 @@
 {
   "name": "@fitbit/sdk-cli",
-  "version": "1.8.0-pre.2",
+  "version": "1.8.0-pre.3",
   "author": "Fitbit, Inc.",
   "license": "BSD-3-Clause",
   "description": "Command line tools for debugging Fitbit OS apps",
@@ -21,7 +21,7 @@
     "@fitbit/jsonrpc-ts": "^3.2.1",
     "@fitbit/memory-profiler": "^1.8.0-pre.2",
     "@fitbit/portable-pixmap": "^1.0.3",
-    "@fitbit/pulse": "^0.1.0",
+    "@fitbit/pulse": "^0.1.1",
     "@moleculer/vorpal": "^1.11.5",
     "@openid/appauth": "^1.2.8",
     "chalk": "^4.1.0",
