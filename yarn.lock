@@ -321,10 +321,10 @@
     error-subclass "^2.2.0"
     tslib "^2.0.3"
 
-"@fitbit/pulse@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@fitbit/pulse/-/pulse-0.1.0.tgz#d85a61bd4dd2a205f5bf6bd65d5901f4e696a65f"
-  integrity sha512-Rt3L82kS2G1poWRNPSdXaod/DwdTswMbgQ4TNuZIzL/NyWdOMwfoftiqBGzcAbZt9CppamI1kzb1VYAZMZOxQQ==
+"@fitbit/pulse@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@fitbit/pulse/-/pulse-0.1.1.tgz#4075b82dae995fbb6b32c64342f44a5be532ec36"
+  integrity sha512-dtfqS+6L7FZfMGAcGBXIM2CYO/4tjduLVRIpfc/Dlks2Fapfa89LPFTAyIyrWGF4WjPDVRcJ9R8r+aAU5IKlfQ==
   dependencies:
     crc-32 "^1.2.0"
     tslib "^2.3.1"
