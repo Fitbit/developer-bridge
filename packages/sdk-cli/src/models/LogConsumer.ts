@@ -94,6 +94,14 @@ export default class LogConsumer {
   };
 
   private handleLog = (message: ConsoleMessage) => {
+    if (
+      this.componentSourceMapConsumers[message.emittedBy.component] &&
+      this.appContext.appPackage &&
+      message.emittedBy.uuid !== this.appContext.appPackage.uuid
+    ) {
+      return;
+    }
+
     this.messageFormatter(
       sourceMapMessage(message, this.componentSourceMapConsumers),
     );

@@ -174,6 +174,7 @@ describe('LogConsumer', () => {
           companion: componentSourceMaps,
           settings: componentSourceMaps,
         },
+        uuid: 'fakeUUID',
       } as any;
 
       sourceMapConsumers = {
@@ -231,6 +232,32 @@ describe('LogConsumer', () => {
         companion: newSourceMapConsumers,
         settings: newSourceMapConsumers,
       });
+    });
+
+    it('processes the log message because uuids match', async () => {
+      await logConsumer.registerHost(registerAppHostObject);
+      const testMessage = {
+        emittedBy: {
+          uuid: 'fakeUUID',
+          component: 'app' as ComponentType,
+        },
+      };
+
+      appHost.emit('consoleMessage', testMessage);
+      expect(messageFormatter).toBeCalledWith(testMessage);
+    });
+
+    it('discards the log message because uuids do not match', async () => {
+      await logConsumer.registerHost(registerAppHostObject);
+      const testMessage = {
+        emittedBy: {
+          uuid: 'fakeUUID2',
+          component: 'app' as ComponentType,
+        },
+      };
+
+      appHost.emit('consoleMessage', testMessage);
+      expect(messageFormatter).not.toBeCalledWith(testMessage);
     });
 
     it('does not register source maps if an appPackage does not exist', async () => {
