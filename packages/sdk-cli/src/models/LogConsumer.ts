@@ -97,7 +97,8 @@ export default class LogConsumer {
     if (
       this.componentSourceMapConsumers[message.emittedBy.component] &&
       this.appContext.appPackage &&
-      message.emittedBy.uuid !== this.appContext.appPackage.uuid
+      message.emittedBy.uuid.toLowerCase() !==
+        this.appContext.appPackage.uuid.toLowerCase()
     ) {
       return;
     }

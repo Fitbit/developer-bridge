@@ -234,7 +234,7 @@ describe('LogConsumer', () => {
       });
     });
 
-    it('processes the log message because uuids match', async () => {
+    it('processes the log message because UUIDs match', async () => {
       await logConsumer.registerHost(registerAppHostObject);
       const testMessage = {
         emittedBy: {
@@ -247,7 +247,20 @@ describe('LogConsumer', () => {
       expect(messageFormatter).toBeCalledWith(testMessage);
     });
 
-    it('discards the log message because uuids do not match', async () => {
+    it('processes the log message because UUIDs match, ignoring casing', async () => {
+      await logConsumer.registerHost(registerAppHostObject);
+      const testMessage = {
+        emittedBy: {
+          uuid: 'FAKEUUID',
+          component: 'app' as ComponentType,
+        },
+      };
+
+      appHost.emit('consoleMessage', testMessage);
+      expect(messageFormatter).toBeCalledWith(testMessage);
+    });
+
+    it('discards the log message because UUIDs do not match', async () => {
       await logConsumer.registerHost(registerAppHostObject);
       const testMessage = {
         emittedBy: {
