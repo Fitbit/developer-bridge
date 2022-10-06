@@ -6,10 +6,14 @@ async function hostsAction(
   cli: vorpal,
   { hostConnections }: { hostConnections: HostConnections },
 ) {
-  const hosts = await hostConnections.list();
+  const deviceHosts = await hostConnections.listOfType('device');
+  const phoneHosts = await hostConnections.listOfType('phone');
 
-  cli.activeCommand.log('Hosts:');
-  cli.activeCommand.log(hosts);
+  cli.activeCommand.log('Device Hosts:');
+  cli.activeCommand.log(deviceHosts);
+
+  cli.activeCommand.log('Phone Hosts:');
+  cli.activeCommand.log(phoneHosts);
 }
 
 export default function (stores: { hostConnections: HostConnections }) {
