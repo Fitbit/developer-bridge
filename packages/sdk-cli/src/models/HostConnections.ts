@@ -98,7 +98,7 @@ class HostConnections {
     return hostConnection;
   }
 
-  async list() {
+  async listOfType(deviceType: DeviceType) {
     const hosts: Host[] = [];
 
     try {
@@ -113,23 +113,19 @@ class HostConnections {
       );
     }
 
-    try {
-      for (const device of await USBDebugHost.list()) {
-        hosts.push(device);
+    if (deviceType === 'device') {
+      try {
+        for (const device of await USBDebugHost.list()) {
+          hosts.push(device);
+        }
+      } catch (error) {
+        throw new Error(
+          `An error was encountered when loading the list of available USB hosts: ${
+            (error as Error).message
+          }`,
+        );
       }
-    } catch (error) {
-      throw new Error(
-        `An error was encountered when loading the list of available USB hosts: ${
-          (error as Error).message
-        }`,
-      );
     }
-
-    return hosts;
-  }
-
-  async listOfType(deviceType: DeviceType) {
-    const hosts = await this.list();
 
     const hostRole = {
       device: 'APP_HOST',

@@ -108,29 +108,6 @@ describe('connect()', () => {
   });
 });
 
-describe('list()', () => {
-  it('returns a list of both USB and Developer Relay hosts', () => {
-    developerRelaySpy.mockResolvedValue([relayHost]);
-    usbSpy.mockResolvedValue([usbHost]);
-    expect(hostConnections.list()).resolves.toEqual([relayHost, usbHost]);
-  });
-
-  it('throws if fetching developer relay hosts fails', () => {
-    developerRelaySpy.mockRejectedValue(new Error('fail devrelay'));
-    return expect(hostConnections.list()).rejects.toThrowError(
-      'An error was encountered when loading the list of available Developer Relay hosts: fail devrelay',
-    );
-  });
-
-  it('throws if fetching USB hosts fails', () => {
-    developerRelaySpy.mockResolvedValue([relayHost]);
-    usbSpy.mockRejectedValue(new Error('fail usb'));
-    return expect(hostConnections.list()).rejects.toThrowError(
-      'An error was encountered when loading the list of available USB hosts: fail usb',
-    );
-  });
-});
-
 describe('listOfType()', () => {
   it('returns only app hosts', () => {
     developerRelaySpy.mockResolvedValue([relayHost]);
@@ -146,5 +123,20 @@ describe('listOfType()', () => {
     return expect(hostConnections.listOfType('phone')).resolves.toEqual([
       relayHost,
     ]);
+  });
+
+  it('throws if fetching USB hosts fails', () => {
+    developerRelaySpy.mockResolvedValue([relayHost]);
+    usbSpy.mockRejectedValue(new Error('fail usb'));
+    return expect(hostConnections.listOfType('device')).rejects.toThrowError(
+      'An error was encountered when loading the list of available USB hosts: fail usb',
+    );
+  });
+
+  it('throws if fetching developer relay hosts fails', () => {
+    developerRelaySpy.mockRejectedValue(new Error('fail devrelay'));
+    return expect(hostConnections.listOfType('phone')).rejects.toThrowError(
+      'An error was encountered when loading the list of available Developer Relay hosts: fail devrelay',
+    );
   });
 });
