@@ -52,7 +52,7 @@ export const connectAction = async (
   }
 
   const connection = await hostConnections.connect(host, deviceType);
-  connection.stream.once('finish', () =>
+  connection.stream.once('close', () =>
     cli.log(`${startCase(deviceType)} '${host.displayName}' disconnected`),
   );
 

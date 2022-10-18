@@ -105,7 +105,7 @@ describe.each<[DeviceType, HostType]>([
     });
 
     it('logs a message when the host disconnects', () => {
-      mockStream.emit('finish');
+      mockStream.emit('close');
       expect(mockLog.mock.calls[1]).toMatchSnapshot();
     });
   });
