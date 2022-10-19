@@ -117,14 +117,28 @@ export default class USBSerialDevice extends Duplex {
   ): Promise<USBSerialDevice> {
     try {
       openedDevices.add(device);
-      device.open(false);
 
-      const setConfigurationFunc = promisify(device.setConfiguration).bind(
-        device,
-      );
-      await setConfigurationFunc(config.configuration);
+      // Only change configuration if needed, since this will fail on Linux
+      // if it's not already correct
+      if (
+        device.configDescriptor?.bConfigurationValue === config.configuration
+      ) {
+        device.open();
+      } else {
+        device.open(false);
+
+        const setConfigurationFunc = promisify(device.setConfiguration).bind(
+          device,
+        );
+        await setConfigurationFunc(config.configuration);
+      }
 
       const intf = device.interface(config.interface);
+
+      if (intf.isKernelDriverActive()) {
+        intf.detachKernelDriver();
+      }
+
       intf.claim();
 
       const readEndpoint = intf.endpoint(config.readEndpoint) as InEndpoint;

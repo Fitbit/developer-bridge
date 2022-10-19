@@ -76,6 +76,8 @@ function makeMockDevice(
     claim: jest.fn(),
     endpoint: jest.fn(),
     release: jest.fn((closeAll, cb) => cb()),
+    isKernelDriverActive: jest.fn(() => false),
+    detachKernelDriver: jest.fn(),
   } as unknown as jest.Mocked<Interface>;
 
   // Order here must match call order in constructor
@@ -168,13 +170,47 @@ it('throws if reading a string descriptor fails when listing devices', () => {
   );
 });
 
-it('connects to a device', async () => {
-  mockUSBDevices = [mockDevice];
+it('connects to a device (config correct)', async () => {
+  mockUSBDevices = [
+    {
+      ...mockDevice,
+      configDescriptor: { bConfigurationValue: 0 },
+    } as unknown as usb.Device,
+  ];
   const [fitbitDevice] = await USBSerialDevice.list();
   const stream = await fitbitDevice.connect();
   expect(stream).toBeInstanceOf(Duplex);
   expect(mockDevice.open).toBeCalled();
+  expect(mockDevice.setConfiguration).not.toBeCalled();
+  expect(mockInterface.claim).toBeCalled();
+  stream.destroy();
+});
+
+it('connects to a device (config change required)', async () => {
+  mockUSBDevices = [
+    {
+      ...mockDevice,
+      configDescriptor: { bConfigurationValue: 1 },
+    } as unknown as usb.Device,
+  ];
+  const [fitbitDevice] = await USBSerialDevice.list();
+  const stream = await fitbitDevice.connect();
+  expect(stream).toBeInstanceOf(Duplex);
+  expect(mockDevice.open).toBeCalledWith(false);
   expect(mockDevice.setConfiguration).toBeCalled();
+  expect(mockInterface.claim).toBeCalled();
+  stream.destroy();
+});
+
+it('detaches kernel driver if needed', async () => {
+  mockUSBDevices = [mockDevice];
+  mockInterface.isKernelDriverActive.mockReturnValueOnce(true);
+  const [fitbitDevice] = await USBSerialDevice.list();
+  const stream = await fitbitDevice.connect();
+  expect(stream).toBeInstanceOf(Duplex);
+  expect(mockDevice.open).toBeCalledWith(false);
+  expect(mockDevice.setConfiguration).toBeCalled();
+  expect(mockInterface.detachKernelDriver).toBeCalled();
   expect(mockInterface.claim).toBeCalled();
   stream.destroy();
 });
