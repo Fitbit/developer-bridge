@@ -1,8 +1,10 @@
+import os from 'os';
+import { Duplex } from 'stream';
+import { promisify } from 'util';
+
 import { usb } from 'usb';
 import { EndpointDescriptor } from 'usb/dist/usb/descriptors';
 import { Interface } from 'usb/dist/usb/interface';
-import { Duplex } from 'stream';
-import { promisify } from 'util';
 import { InEndpoint, OutEndpoint } from 'usb/dist/usb/endpoint';
 import { Transfer } from 'usb/dist/usb';
 
@@ -135,7 +137,7 @@ export default class USBSerialDevice extends Duplex {
 
       const intf = device.interface(config.interface);
 
-      if (intf.isKernelDriverActive()) {
+      if (os.type() === 'Linux' && intf.isKernelDriverActive()) {
         intf.detachKernelDriver();
       }
 

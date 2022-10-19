@@ -1,5 +1,7 @@
-import { usb } from 'usb';
+import os from 'os';
 import { Duplex } from 'stream';
+
+import { usb } from 'usb';
 
 import USBSerialDevice from './USBSerialDevice';
 import { Interface } from 'usb/dist/usb/interface';
@@ -134,6 +136,8 @@ beforeEach(() => {
   const getDeviceListSpy = jest.spyOn(usb, 'getDeviceList');
   getDeviceListSpy.mockImplementation(() => mockUSBDevices);
   mockDevice = makeMockDevice(0x2687, 'CDC-FDB', validEndpoints);
+
+  jest.spyOn(os, 'type').mockReturnValue('Darwin');
 });
 
 it('lists suitable fitbit devices', () => {
@@ -205,6 +209,7 @@ it('connects to a device (config change required)', async () => {
 it('detaches kernel driver if needed', async () => {
   mockUSBDevices = [mockDevice];
   mockInterface.isKernelDriverActive.mockReturnValueOnce(true);
+  jest.spyOn(os, 'type').mockReturnValue('Linux');
   const [fitbitDevice] = await USBSerialDevice.list();
   const stream = await fitbitDevice.connect();
   expect(stream).toBeInstanceOf(Duplex);
