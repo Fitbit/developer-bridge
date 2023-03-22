@@ -7,11 +7,11 @@
   "stage": {
     "clientId": "228VJK",
     "apiUrl": "https://api.fitbit-stage.com:443",
-    "devRelayUrl": "wss://developer-relay-stage-frontend.site-ops.fitbit.com/"
+    "devRelayUrl": "wss://027-v3-api-soa.fitbit-stage.com:443/dbridge/"
   },
   "int": {
     "clientId": "228W5N",
     "apiUrl": "https://api.fitbit-int.com:443",
-    "devRelayUrl": "wss://developer-relay-int-frontend.site-ops.fitbit.com/"
+    "devRelayUrl": "wss://027-v3-api-soa.fitbit-int.com:443/dbridge/"
   }
 }
