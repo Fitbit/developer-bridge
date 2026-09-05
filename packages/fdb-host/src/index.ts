@@ -51,7 +51,7 @@ export class Host extends EventEmitter {
   /** Install method to call after an app install has finalized */
   private installHandler?: InstallHandler;
 
-  /** Host information required for intiialization */
+  /** Host information required for initialization */
   private hostInfo: HostInfo;
 
   /** Open bulk data transfer streams. */

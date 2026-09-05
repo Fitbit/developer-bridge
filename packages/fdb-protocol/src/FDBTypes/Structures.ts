@@ -126,7 +126,7 @@ export type UUID = t.TypeOf<typeof UUID>;
 
 /**
  * The build ID of a Fitbit app. The build ID is a 64-bit number, which
- * cannot be prepresented with full precision by a JSON number. It is
+ * cannot be represented with full precision by a JSON number. It is
  * transmitted over the wire by serializing it to a string of sixteen
  * hexadecimal digits.
  */
